@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    /* Type Checking */
+    "noUncheckedIndexedAccess": true, // Increases type-safety
+    "strict": true,
+
+    /* Modules */
+    "allowImportingTsExtensions": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "baseUrl": "./",
+    "paths": {
+      "src/*": ["./src/*"] // Alias for absolute imports
+    },
+    "resolveJsonModule": true,
+    "types": ["bun-types"], // add Bun global
+
+    /* Emit */
+    "downlevelIteration": true,
+    "noEmit": true,
+
+    /* JavaScript Support */
+    "allowJs": true,
+
+    /* Editor Support */
+
+    /* Interop Constraints */
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Backwards Compatibility */
+
+    /* Language and Environment */
+    "jsx": "react",
+    "jsxFactory": "ElysiaJSX",
+    "jsxFragmentFactory": "ElysiaJSX.Fragment",
+    "lib": ["ESNext"],
+    "moduleDetection": "force",
+    "target": "ESNext",
+
+    /* Compiler Diagnostics */
+
+    /* Projects */
+    "composite": true,
+
+    /* Output Formatting */
+
+    /* Completeness */
+    "skipLibCheck": true
+
+    /* Command Line */
+
+    /* Watch Options */
+  }
+}
