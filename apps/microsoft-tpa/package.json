@@ -1,59 +1,12 @@
 {
-  "$schema": "https://json.schemastore.org/package",
-  "name": "elba-microsoft-tpac-elysia",
-  "module": "src/index.ts",
-  "type": "module",
   "scripts": {
-    "----BUILD": "",
-    "build": "tailwindcss -i ./src/styles/globals.css -o ./public/globals.css",
-    "build:vercel": "bun run build && bun scripts/transform-paths.ts",
-    "----RUN": "",
-    "dev": "concurrently \"bun --watch src/index.ts\" \"bun run build --watch\"",
-    "start": "bun run build && bun src/index.ts",
-    "----CHECK": "",
-    "format:check": "prettier --check .",
-    "format:fix": "prettier --write .",
-    "lint": "eslint --ignore-path .gitignore .",
-    "lint:fix": "eslint --ignore-path .gitignore --fix . ",
-    "typecheck": "tsc --noEmit",
-    "----DATABASE": "",
-    "db:drop": "drizzle-kit drop",
-    "db:generate": "drizzle-kit generate:pg",
-    "db:push": "drizzle-kit push:pg",
-    "db:view": "drizzle-kit studio"
+    "start": "vercel dev",
+    "deploy": "vercel"
   },
   "dependencies": {
-    "@auth/core": "^0.14.0",
-    "@auth/drizzle-adapter": "^0.3.2",
-    "@elysiajs/html": "^0.6.5",
-    "@elysiajs/static": "^0.6.0",
-    "@elysiajs/swagger": "^0.6.2",
-    "@libsql/client": "^0.3.4",
-    "@vercel/postgres": "^0.5.0",
-    "better-sqlite3": "^8.6.0",
-    "drizzle-orm": "^0.28.6",
-    "drizzle-typebox": "^0.1.1",
-    "elysia": "^0.6.23",
-    "zod": "^3.22.2"
+    "hono": "^3.9.0"
   },
   "devDependencies": {
-    "@ianvs/prettier-plugin-sort-imports": "^4.1.0",
-    "@tailwindcss/typography": "^0.5.10",
-    "@total-typescript/ts-reset": "^0.5.1",
-    "@types/uuid": "^9.0.5",
-    "@typescript-eslint/eslint-plugin": "^6.7.0",
-    "@typescript-eslint/parser": "^6.7.0",
-    "bun-types": "latest",
-    "concurrently": "^8.2.1",
-    "drizzle-kit": "^0.19.13",
-    "eslint": "^8.49.0",
-    "eslint-config-prettier": "^9.0.0",
-    "prettier": "^3.0.3",
-    "prettier-plugin-tailwindcss": "^0.5.4",
-    "tailwindcss": "^3.3.3",
-    "tailwindcss-animate": "^1.0.7",
-    "ts-toolbelt": "^9.6.0",
-    "typed-html": "^3.0.1",
-    "typescript": "^5.2.2"
+    "vercel": "^32.4.1"
   }
 }
