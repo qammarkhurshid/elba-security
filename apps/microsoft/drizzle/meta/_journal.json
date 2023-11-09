@@ -1,0 +1,13 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1699462911508,
+      "tag": "0000_nice_skreet",
+      "breakpoints": true
+    }
+  ]
+}
