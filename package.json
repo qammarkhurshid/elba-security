@@ -9,13 +9,13 @@
   "devDependencies": {
     "eslint": "^8.48.0",
     "prettier": "^3.0.3",
-    "tsconfig": "*",
+    "tsconfig": "workspace:*",
     "turbo": "latest"
   },
+  "engines": {
+    "node": "18",
+    "pnpm": "8"
+  },
   "name": "elba-security",
-  "packageManager": "npm@8.11.0",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ]
+  "packageManager": "pnpm@8.10.2"
 }
