@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { Organization } from '@/schemas/organization';
-import { syncJobs } from '@/schemas/syncJob';
+import { syncJobs } from '@/schemas/sync-job';
 
 const formatUserSyncJob = (org: Organization): { tenantId: string; type: 'users' } => ({
   tenantId: org.tenantId,

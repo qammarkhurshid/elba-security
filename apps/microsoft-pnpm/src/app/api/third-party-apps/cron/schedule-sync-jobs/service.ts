@@ -1,6 +1,6 @@
-import { db } from '#src/lib/db';
-import { Organization } from '#src/schemas/organization';
-import { syncJobs } from '#src/schemas/syncJob';
+import { db } from '@/lib/db';
+import { Organization } from '@/schemas/organization';
+import { syncJobs } from '@/schemas/sync-job';
 
 const formatThirdPartyAppsJob = (org: Organization): { tenantId: string; type: 'apps' } => ({
   tenantId: org.tenantId,

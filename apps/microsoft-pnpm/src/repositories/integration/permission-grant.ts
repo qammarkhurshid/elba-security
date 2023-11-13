@@ -1,5 +1,5 @@
 import { and, eq } from 'drizzle-orm';
-import { permissionGrants } from '@/schemas/permissionGrant';
+import { permissionGrants } from '@/schemas/permission-grant';
 import { db } from '@/lib/db';
 
 export const getPermissionGrant = async ({

@@ -1,7 +1,7 @@
 import { db } from '#src/lib/db';
 import { scanThirdPartyAppsByTenantId } from '#src/microsoft/tpa';
 import { organizations } from '#src/schemas/organization';
-import { syncJobs } from '#src/schemas/syncJob';
+import { syncJobs } from '#src/schemas/sync-job';
 import { eq, asc } from 'drizzle-orm';
 
 export const runtime = 'edge';

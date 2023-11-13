@@ -1,5 +1,5 @@
 import { eq } from 'drizzle-orm';
-import { getPermissionGrant } from '@/repositories/integration/permissionGrant';
+import { getPermissionGrant } from '@/repositories/integration/permission-grant';
 import {
   DelegatedPermissionGrant,
   getPaginatedDelegatedPermissionGrantsByTenantId,
@@ -7,13 +7,12 @@ import {
 } from '@/common/microsoft';
 import {
   deletePermissionGrantById,
-  getAllDelegatedPermissionGrantsByTenantId,
   getAllServicePrincipalsById,
   getTokenByTenantId,
 } from '@/common/microsoft';
 import { checkOrganization } from '@/common/utils';
-import { PermissionGrantInsertInput } from '@/schemas/permissionGrant';
-import { permissionGrants as PermissionGrantTable } from '@/schemas/permissionGrant';
+import { PermissionGrantInsertInput } from '@/schemas/permission-grant';
+import { permissionGrants as PermissionGrantTable } from '@/schemas/permission-grant';
 import { db } from '@/lib/db';
 
 interface ThirdPartyAppsObjectsUpsertInput {
