@@ -1,6 +1,6 @@
 import { db } from '@/lib/db';
 import { syncJobs } from '@/schemas/syncJob';
-import { eq, asc } from 'drizzle-orm';
+import { eq, asc, sql } from 'drizzle-orm';
 import { getPermissionGrant } from '@/repositories/integration/permissionGrant';
 import {
   deletePermissionGrantById,
@@ -217,7 +217,7 @@ export const startThirdPartyAppsSyncJobs = async () => {
     if (!result.pageLink) {
       await db
         .update(organizations)
-        .set({ lastTpaScan: new Date() })
+        .set({ lastTpaScan: sql`now()` })
         .where(eq(organizations.id, orgToSync[0].id));
     } else {
       await db.insert(syncJobs).values({
