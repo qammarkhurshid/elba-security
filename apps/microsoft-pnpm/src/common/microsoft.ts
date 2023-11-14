@@ -1,48 +1,29 @@
 import * as jose from 'jose';
 import { env } from './env';
+import * as MicrosoftGraph from 'microsoft-graph';
+
+type MicrosoftGraphCoreResponse = {
+  '@odata.context': string;
+  '@odata.nextLink'?: string;
+};
+
+interface MicrosoftGraphPermissionGrantResponse extends MicrosoftGraphCoreResponse {
+  value: MicrosoftGraph.OAuth2PermissionGrant[];
+}
+
+interface MicrosoftGraphServicePrincipalResponse extends MicrosoftGraphCoreResponse {
+  value: MicrosoftGraph.ServicePrincipal[];
+}
+
+interface MicrosoftGraphUserResponse extends MicrosoftGraphCoreResponse {
+  value: MicrosoftGraph.User[];
+}
 
 interface MicrosoftGraphTokenResponse {
   token_type: string;
   expires_in: number;
   ext_expires_in: number;
   access_token: string;
-}
-
-export interface DelegatedPermissionGrant {
-  clientId: string;
-  id: string;
-  principalId: string;
-  scope: string;
-}
-
-export interface ServicePrincipal {
-  id: string;
-  appDisplayName: string;
-  description: string;
-  homepage: string;
-  verifiedPublisher: {
-    displayName: string;
-    logoUrl: string;
-  };
-  tags: string[];
-  appRoleAssignments: {
-    appRoleId: string;
-    resourceId: string;
-  }[];
-  appRoles: {
-    id: string;
-    value: string;
-  }[];
-  appRoleAssignedTo: string;
-  appScopes: string[];
-}
-
-export interface User {
-  id: string;
-  mail?: string;
-  userPrincipalName?: string;
-  displayName: string;
-  otherMails?: string[];
 }
 
 const MAX_RESULTS_PER_PAGE = 999;
@@ -91,7 +72,7 @@ export const getPaginatedDelegatedPermissionGrantsByTenantId = async ({
       },
     }
   );
-  return response.json();
+  return (await response.json()) as MicrosoftGraphPermissionGrantResponse;
 };
 
 export const getAllDelegatedPermissionGrantsByTenantId = async ({
@@ -100,7 +81,7 @@ export const getAllDelegatedPermissionGrantsByTenantId = async ({
 }: {
   accessToken: string;
   tenantId: string;
-}): Promise<DelegatedPermissionGrant[]> => {
+}): Promise<MicrosoftGraph.OAuth2PermissionGrant[]> => {
   let allFetched = false;
   let pageLink;
   const aggregatedResults = [];
@@ -162,7 +143,7 @@ export const getPaginatedServicePrincipalsByTenantId = async ({
     }
   );
 
-  return response.json();
+  return (await response.json()) as MicrosoftGraphServicePrincipalResponse;
 };
 
 export const getAllServicePrincipalsById = async ({
@@ -171,7 +152,7 @@ export const getAllServicePrincipalsById = async ({
 }: {
   accessToken: string;
   tenantId: string;
-}): Promise<ServicePrincipal[]> => {
+}): Promise<MicrosoftGraph.ServicePrincipal[]> => {
   let allFetched = false;
   let pageLink;
   const aggregatedResults = [];
@@ -213,7 +194,7 @@ export const getPaginatedUsersByTenantId = async ({
     }
   );
 
-  return response.json();
+  return (await response.json()) as MicrosoftGraphUserResponse;
 };
 
 export const getAllUsersByTenantId = async ({
@@ -222,7 +203,7 @@ export const getAllUsersByTenantId = async ({
 }: {
   accessToken: string;
   tenantId: string;
-}): Promise<User[]> => {
+}): Promise<MicrosoftGraph.User[]> => {
   let allFetched = false;
   let pageLink;
   const aggregatedResults = [];
