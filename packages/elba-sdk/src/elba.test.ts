@@ -22,7 +22,7 @@ describe('users', () => {
       }));
       const elba = new Elba({ organisationId, sourceId, baseUrl, apiKey });
       await expect(elba.users.update({ users })).resolves.toStrictEqual({
-        success: true
+        success: true,
       });
     });
   });
@@ -106,7 +106,7 @@ describe('authentication', () => {
         authMethod: (['mfa', 'password', 'sso'] as const)[i % 3]!,
       }));
       const elba = new Elba({ organisationId, sourceId, baseUrl, apiKey });
-      await expect(elba.authentication.updateObjects({objects})).resolves.toStrictEqual({
+      await expect(elba.authentication.updateObjects({ objects })).resolves.toStrictEqual({
         success: true,
       });
     });
@@ -136,7 +136,7 @@ describe('data protection', () => {
       }));
 
       const elba = new Elba({ organisationId, sourceId, baseUrl, apiKey });
-      await expect(elba.dataProtection.updateObjects({objects})).resolves.toStrictEqual({
+      await expect(elba.dataProtection.updateObjects({ objects })).resolves.toStrictEqual({
         success: true,
       });
     });
