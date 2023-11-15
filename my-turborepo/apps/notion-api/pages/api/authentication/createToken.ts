@@ -37,7 +37,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Data>)
             notionId: response.data.bot_id,
           },
         });
-        res.status(200).json({ notion });
+        res.status(200).json({
+          organisationId: response.data.workspace_id,
+          notionToken: response.data.access_token,
+          notionId: response.data.bot_id,
+        });
       } catch (error) {
         console.error('Error saving data:', error);
         res.status(500).json({ error: 'Internal Server Error' });
