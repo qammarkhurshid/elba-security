@@ -1,10 +1,7 @@
-import { HttpResponse, RequestHandler, http } from 'msw';
-import {
-  RequestHandlerDefaultInfo,
-  RequestHandlerOptions,
-} from 'msw/lib/core/handlers/RequestHandler';
-import { env } from '@/common/env';
+import type { RequestHandler } from 'msw';
+import { HttpResponse, http } from 'msw';
 import { z } from 'zod';
+import { env } from '@/common/env';
 
 const updateUsersSchema = z.object({
   organisationId: z.string().uuid(),
@@ -57,12 +54,7 @@ const deleteThirdPartyAppsSchema = z.object({
   syncedBefore: z.string().datetime().optional(),
 });
 
-export const elbaRequestHandlers: RequestHandler<
-  RequestHandlerDefaultInfo,
-  any,
-  any,
-  RequestHandlerOptions
->[] = [
+export const elbaRequestHandlers: RequestHandler[] = [
   http.post(`${env.ELBA_API_BASE_URL}/users`, async ({ request }) => {
     const data = await request.json();
     const result = updateUsersSchema.safeParse(data);

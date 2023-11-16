@@ -1,29 +1,18 @@
+import { resolve } from 'node:path';
 /// <reference types="vitest" />
 import { defineConfig } from 'vite';
+import { config } from 'dotenv';
+
+config({ path: '.env.test' });
 
 export default defineConfig({
   test: {
-    setupFiles: ['./msw/setupTestServer.ts'],
-    env: {
-      CRON_SECRET: '1234',
-      ELBA_API_BASE_URL: 'http://foo.bar',
-      ELBA_SOURCE_ID: 'e99870a8-8adb-449d-95f5-32e26a7b9b70',
-      NEXT_PUBLIC_ELBA_GITHUB_INSTALL_URL: 'https://github-install-link.com',
-      GITHUB_PRIVATE_KEY: 'github-private-key',
-      GITHUB_APP_ID: '123456',
-      GITHUB_CLIENT_ID: 'github-client-id',
-      GITHUB_CLIENT_SECRET: 'github-client-secret',
-      POSTGRES_HOST: '0.0.0.0',
-      POSTGRES_PORT: '5555',
-      POSTGRES_USERNAME: 'postgres-username',
-      POSTGRES_PASSWORD: 'postgres-password',
-      POSTGRES_DATABASE: 'postgres-database',
-      MAX_CONCURRENT_USERS_SYNC_JOBS: '5',
-      MAX_CONCURRENT_THIRD_PARTY_APPS_SYNC_JOBS: '5',
-      USERS_SYNC_FREQUENCY: '3600',
-      USERS_SYNC_BATCH_SIZE: '5',
-      USERS_SYNC_MAX_RETRY: '3',
-      THIRD_PARTY_APPS_SYNC_FREQUENCY: '3600',
+    setupFiles: ['./vitest/setup-test-server.ts', './vitest/setup-database.ts'],
+    env: process.env,
+  },
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, './src'),
     },
   },
 });

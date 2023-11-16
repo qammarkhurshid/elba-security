@@ -26,6 +26,9 @@ importers:
       '@octokit/app':
         specifier: ^14.0.1
         version: 14.0.1
+      '@octokit/request-error':
+        specifier: ^5.0.1
+        version: 5.0.1
       '@t3-oss/env-nextjs':
         specifier: ^0.7.1
         version: 0.7.1(typescript@5.2.2)(zod@3.22.4)

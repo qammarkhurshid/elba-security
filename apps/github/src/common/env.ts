@@ -22,10 +22,10 @@ export const env = createEnv({
     GITHUB_CLIENT_SECRET: z.string(),
     MAX_CONCURRENT_USERS_SYNC_JOBS: zEnvInt(),
     MAX_CONCURRENT_THIRD_PARTY_APPS_SYNC_JOBS: zEnvInt(),
-    USERS_SYNC_FREQUENCY: zEnvInt(),
     USERS_SYNC_BATCH_SIZE: zEnvInt(),
     USERS_SYNC_MAX_RETRY: zEnvInt(),
-    THIRD_PARTY_APPS_SYNC_FREQUENCY: zEnvInt(),
+    THIRD_PARTY_APPS_SYNC_BATCH_SIZE: zEnvInt(),
+    THIRD_PARTY_APPS_MAX_RETRY: zEnvInt(),
   },
   // @ts-expect-error process.env is not typed according to .env
   runtimeEnv: {

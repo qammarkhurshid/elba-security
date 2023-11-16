@@ -1,10 +1,13 @@
+/* eslint-disable turbo/no-undeclared-env-vars -- this is a scripts */
 const { drizzle } = require('drizzle-orm/postgres-js');
 const { migrate } = require('drizzle-orm/postgres-js/migrator');
 const dotenv = require('dotenv');
 const postgres = require('postgres');
 
 // setup process.env from .env file
-dotenv.config();
+dotenv.config({
+  path: process.argv[2],
+});
 
 const sql = postgres({
   host: process.env.POSTGRES_HOST,

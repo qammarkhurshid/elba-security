@@ -1,6 +1,12 @@
-import { and, asc, eq, lt, sql } from 'drizzle-orm';
+import { and, asc, eq, lt, sql, or, isNull } from 'drizzle-orm';
 import type { PgInsertValue } from 'drizzle-orm/pg-core';
-import { Installation, InstallationAdmin, UsersSyncJob, db } from '@/database';
+import {
+  Installation,
+  InstallationAdmin,
+  ThirdPartyAppsSyncJob,
+  UsersSyncJob,
+  db,
+} from '@/database';
 
 export const initUsersSyncJobSyncStartedAt = async (installationId: number) => {
   const [syncJob] = await db
@@ -36,17 +42,13 @@ export const getUsersSyncJobWithInstallation = async () => {
   const [result] = await db
     .select()
     .from(UsersSyncJob)
-    .where(lt(UsersSyncJob.retryAfter, sql`now()`))
-    .leftJoin(Installation, eq(UsersSyncJob.installationId, Installation.id))
+    .where(or(isNull(UsersSyncJob.retryAfter), lt(UsersSyncJob.retryAfter, sql`now()`)))
+    .innerJoin(Installation, eq(UsersSyncJob.installationId, Installation.id))
     .orderBy(asc(UsersSyncJob.priority), asc(UsersSyncJob.syncStartedAt))
     .limit(1);
 
   if (!result) {
     return null;
-  }
-
-  if (!result.installation) {
-    throw new Error('Picked users_sync_job is missing installation');
   }
 
   return {
@@ -94,3 +96,6 @@ export const updateUsersSyncJobRetryAfter = (installationId: number, retryAfter:
     .update(UsersSyncJob)
     .set({ retryAfter, updatedAt: sql`now()` })
     .where(eq(UsersSyncJob.installationId, installationId));
+
+export const insertFirstThirdPartyAppsSyncJob = (installationId: number) =>
+  db.insert(ThirdPartyAppsSyncJob).values({ installationId, priority: 1 }).onConflictDoNothing();

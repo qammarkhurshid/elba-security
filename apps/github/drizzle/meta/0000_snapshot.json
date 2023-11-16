@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "0d1dbf68-bb6c-4923-812e-11e263a59810",
+  "id": "dd3f9d19-fd77-4cdb-8810-ff6fa31354a4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "installation": {
@@ -143,6 +143,90 @@
           "columns": [
             "installation_id",
             "admin_id"
+          ]
+        }
+      }
+    },
+    "third_party_apps_sync_jobs": {
+      "name": "third_party_apps_sync_jobs",
+      "schema": "github",
+      "columns": {
+        "installation_id": {
+          "name": "installation_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "priority": {
+          "name": "priority",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cursor": {
+          "name": "cursor",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "sync_started_at": {
+          "name": "sync_started_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "retry_count": {
+          "name": "retry_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "retry_after": {
+          "name": "retry_after",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "third_party_apps_sync_jobs_installation_id_installation_id_fk": {
+          "name": "third_party_apps_sync_jobs_installation_id_installation_id_fk",
+          "tableFrom": "third_party_apps_sync_jobs",
+          "tableTo": "installation",
+          "columnsFrom": [
+            "installation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "third_party_apps_sync_jobs_installation_id_unique": {
+          "name": "third_party_apps_sync_jobs_installation_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "installation_id"
           ]
         }
       }

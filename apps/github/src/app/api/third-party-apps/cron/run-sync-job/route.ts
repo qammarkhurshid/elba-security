@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { runUsersSyncJobs } from './service';
+import { runThirdPartyAppsSyncJobs } from './service';
 
 export const runtime = 'edge';
 
 export async function GET() {
-  const result = await runUsersSyncJobs();
+  const result = await runThirdPartyAppsSyncJobs();
   return NextResponse.json(result);
 }

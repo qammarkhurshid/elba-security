@@ -16,6 +16,7 @@ import {
   deleteInstallationAdminsSyncedBefore,
   type UsersSyncJobWithInstallation,
   updateUsersSyncJobRetryAfter,
+  insertFirstThirdPartyAppsSyncJob,
 } from './data';
 
 const formatElbaUser = (member: OrganizationMember): User => ({
@@ -34,7 +35,7 @@ const runUsersSyncJob = async (job: UsersSyncJobWithInstallation) => {
     const { nextCursor, validMembers } = await getPaginatedOrganizationMembers(
       job.installationId,
       job.installation.accountLogin,
-      job.cursor
+      cursor
     );
 
     cursor = nextCursor;
@@ -62,6 +63,10 @@ const runUsersSyncJob = async (job: UsersSyncJobWithInstallation) => {
 
   await elba.users.deleteUsers(job.syncStartedAt);
   await deleteInstallationAdminsSyncedBefore(job.installationId, job.syncStartedAt);
+  // if job priority is 1 it's means that it was the first users scan
+  if (job.priority === 1) {
+    await insertFirstThirdPartyAppsSyncJob(job.installationId);
+  }
   await deleteUsersSyncJob(job.installationId);
 };
 

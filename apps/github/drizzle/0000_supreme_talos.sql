@@ -20,6 +20,18 @@ CREATE TABLE IF NOT EXISTS "github"."installation_admin" (
 	CONSTRAINT "installation_admin_installation_id_admin_id_unique" UNIQUE("installation_id","admin_id")
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "github"."third_party_apps_sync_jobs" (
+	"installation_id" integer NOT NULL,
+	"priority" integer NOT NULL,
+	"cursor" text,
+	"sync_started_at" timestamp DEFAULT now() NOT NULL,
+	"retry_count" integer DEFAULT 0 NOT NULL,
+	"retry_after" timestamp,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "third_party_apps_sync_jobs_installation_id_unique" UNIQUE("installation_id")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "github"."users_sync_jobs" (
 	"installation_id" integer NOT NULL,
 	"priority" integer NOT NULL,
@@ -36,6 +48,12 @@ CREATE INDEX IF NOT EXISTS "organisation_id_idx" ON "github"."installation" ("ac
 CREATE INDEX IF NOT EXISTS "elba_organization_id_idx" ON "github"."installation" ("elba_organisation_id");--> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "github"."installation_admin" ADD CONSTRAINT "installation_admin_installation_id_installation_id_fk" FOREIGN KEY ("installation_id") REFERENCES "github"."installation"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "github"."third_party_apps_sync_jobs" ADD CONSTRAINT "third_party_apps_sync_jobs_installation_id_installation_id_fk" FOREIGN KEY ("installation_id") REFERENCES "github"."installation"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

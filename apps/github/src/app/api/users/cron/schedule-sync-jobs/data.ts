@@ -9,8 +9,7 @@ export const getSchedulableInstallationIds = async () => {
     })
     .from(Installation)
     .leftJoin(UsersSyncJob, eq(Installation.id, UsersSyncJob.installationId))
-    .where(isNull(UsersSyncJob));
-
+    .where(isNull(UsersSyncJob.installationId));
   return installations.map(({ id }) => id);
 };
 

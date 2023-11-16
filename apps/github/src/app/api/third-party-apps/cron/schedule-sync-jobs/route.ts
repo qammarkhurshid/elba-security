@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
+import { scheduleThirdPartyAppsSyncJobs } from './service';
 
 export const runtime = 'edge';
 
-export function GET() {
-  return new NextResponse(null, { status: 501, statusText: 'Not Implemented' });
+export async function GET() {
+  const result = await scheduleThirdPartyAppsSyncJobs();
+  return NextResponse.json(result, { status: 200 });
 }

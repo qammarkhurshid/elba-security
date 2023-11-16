@@ -7,13 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest",
-    "database": "docker-compose up -d",
-    "database:migrate": "node ./scripts/migrate.js",
+    "test": "pnpm test:database && node ./scripts/migrate.js .env.test  && vitest --no-threads",
+    "test:database": "docker-compose up -d -p github-test --env-file=.env.test",
+    "database": "docker-compose -p github up -d",
+    "database:migrate": "node ./scripts/migrate.js .env",
     "generate:migration": "npx drizzle-kit generate:pg --schema=./src/database/schema.ts"
   },
   "dependencies": {
     "@octokit/app": "^14.0.1",
+    "@octokit/request-error": "^5.0.1",
     "@t3-oss/env-nextjs": "^0.7.1",
     "drizzle-orm": "^0.28.6",
     "js-cookie": "^3.0.5",
