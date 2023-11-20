@@ -1,6 +1,6 @@
 import { checkOrganization } from '@/common/utils';
+import type { User } from '@/common/microsoft';
 import { getPaginatedUsersByTenantId, getTokenByTenantId } from '@/common/microsoft';
-import { User } from '@/common/microsoft';
 
 const formatUserUpsertInput = (user: User) => ({
   id: user.id,

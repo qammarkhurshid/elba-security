@@ -7,7 +7,7 @@ type MicrosoftGraphCoreResponse = {
   '@odata.nextLink'?: string;
 };
 
-type MicrosoftGraphPermissionGrantResponse = {
+export type MicrosoftGraphPermissionGrantResponse = {
   value: MicrosoftGraph.OAuth2PermissionGrant[];
 } & MicrosoftGraphCoreResponse;
 
@@ -18,13 +18,6 @@ type MicrosoftGraphServicePrincipalResponse = {
 type MicrosoftGraphUserResponse = {
   value: MicrosoftGraph.User[];
 } & MicrosoftGraphCoreResponse;
-
-type MicrosoftGraphTokenResponse = {
-  token_type: string;
-  expires_in: number;
-  ext_expires_in: number;
-  access_token: string;
-};
 
 const MAX_RESULTS_PER_PAGE = 999;
 

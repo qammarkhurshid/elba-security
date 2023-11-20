@@ -1,7 +1,7 @@
 import { expect, test, describe, vi } from 'vitest';
-import { handleMicrosoftAuthCallback } from './auth';
 import * as microsoftModules from '@/common/microsoft';
 import * as utilsModules from '@/common/utils';
+import { handleMicrosoftAuthCallback } from './auth';
 
 const tenantId = 'tenantId';
 

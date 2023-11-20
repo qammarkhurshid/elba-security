@@ -1,15 +1,16 @@
 import { eq } from 'drizzle-orm';
+import type * as MicrosoftGraph from 'microsoft-graph';
 import { getPermissionGrant } from '@/repositories/integration/permission-grant';
-import type {
-  DelegatedPermissionGrant,
-  ServicePrincipal} from '@/common/microsoft';
+import type { MicrosoftGraphPermissionGrantResponse } from '@/common/microsoft';
 import {
-  getPaginatedDelegatedPermissionGrantsByTenantId
+  getPaginatedDelegatedPermissionGrantsByTenantId,
   deletePermissionGrantById,
   getAllServicePrincipalsById,
-  getTokenByTenantId} from '@/common/microsoft';
+  getTokenByTenantId,
+} from '@/common/microsoft';
 import { checkOrganization } from '@/common/utils';
-import type { PermissionGrantInsertInput , permissionGrants as PermissionGrantTable } from '@/schemas/permission-grant';
+import type { PermissionGrantInsertInput } from '@/schemas/permission-grant';
+import { permissionGrants as PermissionGrantTable } from '@/schemas/permission-grant';
 import { db } from '@/lib/db';
 
 type ThirdPartyAppsObjectsUpsertInput = {
@@ -26,14 +27,14 @@ type ThirdPartyAppsObjectsUpsertInput = {
       scopes: string[];
     }[];
   }[];
-}
+};
 
 const formatThirdPartyAppsObjectUpsertInput = (
   tenantId: string,
   // Will be used whenever we decide to scan apps that require application permissions
   // servicePrincipalsWithScopes: ServicePrincipal[],
-  permissionGrants: DelegatedPermissionGrant[],
-  allServicePrincipals: ServicePrincipal[]
+  permissionGrants: MicrosoftGraphPermissionGrantResponse,
+  allServicePrincipals: MicrosoftGraph.ServicePrincipal[]
 ): {
   thirdPartyAppsObjects: ThirdPartyAppsObjectsUpsertInput;
   permissionGrantsObjects: PermissionGrantInsertInput[];
@@ -44,7 +45,7 @@ const formatThirdPartyAppsObjectUpsertInput = (
     // ...servicePrincipalsWithScopes.map((sp) =>
     //   formatServicePrincipalToThirdPartyAppObject(sp)
     // ),
-    ...permissionGrants.map((pg) => {
+    ...permissionGrants.value.map((pg) => {
       permissionGrantsObjects.push({
         tenantId,
         userId: pg.principalId,
@@ -77,19 +78,18 @@ const formatThirdPartyAppsObjectUpsertInput = (
 };
 
 const formatPermissionGrantToThirdPartyAppObject = (
-  permissionGrant: DelegatedPermissionGrant,
-  servicePrincipal: ServicePrincipal
+  permissionGrant: MicrosoftGraph.OAuth2PermissionGrant,
+  servicePrincipal: MicrosoftGraph.ServicePrincipal
 ) => ({
   id: servicePrincipal.id,
   name: servicePrincipal.appDisplayName,
   description: servicePrincipal.description,
   url: servicePrincipal.homepage,
   publisherName: servicePrincipal.verifiedPublisher?.displayName,
-  logoUrl: servicePrincipal.verifiedPublisher?.logoUrl,
   users: [
     {
       id: permissionGrant.principalId,
-      scopes: permissionGrant.scope.trim().split(' '),
+      scopes: permissionGrant.scope?.trim().split(' '),
       metadata: {
         grantId: permissionGrant.id,
       },
@@ -98,13 +98,14 @@ const formatPermissionGrantToThirdPartyAppObject = (
 });
 
 // Will be used whenever we decide to scan apps that require application permissions
-const formatServicePrincipalToThirdPartyAppObject = (servicePrincipal: ServicePrincipal) => ({
+const formatServicePrincipalToThirdPartyAppObject = (
+  servicePrincipal: MicrosoftGraph.ServicePrincipal
+) => ({
   id: servicePrincipal.id,
   name: servicePrincipal.appDisplayName,
   description: servicePrincipal.description,
   url: servicePrincipal.homepage,
   publisherName: servicePrincipal.verifiedPublisher?.displayName,
-  logoUrl: servicePrincipal.verifiedPublisher?.logoUrl,
   users: [
     {
       id: servicePrincipal.appRoleAssignedTo,
