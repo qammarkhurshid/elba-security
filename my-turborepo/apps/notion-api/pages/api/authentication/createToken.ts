@@ -5,11 +5,20 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-type Data = {
-  name: string;
+type SuccessData = {
+  organization_id: string;
+  organization_name: string;
+  notionToken: string;
 };
 
-export default function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+interface ErrorData {
+  error: string;
+}
+
+export default function handler(
+  req: NextApiRequest,
+  res: NextApiResponse<SuccessData | ErrorData>
+) {
   const { code } = req.body;
 
   const options = {
@@ -25,22 +34,51 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Data>)
     },
     data: { code, grant_type: 'authorization_code' },
   };
-
+  
   axios
     .request(options)
     .then(async function (response) {
       try {
-        const notion = await prisma.integration.create({
-          data: {
-            organisationId: response.data.workspace_id,
-            notionToken: response.data.access_token,
-            notionId: response.data.bot_id,
-          },
+        const existingIntegration = await prisma.integration.findFirst({
+          where: { organization_id: response.data.workspace_id },
         });
+        if (existingIntegration) {
+          await prisma.integration.update({
+            where: { id: existingIntegration.id },
+            data: {
+              notionToken: response.data.access_token,
+              organization_name: response.data.workspace_name,
+            },
+          });
+        } else {
+          await prisma.integration.create({
+            data: {
+              organization_id: response.data.workspace_id,
+              organization_name: response.data.workspace_name,
+              notionToken: response.data.access_token,
+            },
+          });
+        }
+
+        const existingJob = await prisma.users_Sync_Jobs.findFirst({
+          where: { organization_id: response.data.workspace_id },
+        });
+
+        if (!existingJob) {
+          await prisma.users_Sync_Jobs.create({
+            data: {
+              priority: 1,
+              organization_id: response.data.workspace_id,
+              pagination_token: '',
+              sync_started_at: new Date(),
+            },
+          });
+        }
+
         res.status(200).json({
-          organisationId: response.data.workspace_id,
+          organization_id: response.data.workspace_id,
+          organization_name: response.data.workspace_name,
           notionToken: response.data.access_token,
-          notionId: response.data.bot_id,
         });
       } catch (error) {
         console.error('Error saving data:', error);
@@ -50,6 +88,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse<Data>)
       }
     })
     .catch(function (error) {
+      console.error(error);
       res.status(405).json({ error: error });
     });
 }

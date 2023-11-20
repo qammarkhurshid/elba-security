@@ -29,7 +29,7 @@ export const SignIn = () => {
         axios
         .request(options)
         .then(function (response) {
-            alert(response.data);
+            alert(response.data.notionToken);
         })
         .catch(function (error) {
             console.error(error);
