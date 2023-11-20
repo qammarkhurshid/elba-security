@@ -97,6 +97,7 @@ export const runThirdPartyAppsSyncJobs = async () => {
     } else {
       await deleteThirdPartyAppsSyncJob(job.installationId);
     }
+
     return { success: false, id: job.installationId };
   }
 };

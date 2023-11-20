@@ -1,21 +1,21 @@
-import { createEnv } from '@t3-oss/env-nextjs';
 import { z } from 'zod';
 
 const zEnvInt = () => z.string().transform(Number).pipe(z.number().int());
 
-export const env = createEnv({
-  client: {
+export const env = z
+  .object({
     NEXT_PUBLIC_ELBA_GITHUB_INSTALL_URL: z.string().url(),
-  },
-  server: {
+    VERCEL_ENV: z.string().optional(),
     CRON_SECRET: z.string(),
     ELBA_API_BASE_URL: z.string().url(),
     ELBA_SOURCE_ID: z.string(),
+    POSTGRES_URL: z.string().optional(),
     POSTGRES_HOST: z.string(),
     POSTGRES_PORT: zEnvInt(),
-    POSTGRES_USERNAME: z.string(),
+    POSTGRES_USER: z.string(),
     POSTGRES_PASSWORD: z.string(),
     POSTGRES_DATABASE: z.string(),
+    POSTGRES_PROXY: zEnvInt(),
     GITHUB_APP_ID: z.string(),
     GITHUB_PRIVATE_KEY: z.string(),
     GITHUB_CLIENT_ID: z.string(),
@@ -26,12 +26,5 @@ export const env = createEnv({
     USERS_SYNC_MAX_RETRY: zEnvInt(),
     THIRD_PARTY_APPS_SYNC_BATCH_SIZE: zEnvInt(),
     THIRD_PARTY_APPS_MAX_RETRY: zEnvInt(),
-  },
-  // @ts-expect-error process.env is not typed according to .env
-  runtimeEnv: {
-    ...process.env,
-    // client env need to be specified explicitly
-    // eslint-disable-next-line turbo/no-undeclared-env-vars -- ??
-    NEXT_PUBLIC_ELBA_GITHUB_INSTALL_URL: process.env.NEXT_PUBLIC_ELBA_GITHUB_INSTALL_URL,
-  },
-});
+  })
+  .parse(process.env);

@@ -1,4 +1,4 @@
-import { asc, eq, lt, sql } from 'drizzle-orm';
+import { asc, eq, lt, sql, or, isNull } from 'drizzle-orm';
 import { Installation, InstallationAdmin, ThirdPartyAppsSyncJob, db } from '@/database';
 
 export type ThirdPartyAppsSyncJob = NonNullable<
@@ -11,7 +11,9 @@ export const getThirdPartyAppsSyncJob = async () => {
     .from(ThirdPartyAppsSyncJob)
     .leftJoin(Installation, eq(ThirdPartyAppsSyncJob.installationId, Installation.id))
     .orderBy(asc(ThirdPartyAppsSyncJob.priority), asc(ThirdPartyAppsSyncJob.syncStartedAt))
-    .where(lt(ThirdPartyAppsSyncJob.retryAfter, sql`now()`))
+    .where(
+      or(isNull(ThirdPartyAppsSyncJob.retryAfter), lt(ThirdPartyAppsSyncJob.retryAfter, sql`now()`))
+    )
     .limit(1);
 
   if (!result) {

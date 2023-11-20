@@ -9,6 +9,12 @@ export default defineConfig({
   test: {
     setupFiles: ['./vitest/setup-test-server.ts', './vitest/setup-database.ts'],
     env: process.env,
+    environment: 'edge-runtime',
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
   },
   resolve: {
     alias: {

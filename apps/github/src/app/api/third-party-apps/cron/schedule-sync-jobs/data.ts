@@ -9,11 +9,11 @@ export const getSchedulableInstallationIds = async () => {
     })
     .from(Installation)
     .leftJoin(ThirdPartyAppsSyncJob, eq(Installation.id, ThirdPartyAppsSyncJob.installationId))
-    .where(isNull(ThirdPartyAppsSyncJob));
+    .where(isNull(ThirdPartyAppsSyncJob.installationId));
 
   return installations.map(({ id }) => id);
 };
 
 export const insertThirdPartyAppsSyncJobs = (
   thirdPartyAppsSyncJobs: PgInsertValue<typeof ThirdPartyAppsSyncJob>[]
-) => db.insert(UsersSyncJob).values(thirdPartyAppsSyncJobs).onConflictDoNothing();
+) => db.insert(ThirdPartyAppsSyncJob).values(thirdPartyAppsSyncJobs).onConflictDoNothing();
