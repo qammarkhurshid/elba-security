@@ -1,30 +1,30 @@
 import * as jose from 'jose';
+import type * as MicrosoftGraph from 'microsoft-graph';
 import { env } from './env';
-import * as MicrosoftGraph from 'microsoft-graph';
 
 type MicrosoftGraphCoreResponse = {
   '@odata.context': string;
   '@odata.nextLink'?: string;
 };
 
-interface MicrosoftGraphPermissionGrantResponse extends MicrosoftGraphCoreResponse {
+type MicrosoftGraphPermissionGrantResponse = {
   value: MicrosoftGraph.OAuth2PermissionGrant[];
-}
+} & MicrosoftGraphCoreResponse;
 
-interface MicrosoftGraphServicePrincipalResponse extends MicrosoftGraphCoreResponse {
+type MicrosoftGraphServicePrincipalResponse = {
   value: MicrosoftGraph.ServicePrincipal[];
-}
+} & MicrosoftGraphCoreResponse;
 
-interface MicrosoftGraphUserResponse extends MicrosoftGraphCoreResponse {
+type MicrosoftGraphUserResponse = {
   value: MicrosoftGraph.User[];
-}
+} & MicrosoftGraphCoreResponse;
 
-interface MicrosoftGraphTokenResponse {
+type MicrosoftGraphTokenResponse = {
   token_type: string;
   expires_in: number;
   ext_expires_in: number;
   access_token: string;
-}
+};
 
 const MAX_RESULTS_PER_PAGE = 999;
 

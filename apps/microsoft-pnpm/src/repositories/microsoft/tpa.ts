@@ -1,21 +1,18 @@
 import { eq } from 'drizzle-orm';
 import { getPermissionGrant } from '@/repositories/integration/permission-grant';
-import {
+import type {
   DelegatedPermissionGrant,
-  getPaginatedDelegatedPermissionGrantsByTenantId,
-  ServicePrincipal,
-} from '@/common/microsoft';
+  ServicePrincipal} from '@/common/microsoft';
 import {
+  getPaginatedDelegatedPermissionGrantsByTenantId
   deletePermissionGrantById,
   getAllServicePrincipalsById,
-  getTokenByTenantId,
-} from '@/common/microsoft';
+  getTokenByTenantId} from '@/common/microsoft';
 import { checkOrganization } from '@/common/utils';
-import { PermissionGrantInsertInput } from '@/schemas/permission-grant';
-import { permissionGrants as PermissionGrantTable } from '@/schemas/permission-grant';
+import type { PermissionGrantInsertInput , permissionGrants as PermissionGrantTable } from '@/schemas/permission-grant';
 import { db } from '@/lib/db';
 
-interface ThirdPartyAppsObjectsUpsertInput {
+type ThirdPartyAppsObjectsUpsertInput = {
   organisationId: string;
   apps: {
     id: string;
