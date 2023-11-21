@@ -2,7 +2,6 @@
 import { useSearchParams } from 'next/navigation';
 import Cookies from 'js-cookie';
 import React, { useEffect } from 'react';
-import { env } from '@/common/env';
 
 export default function Home() {
   const searchParams = useSearchParams();
@@ -19,5 +18,5 @@ export default function Home() {
     return <span>some error</span>;
   }
 
-  return <a href={env.NEXT_PUBLIC_ELBA_GITHUB_INSTALL_URL}>connect elba to Github</a>;
+  return <a href="https://github.com/apps/local-elba/installations/new">connect elba to Github</a>;
 }

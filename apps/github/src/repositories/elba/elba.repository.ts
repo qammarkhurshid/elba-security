@@ -1,4 +1,4 @@
-import { env } from '@/common/env';
+import { env } from '@/env';
 import { RequestSender } from './request-sender';
 import { ThirdPartyApps } from './resources/third-party-apps/third-party-apps';
 import { Users } from './resources/users/users';

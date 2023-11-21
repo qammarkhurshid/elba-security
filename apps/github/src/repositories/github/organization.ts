@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { env } from '@/common/env';
+import { env } from '@/env';
 import { createOctokitApp } from './client';
 import { getNextPageFromLink } from './utils/pagination';
 

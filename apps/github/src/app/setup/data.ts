@@ -1,5 +1,5 @@
 import type { PgInsertValue, PgUpdateSetSource } from 'drizzle-orm/pg-core';
-import { Installation, UsersSyncJob, db } from '@/database';
+import { Installation, db } from '@/database';
 
 export const insertInstallation = async (
   values: PgInsertValue<typeof Installation> & PgUpdateSetSource<typeof Installation>
@@ -23,6 +23,3 @@ export const insertInstallation = async (
 
   return installation;
 };
-
-export const insertUsersSyncJob = (usersSyncJob: PgInsertValue<typeof UsersSyncJob>) =>
-  db.insert(UsersSyncJob).values(usersSyncJob).onConflictDoNothing();

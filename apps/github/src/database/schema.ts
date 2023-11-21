@@ -39,35 +39,3 @@ export const InstallationAdmin = GithubSchema.table(
     unq: unique().on(t.installationId, t.adminId),
   })
 );
-
-export const UsersSyncJob = GithubSchema.table('users_sync_jobs', {
-  installationId: integer('installation_id')
-    .references(() => Installation.id)
-    .unique()
-    .notNull(),
-  priority: integer('priority').notNull(),
-  cursor: text('cursor'),
-  syncStartedAt: timestamp('sync_started_at').defaultNow().notNull(),
-  retryCount: integer('retry_count').default(0).notNull(),
-  retryAfter: timestamp('retry_after'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
-
-export type SelectUsersSyncJob = InferSelectModel<typeof UsersSyncJob>;
-
-export const ThirdPartyAppsSyncJob = GithubSchema.table('third_party_apps_sync_jobs', {
-  installationId: integer('installation_id')
-    .references(() => Installation.id)
-    .unique()
-    .notNull(),
-  priority: integer('priority').notNull(),
-  cursor: text('cursor'),
-  syncStartedAt: timestamp('sync_started_at').defaultNow().notNull(),
-  retryCount: integer('retry_count').default(0).notNull(),
-  retryAfter: timestamp('retry_after'),
-  createdAt: timestamp('created_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-});
-
-export type SelectThirdPartyAppsSyncJob = InferSelectModel<typeof ThirdPartyAppsSyncJob>;

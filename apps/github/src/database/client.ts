@@ -1,7 +1,7 @@
 import { sql } from '@vercel/postgres';
 import { drizzle } from 'drizzle-orm/vercel-postgres';
 import { neonConfig } from '@neondatabase/serverless';
-import { env } from '@/common/env';
+import { env } from '@/env';
 
 if (!env.VERCEL_ENV || env.VERCEL_ENV === 'development') {
   // Set the WebSocket proxy to work with the local instance

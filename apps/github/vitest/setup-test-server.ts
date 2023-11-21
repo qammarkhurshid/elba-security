@@ -1,10 +1,11 @@
 import { setupServer } from 'msw/node';
 import { beforeAll, afterAll, afterEach } from 'vitest';
 import { http, passthrough } from 'msw';
+import { env } from '@/env';
 import { elbaRequestHandlers } from './elba-request-handlers';
 
 const server = setupServer(
-  http.all('http://localhost:1234/*', () => passthrough()),
+  http.all(`http://localhost:${env.POSTGRES_PROXY}/*`, () => passthrough()),
   ...elbaRequestHandlers
 );
 

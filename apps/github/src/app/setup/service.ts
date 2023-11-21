@@ -1,11 +1,12 @@
 import { getInstallation } from '@/repositories/github/installation';
-import { insertInstallation, insertUsersSyncJob } from './data';
+import { inngest } from '../api/inngest/client';
+import { insertInstallation } from './data';
 
 export const setupInstallation = async (installationId: number, elbaOrganizationId: string) => {
   const installation = await getInstallation(installationId);
 
   if (installation.account.type !== 'Organization') {
-    throw new Error('Cannot install elba github app on a personnal account.');
+    throw new Error('Cannot install elba github app on an account that is not an organization');
   }
 
   if (installation.suspended_at) {
@@ -19,9 +20,12 @@ export const setupInstallation = async (installationId: number, elbaOrganization
     elbaOrganizationId,
   });
 
-  await insertUsersSyncJob({
-    installationId: installation.id,
-    priority: 1,
+  await inngest.send({
+    name: 'users/scan',
+    data: {
+      installationId: installation.id,
+      isFirstScan: true,
+    },
   });
 
   return appInstallation;

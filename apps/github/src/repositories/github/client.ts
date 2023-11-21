@@ -1,5 +1,5 @@
 import { App } from '@octokit/app';
-import { env } from '@/common/env';
+import { env } from '@/env';
 
 export const createOctokitApp = () =>
   new App({

@@ -22,6 +22,7 @@ export default async function SetupPage({ searchParams }: SetupPageProps) {
     await setupInstallation(installationId, organisationId);
     return <span>Elba github app installed !</span>;
   } catch (error) {
+    console.log(error);
     return <span>Could not install github app</span>;
   }
 }

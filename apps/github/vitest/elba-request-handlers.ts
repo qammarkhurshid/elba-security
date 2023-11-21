@@ -1,7 +1,7 @@
 import type { RequestHandler } from 'msw';
 import { HttpResponse, http } from 'msw';
 import { z } from 'zod';
-import { env } from '@/common/env';
+import { env } from '@/env';
 
 const updateUsersSchema = z.object({
   organisationId: z.string().uuid(),
