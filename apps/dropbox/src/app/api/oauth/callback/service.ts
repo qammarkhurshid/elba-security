@@ -70,7 +70,7 @@ export const generateAccessToken = async ({
       organisationId,
       accessToken: access_token,
       refreshToken: refresh_token,
-      expiresAt: new Date(accessTokenExpiresAt),
+      expiresAt: accessTokenExpiresAt,
       adminTeamMemberId: team_member_id,
       rootNamespaceId: root_info.root_namespace_id,
       teamName: team?.name as string,

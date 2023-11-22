@@ -13,7 +13,18 @@ services:
       - '${POSTGRES_PORT}:5432'
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
-
+  test_db:
+    image: postgres:latest
+    container_name: test_dbx_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${TEST_POSTGRES_DATABASE}
+      POSTGRES_USER: ${TEST_POSTGRES_USERNAME}
+      POSTGRES_PASSWORD: ${TEST_POSTGRES_PASSWORD}
+    ports:
+      - '${TEST_POSTGRES_PORT}:5432'
+    volumes:
+      - ./data/test-postgres:/var/lib/postgresql/data
   pgadmin:
     image: dpage/pgadmin4
     container_name: dbx_pgadmin4

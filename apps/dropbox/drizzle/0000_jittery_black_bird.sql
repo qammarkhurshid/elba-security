@@ -8,6 +8,6 @@ CREATE TABLE IF NOT EXISTS "tokens" (
 	"unauthorized_at" timestamp,
 	"refresh_after" timestamp,
 	"expires_at" timestamp,
-	"updated_at" timestamp NOT NULL,
-	"created_at" timestamp NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now() NOT NULL
 );
