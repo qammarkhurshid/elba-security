@@ -7,13 +7,14 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest",
-    "big-bang": "pnpm docker:down && pnpm docker:up",
+    "test": "vitest --no-threads",
+    "big-bang": "pnpm docker:down && pnpm docker:up && pnpm migrate && pnpm dev",
     "docker:down": "docker-compose -f 'docker-compose.yaml' down --volumes",
     "docker:up": "docker-compose -f 'docker-compose.yaml' up -d",
     "migration:generate": "drizzle-kit generate:pg --schema=./src/database/schema.ts",
-    "migration:push": "node ./src/database/migrate.ts .env",
-    "migrate": "pnpm migration:generate && pnpm migration:push"
+    "migration:push": "node ./src/database/migrate.ts .env && NODE_ENV=test node ./src/database/migrate.ts",
+    "migrate": "pnpm migration:generate && pnpm migration:push",
+    "inngest": "npx inngest-cli@latest dev -u http://localhost:3000/api/inngest"
   },
   "dependencies": {
     "@t3-oss/env-nextjs": "^0.7.1",
@@ -22,11 +23,13 @@
     "drizzle-kit": "^0.20.4",
     "drizzle-orm": "^0.29.0",
     "dropbox": "^10.34.0",
+    "inngest": "^3.6.1",
     "js-cookie": "^3.0.5",
     "next": "14.0.1",
     "postgres": "^3.4.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "timekeeper": "^2.3.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -36,6 +39,8 @@
     "dotenv": "^16.3.1",
     "eslint": "^8.53.0",
     "eslint-config-custom": "workspace:*",
+    "msw": "^2.0.8",
+    "node-mocks-http": "^1.13.0",
     "tsconfig": "workspace:*",
     "typescript": "^5.2.2",
     "vitest": "^0.34.6"

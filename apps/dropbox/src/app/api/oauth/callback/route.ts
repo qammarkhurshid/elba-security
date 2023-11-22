@@ -1,12 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import { generateAccessToken } from './service';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const cookiesList = cookies();
-  // const organisationId = cookiesList.get('organisationId')?.value;
-  const responseCookies = NextResponse.next();
   let serverState = request.cookies.get('organisationId')?.value;
 
   try {
@@ -15,13 +11,6 @@ export async function GET(request: NextRequest) {
       searchParams.get('state'),
       searchParams.get('error'),
     ];
-
-    console.log('Dbx Callback params', {
-      code,
-      state,
-      error,
-      serverState,
-    });
 
     if (error === 'access_denied') {
       return NextResponse.redirect('https://admin.elba.ninja');
@@ -37,15 +26,18 @@ export async function GET(request: NextRequest) {
 
     await generateAccessToken({ authenticationCode: code, organisationId: state });
 
-    return new NextResponse(JSON.stringify({ success: true, message: 'authentication success' }), {
-      status: 200,
-      headers: { 'content-type': 'application/json' },
-    });
+    // fetch users
+    // Insert a job for user sync
+
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
     console.log(error);
-    return new NextResponse(JSON.stringify({ success: false, message: 'authentication failed' }), {
-      status: 401,
-      headers: { 'content-type': 'application/json' },
-    });
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'authentication failed',
+      },
+      { status: 401 }
+    );
   }
 }
