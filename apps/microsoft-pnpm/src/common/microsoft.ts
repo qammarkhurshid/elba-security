@@ -15,9 +15,18 @@ type MicrosoftGraphServicePrincipalResponse = {
   value: MicrosoftGraph.ServicePrincipal[];
 } & MicrosoftGraphCoreResponse;
 
+export type SafeMicrosoftGraphUser = {
+  id: NonNullable<MicrosoftGraph.User['id']>;
+  displayName: NonNullable<MicrosoftGraph.User['displayName']>;
+} & Omit<MicrosoftGraph.User, 'id' | 'displayName'>;
+
 type MicrosoftGraphUserResponse = {
-  value: MicrosoftGraph.User[];
+  value: SafeMicrosoftGraphUser[];
 } & MicrosoftGraphCoreResponse;
+
+type MicrosoftGraphTokenResponse = {
+  access_token: string;
+};
 
 const MAX_RESULTS_PER_PAGE = 999;
 
@@ -39,11 +48,11 @@ export const getTokenByTenantId = async (tenantId: string) => {
       scope: 'https://graph.microsoft.com/.default',
     }),
   });
-  const json = await response.json();
+  const json = (await response.json()) as MicrosoftGraphTokenResponse;
   const decodedToken = jose.decodeJwt(json.access_token);
   return {
     accessToken: json.access_token,
-    scopes: (decodedToken.roles as MicrosoftAppScope[]) ?? [],
+    scopes: decodedToken.roles as MicrosoftAppScope[],
   };
 };
 

@@ -52,10 +52,11 @@ const formatThirdPartyAppsObjectUpsertInput = (
         appId: pg.clientId,
         grantId: pg.id,
       });
-      return formatPermissionGrantToThirdPartyAppObject(
-        pg,
-        allServicePrincipals.filter((sp) => sp.id === pg.clientId)[0]
-      );
+      const servicePrincipal = allServicePrincipals.filter((sp) => sp.id === pg.clientId)[0];
+      if (!servicePrincipal) {
+        throw new Error(`Service principal not found for permission grant ${pg.id}`);
+      }
+      return formatPermissionGrantToThirdPartyAppObject(pg, servicePrincipal);
     }),
   ];
 
@@ -98,21 +99,21 @@ const formatPermissionGrantToThirdPartyAppObject = (
 });
 
 // Will be used whenever we decide to scan apps that require application permissions
-const formatServicePrincipalToThirdPartyAppObject = (
-  servicePrincipal: MicrosoftGraph.ServicePrincipal
-) => ({
-  id: servicePrincipal.id,
-  name: servicePrincipal.appDisplayName,
-  description: servicePrincipal.description,
-  url: servicePrincipal.homepage,
-  publisherName: servicePrincipal.verifiedPublisher?.displayName,
-  users: [
-    {
-      id: servicePrincipal.appRoleAssignedTo,
-      scopes: servicePrincipal.appScopes,
-    },
-  ],
-});
+// const formatServicePrincipalToThirdPartyAppObject = (
+//   servicePrincipal: MicrosoftGraph.ServicePrincipal
+// ) => ({
+//   id: servicePrincipal.id,
+//   name: servicePrincipal.appDisplayName,
+//   description: servicePrincipal.description,
+//   url: servicePrincipal.homepage,
+//   publisherName: servicePrincipal.verifiedPublisher?.displayName,
+//   users: [
+//     {
+//       id: servicePrincipal.appRoleAssignedTo,
+//       scopes: servicePrincipal.appScopes,
+//     },
+//   ],
+// });
 
 export const scanThirdPartyAppsByTenantId = async (tenantId: string, pageLink: string | null) => {
   await checkOrganization(tenantId);

@@ -1,11 +1,10 @@
 import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
-import { pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
+import { pgTable, text, uuid } from 'drizzle-orm/pg-core';
 
 export const organizations = pgTable('organization', {
   id: uuid('id').notNull().primaryKey().defaultRandom(),
+  elbaOrganizationId: text('elba_organization_id').unique().notNull(),
   tenantId: text('tenant_id').unique().notNull(),
-  lastTpaScan: timestamp('last_tpa_scan'),
-  lastUserScan: timestamp('last_user_scan'),
 });
 
 export type Organization = InferSelectModel<typeof organizations>;

@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "91430c0b-65c9-4307-a74f-0d33720d6474",
+  "id": "5504212e-d2c2-4b5e-8f49-ccd708a4ac7d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "organization": {
@@ -15,29 +15,30 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "elba_organization_id": {
+          "name": "elba_organization_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "tenant_id": {
           "name": "tenant_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
-        },
-        "last_tpa_scan": {
-          "name": "last_tpa_scan",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "last_user_scan": {
-          "name": "last_user_scan",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
+        "organization_elba_organization_id_unique": {
+          "name": "organization_elba_organization_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "elba_organization_id"
+          ]
+        },
         "organization_tenant_id_unique": {
           "name": "organization_tenant_id_unique",
           "nullsNotDistinct": false,
@@ -112,94 +113,9 @@
           ]
         }
       }
-    },
-    "sync_job": {
-      "name": "sync_job",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "tenant_id": {
-          "name": "tenant_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "sync_job_status",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'scheduled'"
-        },
-        "type": {
-          "name": "type",
-          "type": "sync_job_type",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "pagination_token": {
-          "name": "pagination_token",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "sync_job_tenant_id_organization_tenant_id_fk": {
-          "name": "sync_job_tenant_id_organization_tenant_id_fk",
-          "tableFrom": "sync_job",
-          "tableTo": "organization",
-          "columnsFrom": [
-            "tenant_id"
-          ],
-          "columnsTo": [
-            "tenant_id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
     }
   },
-  "enums": {
-    "sync_job_status": {
-      "name": "sync_job_status",
-      "values": {
-        "scheduled": "scheduled",
-        "started": "started"
-      }
-    },
-    "sync_job_type": {
-      "name": "sync_job_type",
-      "values": {
-        "users": "users",
-        "apps": "apps"
-      }
-    }
-  },
+  "enums": {},
   "schemas": {},
   "_meta": {
     "schemas": {},
