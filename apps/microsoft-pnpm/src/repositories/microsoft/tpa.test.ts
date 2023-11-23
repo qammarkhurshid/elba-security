@@ -10,6 +10,7 @@ beforeEach(() => {
 });
 
 const tenantId = 'tenantId';
+const accessToken = 'accessToken';
 
 describe('scanThirdPartyAppsByTenantId', () => {
   it('should scan third-party apps and return formatted objects', async () => {
@@ -21,7 +22,7 @@ describe('scanThirdPartyAppsByTenantId', () => {
       { '@odata.context': 'context', value: [{ id: 'id-1' }] }
     );
     vi.spyOn(microsoftModules, 'getAllServicePrincipalsById').mockResolvedValue([]);
-    const result = await scanThirdPartyAppsByTenantId(tenantId, null);
+    const result = await scanThirdPartyAppsByTenantId({ tenantId, accessToken, pageLink: null });
     expect(result).toStrictEqual({});
   });
 });

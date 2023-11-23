@@ -1,6 +1,5 @@
-import { checkOrganization } from '@/common/utils';
 import type { SafeMicrosoftGraphUser } from '@/common/microsoft';
-import { getPaginatedUsersByTenantId, getTokenByTenantId } from '@/common/microsoft';
+import { getPaginatedUsersByTenantId } from '@/common/microsoft';
 import type { User } from '../elba/resources/users/types';
 
 const formatUserUpsertInput = (user: SafeMicrosoftGraphUser): User => {
@@ -12,9 +11,15 @@ const formatUserUpsertInput = (user: SafeMicrosoftGraphUser): User => {
   };
 };
 
-export const scanUsersByTenantId = async (tenantId: string, pageLink: string | null) => {
-  await checkOrganization(tenantId);
-  const { accessToken } = await getTokenByTenantId(tenantId);
+export const scanUsersByTenantId = async ({
+  accessToken,
+  tenantId,
+  pageLink,
+}: {
+  accessToken: string;
+  tenantId: string;
+  pageLink: string | null;
+}) => {
   const response = await getPaginatedUsersByTenantId({
     accessToken,
     tenantId,

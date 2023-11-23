@@ -115,9 +115,15 @@ const formatPermissionGrantToThirdPartyAppObject = (
 //   ],
 // });
 
-export const scanThirdPartyAppsByTenantId = async (tenantId: string, pageLink: string | null) => {
-  await checkOrganization(tenantId);
-  const { accessToken } = await getTokenByTenantId(tenantId);
+export const scanThirdPartyAppsByTenantId = async ({
+  tenantId,
+  accessToken,
+  pageLink,
+}: {
+  tenantId: string;
+  accessToken: string;
+  pageLink: string | null;
+}) => {
   const permissionGrants = await getPaginatedDelegatedPermissionGrantsByTenantId({
     accessToken,
     tenantId,

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-loop-func -- TODO: disable this rule */
 /* eslint-disable no-await-in-loop -- TODO: disable this rule */
+import { getTokenByTenantId } from '@/common/microsoft';
 import { ElbaRepository } from '@/repositories/elba/elba.repository';
 import { scanThirdPartyAppsByTenantId } from '@/repositories/microsoft/tpa';
 import { inngest } from '../client';
@@ -24,17 +25,20 @@ export const runThirdPartyAppsScan = inngest.createFunction(
     const syncStartedAt = new Date();
     const { tenantId } = event.data;
 
-    const organization = await getOrganizationByTenantId(tenantId);
+    const [organization, token] = await step.run('initialize', () =>
+      Promise.all([getOrganizationByTenantId(tenantId), getTokenByTenantId(tenantId)])
+    );
     const elba = new ElbaRepository(organization.elbaOrganizationId);
     let pageLink: string | null = null;
 
     do {
       try {
-        pageLink = await step.run(`handle-page-${pageLink ?? 'first'}`, async () => {
-          const { thirdPartyAppsObjects, pageLink: nextPage } = await scanThirdPartyAppsByTenantId(
+        pageLink = await step.run('scan', async () => {
+          const { thirdPartyAppsObjects, pageLink: nextPage } = await scanThirdPartyAppsByTenantId({
             tenantId,
-            pageLink
-          );
+            accessToken: token.accessToken,
+            pageLink,
+          });
 
           if (thirdPartyAppsObjects.apps.length > 0) {
             await elba.thirdPartyApps.updateObjects(thirdPartyAppsObjects.apps);
@@ -45,6 +49,6 @@ export const runThirdPartyAppsScan = inngest.createFunction(
       } catch (error) {}
     } while (pageLink);
 
-    await elba.thirdPartyApps.deleteObjects(syncStartedAt);
+    await step.run('finalize', () => elba.thirdPartyApps.deleteObjects(syncStartedAt));
   }
 );

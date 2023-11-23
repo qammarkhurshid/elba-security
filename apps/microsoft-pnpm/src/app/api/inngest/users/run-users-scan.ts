@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-loop-func -- TODO: disable this rule */
 /* eslint-disable no-await-in-loop -- TODO: disable this rule */
+import { getTokenByTenantId } from '@/common/microsoft';
 import { ElbaRepository } from '@/repositories/elba/elba.repository';
 import { scanUsersByTenantId } from '@/repositories/microsoft/users';
 import { inngest } from '../client';
@@ -24,14 +25,20 @@ export const runUsersScan = inngest.createFunction(
     const syncStartedAt = new Date();
     const { tenantId, isFirstScan } = event.data;
 
-    const organization = await getOrganizationByTenantId(tenantId);
+    const [organization, token] = await step.run('initialize', () =>
+      Promise.all([getOrganizationByTenantId(tenantId), getTokenByTenantId(tenantId)])
+    );
     const elba = new ElbaRepository(organization.elbaOrganizationId);
     let pageLink: string | null = null;
 
     do {
       try {
-        pageLink = await step.run(`handle-page-${pageLink ?? 'first'}`, async () => {
-          const { formattedUsers, nextLink } = await scanUsersByTenantId(tenantId, pageLink);
+        pageLink = await step.run(`scan`, async () => {
+          const { formattedUsers, nextLink } = await scanUsersByTenantId({
+            accessToken: token.accessToken,
+            tenantId,
+            pageLink,
+          });
 
           if (formattedUsers.length > 0) {
             await elba.users.updateUsers(formattedUsers);
@@ -42,7 +49,7 @@ export const runUsersScan = inngest.createFunction(
       } catch (error) {}
     } while (pageLink);
 
-    await elba.users.deleteUsers(syncStartedAt);
+    await step.run('finalize', () => elba.users.deleteUsers(syncStartedAt));
 
     if (isFirstScan) {
       await inngest.send({
