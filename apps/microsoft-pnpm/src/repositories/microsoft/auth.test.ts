@@ -4,6 +4,7 @@ import * as utilsModules from '@/common/utils';
 import { handleMicrosoftAuthCallback } from './auth';
 
 const tenantId = 'tenantId';
+const elbaOrganizationId = 'elbaOrganizationId';
 
 describe('auth.ts', () => {
   describe('handleMicrosoftAuthCallback', () => {
@@ -14,6 +15,7 @@ describe('auth.ts', () => {
       });
       const result = await handleMicrosoftAuthCallback({
         tenantId,
+        elbaOrganizationId,
         isAdminConsentGiven: false,
       });
       expect(result).toEqual('You must give admin consent to continue');
@@ -26,6 +28,7 @@ describe('auth.ts', () => {
       });
       const result = await handleMicrosoftAuthCallback({
         tenantId: null,
+        elbaOrganizationId,
         isAdminConsentGiven: true,
       });
       expect(result).toEqual('You must give admin consent to continue');
@@ -38,7 +41,7 @@ describe('auth.ts', () => {
         scopes: [],
       });
       await expect(
-        handleMicrosoftAuthCallback({ tenantId, isAdminConsentGiven: true })
+        handleMicrosoftAuthCallback({ tenantId, elbaOrganizationId, isAdminConsentGiven: true })
       ).rejects.toThrow("Couldn't retrieve required scopes");
     });
 
@@ -54,7 +57,7 @@ describe('auth.ts', () => {
       });
 
       await expect(
-        handleMicrosoftAuthCallback({ tenantId, isAdminConsentGiven: true })
+        handleMicrosoftAuthCallback({ tenantId, elbaOrganizationId, isAdminConsentGiven: true })
       ).resolves.toEqual(
         'You have successfully given admin consent. You may close this window now.'
       );

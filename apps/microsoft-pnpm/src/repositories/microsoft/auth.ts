@@ -1,3 +1,4 @@
+import { inngest } from '@/app/api/inngest/client';
 import { getTokenByTenantId } from '@/common/microsoft';
 import { timeout } from '@/common/utils';
 import { db } from '@/lib/db';
@@ -5,9 +6,11 @@ import { organizations } from '@/schemas/organization';
 
 export const handleMicrosoftAuthCallback = async ({
   tenantId,
+  elbaOrganizationId,
   isAdminConsentGiven,
 }: {
   tenantId: string | null;
+  elbaOrganizationId: string;
   isAdminConsentGiven: boolean;
 }) => {
   if (!isAdminConsentGiven || !tenantId) {
@@ -23,7 +26,8 @@ export const handleMicrosoftAuthCallback = async ({
     throw new Error("Couldn't retrieve required scopes");
   }
   try {
-    await db.insert(organizations).values({ tenantId });
+    await db.insert(organizations).values({ tenantId, elbaOrganizationId });
+    await inngest.send({ name: 'users/scan', data: { tenantId, isFirstScan: true } });
   } catch {
     return 'You have already given admin consent. You may close this window now.';
   }
