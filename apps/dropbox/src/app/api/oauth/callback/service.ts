@@ -1,6 +1,7 @@
 import { DBXAccess, DBXAuth } from '@/repositories/dropbox/clients';
 import { insertAccessToken } from './data';
 import { addSeconds } from 'date-fns';
+import { inngest } from '../../inngest/client';
 
 type GenerateAccessTokenArgs = {
   authenticationCode: string;
@@ -66,7 +67,7 @@ export const generateAccessToken = async ({
 
   try {
     const accessTokenExpiresAt = addSeconds(new Date(), expires_in).toISOString();
-    const response = await insertAccessToken({
+    await insertAccessToken({
       organisationId,
       accessToken: access_token,
       refreshToken: refresh_token,
@@ -74,6 +75,15 @@ export const generateAccessToken = async ({
       adminTeamMemberId: team_member_id,
       rootNamespaceId: root_info.root_namespace_id,
       teamName: team?.name as string,
+    });
+
+    await inngest.send({
+      name: 'users/run-user-sync-jobs',
+      data: {
+        organisationId,
+        accessToken: access_token,
+        isFirstScan: true,
+      },
     });
 
     return {

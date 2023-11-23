@@ -1,27 +1,28 @@
-const { drizzle } = require('drizzle-orm/postgres-js');
-const { migrate } = require('drizzle-orm/postgres-js/migrator');
-const postgres = require('postgres');
-const dotenv = require('dotenv');
-dotenv.config();
+import { drizzle } from 'drizzle-orm/postgres-js';
+import { migrate } from 'drizzle-orm/postgres-js/migrator';
+import 'dotenv/config';
+import postgres from 'postgres';
 
-const isTest = process.env.NODE_ENV === 'test';
-const sql = postgres({
-  host: isTest ? process.env.TEST_POSTGRES_HOST : process.env.POSTGRES_HOST,
-  port: isTest ? process.env.TEST_POSTGRES_PORT : process.env.POSTGRES_PORT,
-  username: isTest ? process.env.TEST_POSTGRES_USERNAME : process.env.POSTGRES_USERNAME,
-  password: isTest ? process.env.TEST_POSTGRES_PASSWORD : process.env.POSTGRES_PASSWORD,
-  db: isTest ? process.env.TEST_POSTGRES_DATABASE : process.env.POSTGRES_DATABASE,
-});
+const connectionString =
+  process.env.NODE_ENV === 'test'
+    ? process.env.TEST_POSTGRES_CONNECTION_URL
+    : process.env.POSTGRES_CONNECTION_URL;
 
-const db = drizzle(sql);
+const migrationClient = postgres(connectionString as string);
 
-async function main() {
-  console.log('Migrating database...');
-  await migrate(db, { migrationsFolder: './drizzle' }).finally(sql.end);
-  console.log('Done!');
+async function postgresMigrate() {
+  try {
+    const db = drizzle(migrationClient);
+
+    console.log('Migrating...');
+    await migrate(db, { migrationsFolder: './drizzle' });
+    console.log('Done!');
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  } finally {
+    process.exit(0);
+  }
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+postgresMigrate();

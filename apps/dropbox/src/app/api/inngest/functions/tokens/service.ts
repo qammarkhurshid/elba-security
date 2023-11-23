@@ -69,13 +69,15 @@ export async function refreshDropboxAccessTokens(request: Request) {
 
   const updatedTokens = await updateDropboxTokens(refreshedTokens);
 
-  console.log('updatedTokens', updatedTokens.length);
+  console.log('Expired Token Updated', {
+    refreshedOrganisationIds: updatedTokens.flat().length,
+  });
 
   return {
     success: true,
     message: 'Organisations refreshed',
     data: {
-      refreshedOrganisationIds: expiringTokens.map((token) => token.organisationId),
+      refreshedOrganisationIds: updatedTokens.flat().length,
       failedOrganisationIds: [],
     },
   };

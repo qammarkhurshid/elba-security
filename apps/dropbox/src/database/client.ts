@@ -3,13 +3,17 @@ import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
 const isTest = env.NODE_ENV === 'test';
+const connectionString = isTest ? env.TEST_POSTGRES_CONNECTION_URL : env.POSTGRES_CONNECTION_URL;
+const client = postgres(connectionString);
 
-const client = postgres({
-  host: isTest ? env.TEST_POSTGRES_HOST : env.POSTGRES_HOST,
-  port: isTest ? env.TEST_POSTGRES_PORT : env.POSTGRES_PORT,
-  username: isTest ? env.TEST_POSTGRES_USERNAME : env.POSTGRES_USERNAME,
-  password: isTest ? env.TEST_POSTGRES_PASSWORD : env.POSTGRES_PASSWORD,
-  db: isTest ? env.TEST_POSTGRES_DATABASE : env.POSTGRES_DATABASE,
-});
+// TODO: remove this later
+function main() {
+  console.log({
+    'Connected Environment': env.NODE_ENV,
+    'Connected Database': isTest ? env.TEST_POSTGRES_DATABASE : env.POSTGRES_DATABASE,
+  });
+}
+
+main();
 
 export const db = drizzle(client);

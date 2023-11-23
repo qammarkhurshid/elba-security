@@ -1,10 +1,11 @@
 import { inngest } from '@/app/api/inngest/client';
-import { refreshDropboxAccessTokens } from './refresh-dropbox-tokens';
+import { refreshDropboxAccessTokens } from './service';
 
 export const runTokenRefresh = inngest.createFunction(
-  { id: 'run-token-refresh' },
-  { event: 'tokens/refresh-tokens' },
+  { id: 'run-refresh-tokens' },
+  { event: 'tokens/run-refresh-tokens' },
   async ({ event, step }) => {
+    console.log('tokens/run-refresh-tokens');
     return await refreshDropboxAccessTokens(event.data);
   }
 );

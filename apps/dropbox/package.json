@@ -3,18 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3300",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest --no-threads",
-    "big-bang": "pnpm docker:down && pnpm docker:up && pnpm migrate && pnpm dev",
+    "big-bang": "pnpm docker:down && pnpm docker:up && pnpm migrate",
     "docker:down": "docker-compose -f 'docker-compose.yaml' down --volumes",
     "docker:up": "docker-compose -f 'docker-compose.yaml' up -d",
     "migration:generate": "drizzle-kit generate:pg --schema=./src/database/schema.ts",
-    "migration:push": "node ./src/database/migrate.ts .env && NODE_ENV=test node ./src/database/migrate.ts",
+    "migration:push": "npx ts-node ./src/database/migrate.ts .env && npx ts-node ./src/database/migrate.ts",
     "migrate": "pnpm migration:generate && pnpm migration:push",
-    "inngest": "npx inngest-cli@latest dev -u http://localhost:3000/api/inngest"
+    "inngest": "npx inngest-cli@latest dev -u http://localhost:3300/api/inngest"
   },
   "dependencies": {
     "@t3-oss/env-nextjs": "^0.7.1",
@@ -23,6 +23,7 @@
     "drizzle-kit": "^0.20.4",
     "drizzle-orm": "^0.29.0",
     "dropbox": "^10.34.0",
+    "elba-sdk": "workspace:*",
     "inngest": "^3.6.1",
     "js-cookie": "^3.0.5",
     "next": "14.0.1",
