@@ -51,7 +51,7 @@ const refreshToken = async ({
   }
 };
 
-export async function refreshDropboxAccessTokens(request: Request) {
+export const handler = async () => {
   const expiringTokens = await getExpiringDropboxTokens();
 
   if (!expiringTokens.length) {
@@ -69,14 +69,16 @@ export async function refreshDropboxAccessTokens(request: Request) {
 
   const updatedTokens = await updateDropboxTokens(refreshedTokens);
 
-  console.log('updatedTokens', updatedTokens.length);
+  console.log('Expired Token Updated', {
+    refreshedOrganisationIds: updatedTokens.flat().length,
+  });
 
   return {
     success: true,
     message: 'Organisations refreshed',
     data: {
-      refreshedOrganisationIds: expiringTokens.map((token) => token.organisationId),
+      refreshedOrganisationIds: updatedTokens.flat().length,
       failedOrganisationIds: [],
     },
   };
-}
+};

@@ -1,38 +1,25 @@
 version: '3.8'
 
 services:
-  db:
+  postgres:
     image: postgres:latest
-    container_name: dbx_postgres
-    restart: always
+    container_name: 'postgres-${COMPOSE_PROJECT_NAME}'
     environment:
       POSTGRES_DB: ${POSTGRES_DATABASE}
-      POSTGRES_USER: ${POSTGRES_USERNAME}
+      POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
       - '${POSTGRES_PORT}:5432'
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
-  test_db:
-    image: postgres:latest
-    container_name: test_dbx_postgres
-    restart: always
+    extra_hosts: # for docker on mac, it allows to use localhost
+      - 'host.docker.internal:host-gateway'
+  pg_proxy:
+    image: ghcr.io/neondatabase/wsproxy:latest
+    container_name: 'pg_proxy-${COMPOSE_PROJECT_NAME}'
     environment:
-      POSTGRES_DB: ${TEST_POSTGRES_DATABASE}
-      POSTGRES_USER: ${TEST_POSTGRES_USERNAME}
-      POSTGRES_PASSWORD: ${TEST_POSTGRES_PASSWORD}
+      APPEND_PORT: postgres:5432
+      ALLOW_ADDR_REGEX: '.*'
+      LOG_TRAFFIC: 'true'
     ports:
-      - '${TEST_POSTGRES_PORT}:5432'
-    volumes:
-      - ./data/test-postgres:/var/lib/postgresql/data
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: dbx_pgadmin4
-    restart: always
-    ports:
-      - '8888:80'
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-    volumes:
-      - ./data/pgadmin:/var/lib/pgadmin
+      - '${POSTGRES_PROXY}:80'
+    depends_on:
+      - postgres

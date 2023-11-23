@@ -1,7 +1,7 @@
 import { InferModel, InferSelectModel, and, asc, eq, isNull, lte, or, sql } from 'drizzle-orm';
 import { db, tokens } from '@/database';
 import { addMinutes } from 'date-fns';
-import { RefreshTokenResult } from './refresh-dropbox-tokens';
+import { RefreshTokenResult } from './service';
 
 const EXPIRES_BEFORE = 30;
 const SELECT_TOKENS_BATCH_SIZE = 20;
@@ -13,24 +13,28 @@ export type RefreshTokens = Pick<
 >;
 
 export const getExpiringDropboxTokens = async () => {
-  return await db
-    .select({
-      organisationId: tokens.organisationId,
-      refreshToken: tokens.refreshToken,
-    })
-    .from(tokens)
-    .limit(SELECT_TOKENS_BATCH_SIZE)
-    .orderBy(asc(tokens.expiresAt))
-    .where(
-      and(
-        lte(tokens.expiresAt, addMinutes(new Date(), EXPIRES_BEFORE).toISOString()),
-        isNull(tokens.unauthorizedAt),
-        or(
-          isNull(tokens.refreshAfter),
-          lte(tokens.refreshAfter, new Date(Date.now()).toISOString())
+  try {
+    return await db
+      .select({
+        organisationId: tokens.organisationId,
+        refreshToken: tokens.refreshToken,
+      })
+      .from(tokens)
+      .limit(SELECT_TOKENS_BATCH_SIZE)
+      .orderBy(asc(tokens.expiresAt))
+      .where(
+        and(
+          lte(tokens.expiresAt, addMinutes(new Date(), EXPIRES_BEFORE).toISOString()),
+          isNull(tokens.unauthorizedAt),
+          or(
+            isNull(tokens.refreshAfter),
+            lte(tokens.refreshAfter, new Date(Date.now()).toISOString())
+          )
         )
-      )
-    );
+      );
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const updateDropboxTokens = async (accessTokenDetails: RefreshTokenResult[]) => {

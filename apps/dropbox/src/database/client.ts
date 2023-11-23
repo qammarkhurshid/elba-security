@@ -1,15 +1,15 @@
-import { env } from '@/common/env';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { sql } from '@vercel/postgres';
+import { drizzle } from 'drizzle-orm/vercel-postgres';
+import { neonConfig } from '@neondatabase/serverless';
+import * as schema from './schema';
 
-const isTest = env.NODE_ENV === 'test';
+if (!process.env.VERCEL_ENV || process.env.VERCEL_ENV === 'development') {
+  // Set the WebSocket proxy to work with the local instance
+  neonConfig.wsProxy = (host) => `${host}:${process.env.POSTGRES_PROXY}/v1`;
+  // Disable all authentication and encryption
+  neonConfig.useSecureWebSocket = false;
+  neonConfig.pipelineTLS = false;
+  neonConfig.pipelineConnect = false;
+}
 
-const client = postgres({
-  host: isTest ? env.TEST_POSTGRES_HOST : env.POSTGRES_HOST,
-  port: isTest ? env.TEST_POSTGRES_PORT : env.POSTGRES_PORT,
-  username: isTest ? env.TEST_POSTGRES_USERNAME : env.POSTGRES_USERNAME,
-  password: isTest ? env.TEST_POSTGRES_PASSWORD : env.POSTGRES_PASSWORD,
-  db: isTest ? env.TEST_POSTGRES_DATABASE : env.POSTGRES_DATABASE,
-});
-
-export const db = drizzle(client);
+export const db = drizzle(sql, { schema });

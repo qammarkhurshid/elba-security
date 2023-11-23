@@ -40,5 +40,5 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 Get the postgres container ip address
 
 ```
-    docker inspect  1703db2ad06f | grep IPAddress
+    docker inspect  dbx_postgres | grep IPAddress
 ```

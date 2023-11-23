@@ -17,7 +17,6 @@ const defaultAccessToken = {
 
 export const insertTestAccessToken = async (tokenDetails = defaultAccessToken) => {
   try {
-    // await db.delete(tokens);
     return db
       .insert(tokens)
       .values(tokenDetails)

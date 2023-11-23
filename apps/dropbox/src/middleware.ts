@@ -15,7 +15,6 @@ export function middleware(request: NextRequest) {
     return response;
   }
 
-  // eslint-disable-next-line turbo/no-undeclared-env-vars -- TODO: retrieve env variable securely
   if (request.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
     return new NextResponse('Invalid secret - Middle', {
       status: 401,
