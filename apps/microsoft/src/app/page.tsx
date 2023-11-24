@@ -1,3 +1,5 @@
+import { formatMicrosoftConsentUrl } from '@/common/microsoft';
+
 export default function Home() {
-  return <main>Elba x Saas</main>;
+  return <a href={formatMicrosoftConsentUrl()}>Connect elba to Microsoft</a>;
 }
