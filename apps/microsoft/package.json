@@ -7,10 +7,12 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "pnpm test:database && node ./scripts/migrate.js .env.test  && vitest --no-threads",
-    "test:database": "docker-compose --env-file .env.test -p microsoft-test up -d ",
+    "test": "vitest --no-threads",
+    "test:database": "docker-compose --env-file .env.test -p microsoft-test down -v && docker-compose --env-file .env.test -p microsoft-test up -d",
+    "test:database:migrate": "node ./scripts/migrate.js .env.test",
     "database": "docker-compose up -d",
-    "generate:migration": "npx drizzle-kit generate:pg"
+    "generate:migration": "npx drizzle-kit generate:pg",
+    "inngest:dev": "pnpm inngest-cli dev"
   },
   "dependencies": {
     "@vercel/postgres": "^0.5.1",
@@ -36,6 +38,7 @@
     "drizzle-kit": "^0.19.13",
     "eslint": "^8",
     "eslint-config-custom": "workspace:*",
+    "inngest-cli": "^0.21.1",
     "msw": "^2.0.7",
     "pg": "^8.11.3",
     "postcss": "^8.4.31",

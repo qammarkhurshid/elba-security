@@ -17,6 +17,8 @@ const envVariables = z.object({
   POSTGRES_PRISMA_URL: z.string().min(1),
   POSTGRES_URL_NON_POOLING: z.string().min(1),
   POSTGRES_USER: z.string().min(1),
+  ELBA_API_BASE_URL: z.string().min(1),
+  ELBA_SOURCE_ID: z.string().min(1),
 });
 
 export const env = envVariables.parse(process.env);

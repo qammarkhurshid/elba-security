@@ -8,12 +8,47 @@ type MicrosoftGraphCoreResponse = {
 };
 
 export type MicrosoftGraphPermissionGrantResponse = {
-  value: MicrosoftGraph.OAuth2PermissionGrant[];
+  value: SafeMicrosoftGraphPermissionGrant[];
 } & MicrosoftGraphCoreResponse;
 
+export type SafeMicrosoftGraphPermissionGrant = {
+  id: NonNullable<MicrosoftGraph.OAuth2PermissionGrant['id']>;
+  clientId: NonNullable<MicrosoftGraph.OAuth2PermissionGrant['clientId']>;
+  consentType: NonNullable<MicrosoftGraph.OAuth2PermissionGrant['consentType']>;
+  principalId: NonNullable<MicrosoftGraph.OAuth2PermissionGrant['principalId']>;
+  resourceId: NonNullable<MicrosoftGraph.OAuth2PermissionGrant['resourceId']>;
+  scope: NonNullable<MicrosoftGraph.OAuth2PermissionGrant['scope']>;
+} & Omit<
+  MicrosoftGraph.OAuth2PermissionGrant,
+  'id' | 'clientId' | 'consentType' | 'principalId' | 'resourceId' | 'scope'
+>;
+
 type MicrosoftGraphServicePrincipalResponse = {
-  value: MicrosoftGraph.ServicePrincipal[];
+  value: SafeMicrosoftGraphServicePrincipal[];
 } & MicrosoftGraphCoreResponse;
+
+export type SafeMicrosoftGraphServicePrincipal = {
+  id: NonNullable<MicrosoftGraph.ServicePrincipal['id']>;
+  appDisplayName: NonNullable<MicrosoftGraph.ServicePrincipal['appDisplayName']>;
+  description: NonNullable<MicrosoftGraph.ServicePrincipal['description']>;
+  homepage: NonNullable<MicrosoftGraph.ServicePrincipal['homepage']>;
+  info: NonNullable<MicrosoftGraph.ServicePrincipal['info']>;
+  verifiedPublisher: NonNullable<MicrosoftGraph.ServicePrincipal['verifiedPublisher']>;
+  tags: NonNullable<MicrosoftGraph.ServicePrincipal['tags']>;
+  appRoles: NonNullable<MicrosoftGraph.ServicePrincipal['appRoles']>;
+  appRoleAssignments: NonNullable<MicrosoftGraph.ServicePrincipal['appRoleAssignments']>;
+} & Omit<
+  MicrosoftGraph.ServicePrincipal,
+  | 'id'
+  | 'appDisplayName'
+  | 'description'
+  | 'homepage'
+  | 'info'
+  | 'verifiedPublisher'
+  | 'tags'
+  | 'appRoles'
+  | 'appRoleAssignments'
+>;
 
 export type SafeMicrosoftGraphUser = {
   id: NonNullable<MicrosoftGraph.User['id']>;
@@ -174,7 +209,7 @@ export const getAllServicePrincipalsById = async ({
       allFetched = true;
     }
   }
-  return aggregatedResults.flat();
+  return aggregatedResults.flat() as SafeMicrosoftGraphServicePrincipal[];
 };
 
 export const getPaginatedUsersByTenantId = async ({
