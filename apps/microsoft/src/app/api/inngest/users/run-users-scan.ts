@@ -4,6 +4,7 @@ import { getTokenByTenantId } from '@/common/microsoft';
 import { ElbaRepository } from '@/repositories/elba/elba.repository';
 import { scanUsersByTenantId } from '@/repositories/microsoft/users';
 import { inngest } from '../client';
+import { handleError } from '../functions/utils';
 import { getOrganizationByTenantId } from './data';
 
 export const runUsersScan = inngest.createFunction(
@@ -32,8 +33,8 @@ export const runUsersScan = inngest.createFunction(
     let pageLink: string | null = null;
 
     do {
-      try {
-        pageLink = await step.run(`scan`, async () => {
+      pageLink = await step
+        .run(`scan`, async () => {
           const { formattedUsers, nextLink } = await scanUsersByTenantId({
             accessToken: token.accessToken,
             tenantId,
@@ -45,8 +46,8 @@ export const runUsersScan = inngest.createFunction(
           }
 
           return nextLink;
-        });
-      } catch (error) {}
+        })
+        .catch(handleError);
     } while (pageLink);
 
     await step.run('finalize', () => elba.users.deleteUsers(syncStartedAt));

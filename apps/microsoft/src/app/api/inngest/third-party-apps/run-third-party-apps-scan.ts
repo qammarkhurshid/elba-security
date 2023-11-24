@@ -3,6 +3,7 @@
 import { getTokenByTenantId } from '@/common/microsoft';
 import { ElbaRepository } from '@/repositories/elba/elba.repository';
 import { scanThirdPartyAppsByTenantId } from '@/repositories/microsoft/tpa';
+import { handleError } from '@/app/api/inngest/functions/utils';
 import { inngest } from '../client';
 import { getOrganizationByTenantId } from './data';
 
@@ -32,8 +33,8 @@ export const runThirdPartyAppsScan = inngest.createFunction(
     let pageLink: string | null = null;
 
     do {
-      try {
-        pageLink = await step.run('scan', async () => {
+      pageLink = await step
+        .run('scan', async () => {
           const { thirdPartyAppsObjects, pageLink: nextPage } = await scanThirdPartyAppsByTenantId({
             tenantId,
             accessToken: token.accessToken,
@@ -45,8 +46,8 @@ export const runThirdPartyAppsScan = inngest.createFunction(
           }
 
           return nextPage;
-        });
-      } catch (error) {}
+        })
+        .catch(handleError);
     } while (pageLink);
 
     await step.run('finalize', () => elba.thirdPartyApps.deleteObjects(syncStartedAt));
