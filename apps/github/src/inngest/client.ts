@@ -19,6 +19,17 @@ export const inngest = new Inngest({
         cursor: string | null;
       };
     };
+    'third-party-apps/page_sync.requested': {
+      data: {
+        installationId: number;
+        organisationId: string;
+        region: string;
+        isFirstSync: boolean;
+        accountLogin: string;
+        syncStartedAt: number;
+        cursor: string | null;
+      };
+    };
   }>(),
   middleware: [sentryMiddleware, rateLimitMiddleware, unauthorizedMiddleware],
 });

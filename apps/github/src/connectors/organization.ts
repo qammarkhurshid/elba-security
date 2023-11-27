@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { env } from '@/env';
 import { createOctokitApp } from './commons/client';
+import { getNextPageFromLink } from './commons/pagination';
 
 const isNotNull = <T>(input: T | null): input is T => input !== null;
 
@@ -101,4 +102,55 @@ export const getPaginatedOrganizationMembers = async (
   }
 
   return { validMembers, invalidMembers, nextCursor };
+};
+
+const OrganizationInstallationSchema = z.object({
+  id: z.number(),
+  app_slug: z.string(),
+  created_at: z.string(),
+  permissions: z.record(z.enum(['read', 'write'])),
+  suspended_at: z.string().nullable(),
+});
+
+export type OrganizationInstallation = z.infer<typeof OrganizationInstallationSchema>;
+
+const OrganisationInstallationsSchema = z.object({
+  total_count: z.number(),
+  installations: z.array(z.unknown()),
+});
+
+export const getPaginatedOrganizationInstallations = async (
+  installationId: number,
+  login: string,
+  cursor: string | null
+) => {
+  const app = createOctokitApp();
+
+  const installationOctokit = await app.getInstallationOctokit(installationId);
+  const { data, headers } = await installationOctokit.request('GET /orgs/{org}/installations', {
+    org: login,
+    per_page: env.THIRD_PARTY_APPS_SYNC_BATCH_SIZE,
+    page: cursor ? Number(cursor) : 0,
+  });
+
+  const nextPage = getNextPageFromLink(headers.link);
+
+  const validInstallations: OrganizationInstallation[] = [];
+  const invalidInstallations: unknown[] = [];
+  const { installations } = OrganisationInstallationsSchema.parse(data);
+
+  for (const installation of installations) {
+    const result = OrganizationInstallationSchema.safeParse(installation);
+    if (result.success) {
+      validInstallations.push(result.data);
+    } else {
+      invalidInstallations.push(installation);
+    }
+  }
+
+  return {
+    nextCursor: nextPage ? String(nextPage) : null,
+    validInstallations,
+    invalidInstallations,
+  };
 };

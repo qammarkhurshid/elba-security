@@ -1,6 +1,10 @@
 import { expect, test, describe, vi } from 'vitest';
+import { env } from '@/env';
 import * as client from './commons/client';
-import { getPaginatedOrganizationMembers } from './organization';
+import {
+  getPaginatedOrganizationInstallations,
+  getPaginatedOrganizationMembers,
+} from './organization';
 
 const installationId = 123456;
 const login = 'some-login';
@@ -21,6 +25,21 @@ const invalidMembers = [
     node: {
       id: `dog-id-1`,
     },
+  },
+];
+
+const validInstallations = Array.from({ length: 5 }, (_, i) => ({
+  id: i,
+  app_slug: `app-${i}`,
+  created_at: new Date().toISOString(),
+  permissions: { foo: 'read', baz: 'write', biz: 'read' },
+  suspended_at: null,
+}));
+
+const invalidInstallations = [
+  {
+    id: 'wrong-format',
+    app_slug: 12,
   },
 ];
 
@@ -68,6 +87,43 @@ describe('organization connector', () => {
       await expect(
         getPaginatedOrganizationMembers(installationId, login, 'initial-cursor')
       ).rejects.toBeInstanceOf(Error);
+    });
+  });
+
+  describe('getPaginatedOrganizationInstallations', () => {
+    test('should return installations and nextCursor', async () => {
+      const nextCursor = '4';
+      const cursor = '3';
+
+      const request = vi.fn().mockResolvedValue({
+        data: {
+          total_count: 120,
+          installations: [...validInstallations, ...invalidInstallations],
+        },
+        headers: {
+          link: `<https://api.github.com/repositories/1300192/issues?page=2>; rel="prev", <https://api.github.com/repositories/1300192/issues?page=${nextCursor}>; rel="next", <https://api.github.com/repositories/1300192/issues?page=515>; rel="last", <https://api.github.com/repositories/1300192/issues?page=1>; rel="first"`,
+        },
+      });
+      // @ts-expect-error this is a mock
+      vi.spyOn(client, 'createOctokitApp').mockReturnValue({
+        getInstallationOctokit: vi.fn().mockResolvedValue({
+          request,
+        }),
+      });
+
+      await expect(
+        getPaginatedOrganizationInstallations(installationId, login, cursor)
+      ).resolves.toStrictEqual({
+        validInstallations,
+        invalidInstallations,
+        nextCursor,
+      });
+      expect(request).toBeCalledTimes(1);
+      expect(request).toBeCalledWith('GET /orgs/{org}/installations', {
+        org: login,
+        per_page: env.THIRD_PARTY_APPS_SYNC_BATCH_SIZE,
+        page: Number(cursor),
+      });
     });
   });
 });
