@@ -1,4 +1,6 @@
 import { cookies } from 'next/headers';
+import { RedirectType, redirect } from 'next/navigation';
+import { isRedirectError } from 'next/dist/client/components/redirect';
 import { setupInstallation } from './service';
 
 type SetupPageProps = {
@@ -8,22 +10,22 @@ type SetupPageProps = {
 export default async function SetupPage({ searchParams }: SetupPageProps) {
   const rawInstallationId = searchParams?.installation_id;
   const installationId = Number(rawInstallationId);
-
-  if (Number.isNaN(installationId) || !rawInstallationId) {
-    throw new Error('foo bar');
-  }
-
   const organisationId = cookies().get('organisationId')?.value;
-  if (typeof organisationId !== 'string') {
-    throw new Error('blabla');
+
+  if (Number.isNaN(installationId) || !rawInstallationId || typeof organisationId !== 'string') {
+    // TODO - replace url by elba install error
+    redirect('https://foo.bar?error=true', RedirectType.replace);
   }
 
   try {
     await setupInstallation(installationId, organisationId);
-    return <span>Elba github app installed !</span>;
+    // TODO - replace url by elba install success
+    redirect('https://foo.bar', RedirectType.replace);
   } catch (error) {
-    // eslint-disable-next-line no-console -- todo
-    console.log(error);
-    return <span>Could not install github app</span>;
+    if (isRedirectError(error)) {
+      throw error;
+    }
+    // TODO - replace url by elba install error
+    redirect('https://foo.bar?error=true', RedirectType.replace);
   }
 }
