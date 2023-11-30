@@ -14,4 +14,7 @@ export const checkOrganization = async (tenantId: string) => {
   }
 };
 
-export const timeout = (ms: number) => new Promise((res) => setTimeout(res, ms));
+export const timeout = (ms: number) =>
+  new Promise((res) => {
+    setTimeout(res, ms);
+  });

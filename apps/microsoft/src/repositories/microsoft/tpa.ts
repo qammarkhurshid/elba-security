@@ -1,7 +1,11 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO : disable this rule */
 import { eq } from 'drizzle-orm';
-import type * as MicrosoftGraph from 'microsoft-graph';
 import { getPermissionGrant } from '@/repositories/integration/permission-grant';
-import type { MicrosoftGraphPermissionGrantResponse } from '@/common/microsoft';
+import type {
+  MicrosoftGraphPermissionGrantResponse,
+  SafeMicrosoftGraphPermissionGrant,
+  SafeMicrosoftGraphServicePrincipal,
+} from '@/common/microsoft';
 import {
   getPaginatedDelegatedPermissionGrantsByTenantId,
   deletePermissionGrantById,
@@ -12,21 +16,10 @@ import { checkOrganization } from '@/common/utils';
 import type { PermissionGrantInsertInput } from '@/schemas/permission-grant';
 import { permissionGrants as PermissionGrantTable } from '@/schemas/permission-grant';
 import { db } from '@/lib/db';
+import type { ThirdPartyAppsObject } from '../elba/resources/third-party-apps/types';
 
 type ThirdPartyAppsObjectsUpsertInput = {
-  organisationId: string;
-  apps: {
-    id: string;
-    name: string;
-    description: string;
-    url: string;
-    publisherName: string;
-    logoUrl: string;
-    users: {
-      id: string;
-      scopes: string[];
-    }[];
-  }[];
+  apps: ThirdPartyAppsObject[];
 };
 
 const formatThirdPartyAppsObjectUpsertInput = (
@@ -34,7 +27,7 @@ const formatThirdPartyAppsObjectUpsertInput = (
   // Will be used whenever we decide to scan apps that require application permissions
   // servicePrincipalsWithScopes: ServicePrincipal[],
   permissionGrants: MicrosoftGraphPermissionGrantResponse,
-  allServicePrincipals: MicrosoftGraph.ServicePrincipal[]
+  allServicePrincipals: SafeMicrosoftGraphServicePrincipal[]
 ): {
   thirdPartyAppsObjects: ThirdPartyAppsObjectsUpsertInput;
   permissionGrantsObjects: PermissionGrantInsertInput[];
@@ -62,7 +55,8 @@ const formatThirdPartyAppsObjectUpsertInput = (
 
   const groupedApps = apps.reduce((acc: Record<string, (typeof apps)[0]>, curr) => {
     if (acc[curr.id]) {
-      acc[curr.id].users = [...acc[curr.id].users, ...curr.users];
+      const existingApp = acc[curr.id]!;
+      existingApp.users = [...existingApp.users, ...curr.users];
     } else {
       acc[curr.id] = { ...curr };
     }
@@ -71,7 +65,6 @@ const formatThirdPartyAppsObjectUpsertInput = (
 
   return {
     thirdPartyAppsObjects: {
-      organisationId: tenantId,
       apps: Object.values(groupedApps),
     },
     permissionGrantsObjects,
@@ -79,18 +72,19 @@ const formatThirdPartyAppsObjectUpsertInput = (
 };
 
 const formatPermissionGrantToThirdPartyAppObject = (
-  permissionGrant: MicrosoftGraph.OAuth2PermissionGrant,
-  servicePrincipal: MicrosoftGraph.ServicePrincipal
+  permissionGrant: SafeMicrosoftGraphPermissionGrant,
+  servicePrincipal: SafeMicrosoftGraphServicePrincipal
 ) => ({
   id: servicePrincipal.id,
   name: servicePrincipal.appDisplayName,
   description: servicePrincipal.description,
   url: servicePrincipal.homepage,
-  publisherName: servicePrincipal.verifiedPublisher?.displayName,
+  logoUrl: servicePrincipal.logoUrl,
+  publisherName: servicePrincipal.publisherName,
   users: [
     {
       id: permissionGrant.principalId,
-      scopes: permissionGrant.scope?.trim().split(' '),
+      scopes: permissionGrant.scope.trim().split(' '),
       metadata: {
         grantId: permissionGrant.id,
       },

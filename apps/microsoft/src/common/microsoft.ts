@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop -- TODO: disable this rule */
 import * as jose from 'jose';
 import type * as MicrosoftGraph from 'microsoft-graph';
 import { env } from './env';
@@ -32,8 +33,10 @@ export type SafeMicrosoftGraphServicePrincipal = {
   appDisplayName: NonNullable<MicrosoftGraph.ServicePrincipal['appDisplayName']>;
   description: NonNullable<MicrosoftGraph.ServicePrincipal['description']>;
   homepage: NonNullable<MicrosoftGraph.ServicePrincipal['homepage']>;
-  info: NonNullable<MicrosoftGraph.ServicePrincipal['info']>;
-  verifiedPublisher: NonNullable<MicrosoftGraph.ServicePrincipal['verifiedPublisher']>;
+  logoUrl?: NonNullable<NonNullable<MicrosoftGraph.ServicePrincipal['info']>['logoUrl']>;
+  publisherName?: NonNullable<
+    NonNullable<MicrosoftGraph.ServicePrincipal['verifiedPublisher']>['displayName']
+  >;
   tags: NonNullable<MicrosoftGraph.ServicePrincipal['tags']>;
   appRoles: NonNullable<MicrosoftGraph.ServicePrincipal['appRoles']>;
   appRoleAssignments: NonNullable<MicrosoftGraph.ServicePrincipal['appRoleAssignments']>;
@@ -112,35 +115,6 @@ export const getPaginatedDelegatedPermissionGrantsByTenantId = async ({
   return (await response.json()) as MicrosoftGraphPermissionGrantResponse;
 };
 
-export const getAllDelegatedPermissionGrantsByTenantId = async ({
-  accessToken,
-  tenantId,
-}: {
-  accessToken: string;
-  tenantId: string;
-}): Promise<MicrosoftGraph.OAuth2PermissionGrant[]> => {
-  let allFetched = false;
-  let pageLink;
-  const aggregatedResults = [];
-
-  while (!allFetched) {
-    const response = await getPaginatedDelegatedPermissionGrantsByTenantId({
-      accessToken,
-      tenantId,
-      pageLink,
-    });
-    aggregatedResults.push(response.value);
-
-    if (response['@odata.nextLink']) {
-      allFetched = false;
-      pageLink = response['@odata.nextLink'];
-    } else {
-      allFetched = true;
-    }
-  }
-  return aggregatedResults.flat();
-};
-
 export const getServicePrincipalAppRoleAssignedToById = async ({
   tenantId,
   accessToken,
@@ -189,10 +163,10 @@ export const getAllServicePrincipalsById = async ({
 }: {
   accessToken: string;
   tenantId: string;
-}): Promise<MicrosoftGraph.ServicePrincipal[]> => {
+}): Promise<SafeMicrosoftGraphServicePrincipal[]> => {
   let allFetched = false;
-  let pageLink;
-  const aggregatedResults = [];
+  let pageLink: string | undefined;
+  const aggregatedResults: SafeMicrosoftGraphServicePrincipal[][] = [];
 
   while (!allFetched) {
     const response = await getPaginatedServicePrincipalsByTenantId({
@@ -209,7 +183,7 @@ export const getAllServicePrincipalsById = async ({
       allFetched = true;
     }
   }
-  return aggregatedResults.flat() as SafeMicrosoftGraphServicePrincipal[];
+  return aggregatedResults.flat();
 };
 
 export const getPaginatedUsersByTenantId = async ({
@@ -219,7 +193,7 @@ export const getPaginatedUsersByTenantId = async ({
 }: {
   accessToken: string;
   tenantId: string;
-  pageLink: string | null;
+  pageLink: string | undefined;
 }) => {
   const response = await fetch(
     pageLink ??
@@ -240,10 +214,10 @@ export const getAllUsersByTenantId = async ({
 }: {
   accessToken: string;
   tenantId: string;
-}): Promise<MicrosoftGraph.User[]> => {
+}): Promise<SafeMicrosoftGraphUser[]> => {
   let allFetched = false;
-  let pageLink;
-  const aggregatedResults = [];
+  let pageLink: string | undefined;
+  const aggregatedResults: SafeMicrosoftGraphUser[][] = [];
 
   while (!allFetched) {
     const response = await getPaginatedUsersByTenantId({
