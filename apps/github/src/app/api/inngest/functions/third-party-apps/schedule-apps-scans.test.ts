@@ -1,7 +1,7 @@
 import { expect, test, describe } from 'vitest';
 import { Installation, db } from '@/database';
-import { scheduleThirdPartyAppsScans } from './schedule-third-party-apps-scans';
-import { mockFunction } from './__mocks__/inngest';
+import { createFunctionMock } from '../__mocks__/inngest';
+import { scheduleAppsScans } from './schedule-apps-scans';
 
 const installationIds = Array.from({ length: 5 }, (_, i) => i);
 const installations = installationIds.map((id) => ({
@@ -11,16 +11,18 @@ const installations = installationIds.map((id) => ({
   accountLogin: `login-${id}`,
 }));
 
-describe('schedule-third-party-apps-scans', () => {
-  test('should not schedule any jobs when there are no installation', async () => {
-    const { result, step } = mockFunction(scheduleThirdPartyAppsScans);
+const setup = createFunctionMock(scheduleAppsScans);
+
+describe('schedule-apps-scans', () => {
+  test('should not schedule any scans when there are no installation', async () => {
+    const [result, { step }] = setup();
     await expect(result).resolves.toStrictEqual({ installationIds: [] });
     expect(step.sendEvent).toBeCalledTimes(0);
   });
 
-  test('should schedule jobs when there are installations', async () => {
+  test('should schedule scans when there are installations', async () => {
     await db.insert(Installation).values(installations);
-    const { result, step } = mockFunction(scheduleThirdPartyAppsScans);
+    const [result, { step }] = setup();
 
     await expect(result).resolves.toStrictEqual({
       installationIds,
@@ -28,7 +30,7 @@ describe('schedule-third-party-apps-scans', () => {
 
     expect(step.sendEvent).toBeCalledTimes(1);
     expect(step.sendEvent).toBeCalledWith(
-      'run-third-party-apps-scan',
+      'scan-apps',
       installations.map((installation) => ({
         name: 'third-party-apps/scan',
         data: { installationId: installation.id, isFirstScan: false },

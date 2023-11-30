@@ -1,6 +1,6 @@
 import { env } from '@/env';
-import { inngest } from '../client';
-import { getInstallationIds } from './data';
+import { inngest } from '../../client';
+import { getInstallationIds } from '../data';
 
 export const scheduleUsersScans = inngest.createFunction(
   { id: 'schedule-users-scans' },
@@ -10,7 +10,7 @@ export const scheduleUsersScans = inngest.createFunction(
 
     if (installationIds.length > 0) {
       await step.sendEvent(
-        'run-users-scan',
+        'scan-users',
         installationIds.map((installationId) => ({
           name: 'users/scan',
           data: { installationId, isFirstScan: false },

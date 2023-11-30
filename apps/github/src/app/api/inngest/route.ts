@@ -1,11 +1,20 @@
 import { serve } from 'inngest/next';
 import { inngest } from './client';
-import { scheduleUsersScans } from './functions/schedule-users-scans';
-import { scheduleThirdPartyAppsScans } from './functions/schedule-third-party-apps-scans';
-import { runUsersScan } from './functions/run-users-scan';
-import { runThirdPartyAppsScan } from './functions/run-third-party-apps-scan';
+import { scheduleUsersScans } from './functions/users/schedule-users-scans';
+import { scheduleAppsScans } from './functions/third-party-apps/schedule-apps-scans';
+import { scanUsers } from './functions/users/scan-users';
+import { scanUsersPage } from './functions/users/scan-users-page';
+import { scanApps } from './functions/third-party-apps/scan-apps';
+import { scanAppsPage } from './functions/third-party-apps/scan-apps-page';
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
-  functions: [scheduleUsersScans, scheduleThirdPartyAppsScans, runUsersScan, runThirdPartyAppsScan],
+  functions: [
+    scanApps,
+    scanAppsPage,
+    scanUsers,
+    scanUsersPage,
+    scheduleAppsScans,
+    scheduleUsersScans,
+  ],
 });
