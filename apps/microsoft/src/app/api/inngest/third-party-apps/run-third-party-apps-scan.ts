@@ -30,24 +30,26 @@ export const runThirdPartyAppsScan = inngest.createFunction(
       Promise.all([getOrganizationByTenantId(tenantId), getTokenByTenantId(tenantId)])
     );
     const elba = new ElbaRepository(organization.elbaOrganizationId);
-    let pageLink: string | null = null;
+    let pageLink: string | undefined;
 
     do {
-      pageLink = await step
-        .run('scan', async () => {
-          const { thirdPartyAppsObjects, pageLink: nextPage } = await scanThirdPartyAppsByTenantId({
-            tenantId,
-            accessToken: token.accessToken,
-            pageLink,
-          });
+      pageLink =
+        (await step
+          .run('scan', async () => {
+            const { thirdPartyAppsObjects, pageLink: nextPage } =
+              await scanThirdPartyAppsByTenantId({
+                tenantId,
+                accessToken: token.accessToken,
+                pageLink,
+              });
 
-          if (thirdPartyAppsObjects.apps.length > 0) {
-            await elba.thirdPartyApps.updateObjects(thirdPartyAppsObjects.apps);
-          }
+            if (thirdPartyAppsObjects.apps.length > 0) {
+              await elba.thirdPartyApps.updateObjects(thirdPartyAppsObjects.apps);
+            }
 
-          return nextPage;
-        })
-        .catch(handleError);
+            return nextPage;
+          })
+          .catch(handleError)) ?? undefined;
     } while (pageLink);
 
     await step.run('finalize', () => elba.thirdPartyApps.deleteObjects(syncStartedAt));

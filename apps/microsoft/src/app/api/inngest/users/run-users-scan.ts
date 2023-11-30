@@ -30,24 +30,25 @@ export const runUsersScan = inngest.createFunction(
       Promise.all([getOrganizationByTenantId(tenantId), getTokenByTenantId(tenantId)])
     );
     const elba = new ElbaRepository(organization.elbaOrganizationId);
-    let pageLink: string | null = null;
+    let pageLink: string | undefined;
 
     do {
-      pageLink = await step
-        .run(`scan`, async () => {
-          const { formattedUsers, nextLink } = await scanUsersByTenantId({
-            accessToken: token.accessToken,
-            tenantId,
-            pageLink,
-          });
+      pageLink =
+        (await step
+          .run(`scan`, async () => {
+            const { formattedUsers, nextLink } = await scanUsersByTenantId({
+              accessToken: token.accessToken,
+              tenantId,
+              pageLink,
+            });
 
-          if (formattedUsers.length > 0) {
-            await elba.users.updateUsers(formattedUsers);
-          }
+            if (formattedUsers.length > 0) {
+              await elba.users.updateUsers(formattedUsers);
+            }
 
-          return nextLink;
-        })
-        .catch(handleError);
+            return nextLink;
+          })
+          .catch(handleError)) ?? undefined;
     } while (pageLink);
 
     await step.run('finalize', () => elba.users.deleteUsers(syncStartedAt));

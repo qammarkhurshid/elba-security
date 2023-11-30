@@ -18,7 +18,7 @@ export const scanUsersByTenantId = async ({
 }: {
   accessToken: string;
   tenantId: string;
-  pageLink: string | null;
+  pageLink: string | undefined;
 }) => {
   const response = await getPaginatedUsersByTenantId({
     accessToken,

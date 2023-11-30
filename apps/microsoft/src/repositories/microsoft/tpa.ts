@@ -2,7 +2,7 @@
 import { eq } from 'drizzle-orm';
 import { getPermissionGrant } from '@/repositories/integration/permission-grant';
 import type {
-  MicrosoftGraphPermissionGrantResponse,
+  MicrosoftGraphAPIResponse,
   SafeMicrosoftGraphPermissionGrant,
   SafeMicrosoftGraphServicePrincipal,
 } from '@/common/microsoft';
@@ -26,7 +26,7 @@ const formatThirdPartyAppsObjectUpsertInput = (
   tenantId: string,
   // Will be used whenever we decide to scan apps that require application permissions
   // servicePrincipalsWithScopes: ServicePrincipal[],
-  permissionGrants: MicrosoftGraphPermissionGrantResponse,
+  permissionGrants: MicrosoftGraphAPIResponse<SafeMicrosoftGraphPermissionGrant>,
   allServicePrincipals: SafeMicrosoftGraphServicePrincipal[]
 ): {
   thirdPartyAppsObjects: ThirdPartyAppsObjectsUpsertInput;
@@ -116,7 +116,7 @@ export const scanThirdPartyAppsByTenantId = async ({
 }: {
   tenantId: string;
   accessToken: string;
-  pageLink: string | null;
+  pageLink: string | undefined;
 }) => {
   const permissionGrants = await getPaginatedDelegatedPermissionGrantsByTenantId({
     accessToken,

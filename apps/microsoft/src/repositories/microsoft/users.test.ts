@@ -33,7 +33,7 @@ describe('scanThirdPartyAppsByTenantId', () => {
         },
       ],
     });
-    const result = await scanUsersByTenantId({ tenantId, accessToken, pageLink: null });
+    const result = await scanUsersByTenantId({ tenantId, accessToken, pageLink: undefined });
     expect(result).toStrictEqual({
       nextLink: undefined,
       formattedUsers: [

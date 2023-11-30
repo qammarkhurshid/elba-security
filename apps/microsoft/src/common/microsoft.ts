@@ -3,14 +3,11 @@ import * as jose from 'jose';
 import type * as MicrosoftGraph from 'microsoft-graph';
 import { env } from './env';
 
-type MicrosoftGraphCoreResponse = {
+export type MicrosoftGraphAPIResponse<T> = {
   '@odata.context': string;
   '@odata.nextLink'?: string;
+  value: T[];
 };
-
-export type MicrosoftGraphPermissionGrantResponse = {
-  value: SafeMicrosoftGraphPermissionGrant[];
-} & MicrosoftGraphCoreResponse;
 
 export type SafeMicrosoftGraphPermissionGrant = {
   id: NonNullable<MicrosoftGraph.OAuth2PermissionGrant['id']>;
@@ -23,10 +20,6 @@ export type SafeMicrosoftGraphPermissionGrant = {
   MicrosoftGraph.OAuth2PermissionGrant,
   'id' | 'clientId' | 'consentType' | 'principalId' | 'resourceId' | 'scope'
 >;
-
-type MicrosoftGraphServicePrincipalResponse = {
-  value: SafeMicrosoftGraphServicePrincipal[];
-} & MicrosoftGraphCoreResponse;
 
 export type SafeMicrosoftGraphServicePrincipal = {
   id: NonNullable<MicrosoftGraph.ServicePrincipal['id']>;
@@ -57,10 +50,6 @@ export type SafeMicrosoftGraphUser = {
   id: NonNullable<MicrosoftGraph.User['id']>;
   displayName: NonNullable<MicrosoftGraph.User['displayName']>;
 } & Omit<MicrosoftGraph.User, 'id' | 'displayName'>;
-
-type MicrosoftGraphUserResponse = {
-  value: SafeMicrosoftGraphUser[];
-} & MicrosoftGraphCoreResponse;
 
 type MicrosoftGraphTokenResponse = {
   access_token: string;
@@ -101,7 +90,7 @@ export const getPaginatedDelegatedPermissionGrantsByTenantId = async ({
 }: {
   accessToken: string;
   tenantId: string;
-  pageLink: string | null;
+  pageLink: string | undefined;
 }) => {
   const response = await fetch(
     pageLink ??
@@ -112,7 +101,7 @@ export const getPaginatedDelegatedPermissionGrantsByTenantId = async ({
       },
     }
   );
-  return (await response.json()) as MicrosoftGraphPermissionGrantResponse;
+  return (await response.json()) as MicrosoftGraphAPIResponse<SafeMicrosoftGraphPermissionGrant>;
 };
 
 export const getServicePrincipalAppRoleAssignedToById = async ({
@@ -142,7 +131,7 @@ export const getPaginatedServicePrincipalsByTenantId = async ({
 }: {
   accessToken: string;
   tenantId: string;
-  pageLink?: string;
+  pageLink: string | undefined;
 }) => {
   const response = await fetch(
     pageLink ??
@@ -154,7 +143,7 @@ export const getPaginatedServicePrincipalsByTenantId = async ({
     }
   );
 
-  return (await response.json()) as MicrosoftGraphServicePrincipalResponse;
+  return (await response.json()) as MicrosoftGraphAPIResponse<SafeMicrosoftGraphServicePrincipal>;
 };
 
 export const getAllServicePrincipalsById = async ({
@@ -205,7 +194,7 @@ export const getPaginatedUsersByTenantId = async ({
     }
   );
 
-  return (await response.json()) as MicrosoftGraphUserResponse;
+  return (await response.json()) as MicrosoftGraphAPIResponse<SafeMicrosoftGraphUser>;
 };
 
 export const getAllUsersByTenantId = async ({
