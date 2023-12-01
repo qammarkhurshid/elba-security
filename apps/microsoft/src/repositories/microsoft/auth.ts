@@ -14,7 +14,7 @@ export const handleMicrosoftAuthCallback = async ({
   isAdminConsentGiven: boolean;
 }) => {
   if (!isAdminConsentGiven || !tenantId || !elbaOrganizationId) {
-    return 'You must give admin consent to continue';
+    throw new Error('You must give admin consent to continue');
   }
   const { scopes } = await getTokenByTenantId(tenantId);
   await timeout(10000);
