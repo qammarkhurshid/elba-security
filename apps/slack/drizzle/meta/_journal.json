@@ -1,0 +1,27 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1701183110307,
+      "tag": "0000_productive_penance",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1701183542621,
+      "tag": "0001_worthless_joseph",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1701279706559,
+      "tag": "0002_past_network",
+      "breakpoints": true
+    }
+  ]
+}
