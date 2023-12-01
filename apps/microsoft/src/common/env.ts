@@ -3,6 +3,8 @@ import { config } from 'dotenv';
 
 config();
 
+const zEnvInt = () => z.string().transform(Number).pipe(z.number().int());
+
 const envVariables = z.object({
   ENV: z.enum(['development', 'production', 'test']).default('development'),
   PORT: z.coerce.number().default(3000),
@@ -19,6 +21,8 @@ const envVariables = z.object({
   POSTGRES_USER: z.string().min(1),
   ELBA_API_BASE_URL: z.string().min(1),
   ELBA_SOURCE_ID: z.string().min(1),
+  VERCEL_ENV: z.string().optional(),
+  POSTGRES_PROXY: zEnvInt(),
 });
 
 export const env = envVariables.parse(process.env);

@@ -1,15 +1,15 @@
 import { sql } from '@vercel/postgres';
-import { drizzle as drizzleVercel } from 'drizzle-orm/vercel-postgres';
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/vercel-postgres';
+import { neonConfig } from '@neondatabase/serverless';
 import { env } from '@/common/env';
 
-const localClient = postgres({
-  host: env.POSTGRES_HOST,
-  port: env.POSTGRES_PORT,
-  username: env.POSTGRES_USER,
-  password: env.POSTGRES_PASSWORD,
-  db: env.POSTGRES_DATABASE,
-});
+if (!env.VERCEL_ENV || env.VERCEL_ENV === 'development') {
+  // Set the WebSocket proxy to work with the local instance
+  neonConfig.wsProxy = (host) => `${host}:${env.POSTGRES_PROXY}/v1`;
+  // Disable all authentication and encryption
+  neonConfig.useSecureWebSocket = false;
+  neonConfig.pipelineTLS = false;
+  neonConfig.pipelineConnect = false;
+}
 
-export const db = env.ENV === 'development' ? drizzle(localClient) : drizzleVercel(sql);
+export const db = drizzle(sql);
