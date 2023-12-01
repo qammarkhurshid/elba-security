@@ -26,10 +26,10 @@ export const handleMicrosoftAuthCallback = async ({
     throw new Error("Couldn't retrieve required scopes");
   }
   try {
-    await db.insert(organizations).values({ tenantId, elbaOrganizationId });
-    await inngest.send({ name: 'users/scan', data: { tenantId, isFirstScan: true } });
-  } catch {
-    return 'You have already given admin consent. You may close this window now.';
+    await db.insert(organizations).values({ tenantId, elbaOrganizationId }).onConflictDoNothing();
+  } catch (error) {
+    throw new Error('Something went wrong', { cause: error });
   }
+  await inngest.send({ name: 'users/scan', data: { tenantId, isFirstScan: true } });
   return 'You have successfully given admin consent. You may close this window now.';
 };
