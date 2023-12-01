@@ -16,8 +16,8 @@ export const handleMicrosoftAuthCallback = async ({
   if (!isAdminConsentGiven || !tenantId || !elbaOrganizationId) {
     throw new Error('You must give admin consent to continue');
   }
-  const { scopes } = await getTokenByTenantId(tenantId);
   await timeout(10000);
+  const { scopes } = await getTokenByTenantId(tenantId);
   if (
     !scopes.includes('DelegatedPermissionGrant.ReadWrite.All') ||
     !scopes.includes('Application.ReadWrite.All') ||
