@@ -6,13 +6,13 @@ import { formatMicrosoftConsentUrl } from '@/common/microsoft';
 export const dynamic = 'force-dynamic';
 
 export function GET(request: NextRequest) {
-  const organisationId = request.nextUrl.searchParams.get('organisation_id');
+  const organizationId = request.nextUrl.searchParams.get('organizationId');
 
-  if (!organisationId) {
+  if (!organizationId) {
     // TODO - replace url by elba install error
     redirect('https://foo.bar?error=true');
   }
 
-  cookies().set('organisationId', organisationId);
+  cookies().set('organizationId', organizationId);
   redirect(formatMicrosoftConsentUrl());
 }
