@@ -1,13 +1,13 @@
+import type { User } from 'elba-sdk';
 import type { SafeMicrosoftGraphUser } from '@/common/microsoft';
 import { getPaginatedUsersByTenantId } from '@/common/microsoft';
-import type { User } from '../elba/resources/users/types';
 
 const formatUserUpsertInput = (user: SafeMicrosoftGraphUser): User => {
   return {
     id: user.id,
     email: user.mail || user.userPrincipalName || undefined,
     displayName: user.displayName,
-    additionalEmails: user.otherMails,
+    additionalEmails: user.otherMails ?? [],
   };
 };
 

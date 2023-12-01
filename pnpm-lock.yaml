@@ -35,6 +35,9 @@ importers:
       drizzle-orm:
         specifier: ^0.28.6
         version: 0.28.6(@neondatabase/serverless@0.6.0)(@vercel/postgres@0.5.1)(pg@8.11.3)(postgres@3.4.3)
+      elba-sdk:
+        specifier: workspace:^
+        version: link:../../packages/elba-sdk
       inngest:
         specifier: ^3.6.1
         version: 3.6.1(typescript@5.2.2)

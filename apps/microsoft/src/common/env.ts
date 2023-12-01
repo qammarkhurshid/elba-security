@@ -21,6 +21,7 @@ const envVariables = z.object({
   POSTGRES_USER: z.string().min(1),
   ELBA_API_BASE_URL: z.string().min(1),
   ELBA_SOURCE_ID: z.string().min(1),
+  ELBA_API_KEY: z.string().min(1),
   VERCEL_ENV: z.string().optional(),
   POSTGRES_PROXY: zEnvInt(),
 });

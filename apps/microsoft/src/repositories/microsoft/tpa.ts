@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO : disable this rule */
 import { eq } from 'drizzle-orm';
+import type { ThirdPartyAppsObject } from 'elba-sdk';
 import { getPermissionGrant } from '@/repositories/integration/permission-grant';
 import type {
   MicrosoftGraphAPIResponse,
@@ -16,7 +17,6 @@ import { checkOrganization } from '@/common/utils';
 import type { PermissionGrantInsertInput } from '@/schemas/permission-grant';
 import { permissionGrants as PermissionGrantTable } from '@/schemas/permission-grant';
 import { db } from '@/lib/db';
-import type { ThirdPartyAppsObject } from '../elba/resources/third-party-apps/types';
 
 type ThirdPartyAppsObjectsUpsertInput = {
   apps: ThirdPartyAppsObject[];
