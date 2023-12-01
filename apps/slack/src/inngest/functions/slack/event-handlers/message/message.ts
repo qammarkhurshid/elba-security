@@ -4,7 +4,7 @@ import { and, eq } from 'drizzle-orm';
 import { db } from '@/database/client';
 import { conversations } from '@/database/schema';
 import { formatDataProtectionObject } from '@/repositories/elba/data-protection/objects';
-import { slackMessageSchema } from '../../messages';
+import { slackMessageSchema } from '@/repositories/slack/messages';
 
 export const genericMessageHandler = async (event: GenericMessageEvent) => {
   const result = slackMessageSchema.safeParse(event);

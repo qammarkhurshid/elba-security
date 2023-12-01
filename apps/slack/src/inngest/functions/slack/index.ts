@@ -1,7 +1,7 @@
 import type { EnvelopedEvent, SlackEvent } from '@slack/bolt';
-import { slackEventHandler } from '@/repositories/slack/event-handlers';
 import type { GetInngestFunctionInput } from '@/inngest/client';
 import { inngest } from '@/inngest/client';
+import { slackEventHandler } from './event-handlers';
 
 export const slackWebhookHandlerEventName = 'slack/webhook.handle';
 

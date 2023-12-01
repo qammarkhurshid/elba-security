@@ -1,9 +1,9 @@
 import { eq } from 'drizzle-orm';
-import type { SlackEventHandler } from '@/repositories/slack/event-handlers/types';
 import { env } from '@/common/env';
 import { db } from '@/database/client';
 import { teams } from '@/database/schema';
-import { slackMemberSchema } from '../members';
+import { slackMemberSchema } from '@/repositories/slack/members';
+import type { SlackEventHandler } from './types';
 
 export const userChangeHandler: SlackEventHandler<'user_change'> = async ({
   team_id: teamId,

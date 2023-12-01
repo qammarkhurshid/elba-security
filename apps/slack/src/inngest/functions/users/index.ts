@@ -63,7 +63,7 @@ export const synchronizeUsers = inngest.createFunction(
     const users: { id: string; email: string; displayName?: string; additionalEmails: [] }[] = [];
     for (const member of members) {
       const result = slackMemberSchema.safeParse(member);
-      if (!member.deleted && !member.is_bot && result.success) {
+      if (member.team_id === teamId && !member.deleted && !member.is_bot && result.success) {
         users.push({
           id: result.data.id,
           email: result.data.profile.email,
@@ -109,31 +109,6 @@ export const synchronizeUsers = inngest.createFunction(
     }
 
     return { users, nextCursor };
-  }
-);
-
-export const scheduleUsersSync = inngest.createFunction(
-  { id: 'schedule-users-sync', retries: 5 },
-  { cron: 'TZ=Europe/Paris 0 0 * * *' },
-  async ({ step }) => {
-    const teams = await db.query.teams.findMany({
-      columns: {
-        id: true,
-      },
-    });
-    await step.sendEvent(
-      'start-users-sync',
-      teams.map(({ id: teamId }) => ({
-        name: 'users/synchronize',
-        data: {
-          teamId,
-          isFirstSync: false,
-          syncStartedAt: Date.now(),
-        },
-      }))
-    );
-
-    return { teams };
   }
 );
 

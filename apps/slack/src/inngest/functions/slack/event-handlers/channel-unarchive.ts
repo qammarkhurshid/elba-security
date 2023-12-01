@@ -2,7 +2,7 @@ import { SlackAPIClient } from 'slack-web-api-client';
 import { eq } from 'drizzle-orm';
 import { conversations, teams } from '@/database/schema';
 import { db } from '@/database/client';
-import { slackChannelSchema } from '../channels';
+import { slackChannelSchema } from '@/repositories/slack/channels';
 import type { SlackEventHandler } from './types';
 
 export const channelUnarchiveHandler: SlackEventHandler<'channel_unarchive'> = async (
