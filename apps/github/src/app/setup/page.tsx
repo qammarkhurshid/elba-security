@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { RedirectType, redirect } from 'next/navigation';
 import { isRedirectError } from 'next/dist/client/components/redirect';
+import { env } from '@/env';
 import { setupInstallation } from './service';
 
 type SetupPageProps = {
@@ -13,19 +14,16 @@ export default async function SetupPage({ searchParams }: SetupPageProps) {
   const organisationId = cookies().get('organisationId')?.value;
 
   if (Number.isNaN(installationId) || !rawInstallationId || typeof organisationId !== 'string') {
-    // TODO - replace url by elba install error
-    redirect('https://foo.bar?error=true', RedirectType.replace);
+    redirect(`${env.ELBA_REDIRECT_URL}?error=true`, RedirectType.replace);
   }
 
   try {
     await setupInstallation(installationId, organisationId);
-    // TODO - replace url by elba install success
-    redirect('https://foo.bar', RedirectType.replace);
+    redirect(env.ELBA_REDIRECT_URL, RedirectType.replace);
   } catch (error) {
     if (isRedirectError(error)) {
       throw error;
     }
-    // TODO - replace url by elba install error
-    redirect('https://foo.bar?error=true', RedirectType.replace);
+    redirect(`${env.ELBA_REDIRECT_URL}?error=true`, RedirectType.replace);
   }
 }

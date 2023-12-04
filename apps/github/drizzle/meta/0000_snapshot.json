@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "f472bfff-3013-458b-becd-1d9e763707cb",
+  "id": "ef34f380-d9d4-4ee8-8bfc-6923dbb78918",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "installation": {
@@ -11,11 +11,11 @@
         "id": {
           "name": "id",
           "type": "integer",
-          "primaryKey": true,
+          "primaryKey": false,
           "notNull": true
         },
-        "elba_organisation_id": {
-          "name": "elba_organisation_id",
+        "organisation_id": {
+          "name": "organisation_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": true
@@ -32,6 +32,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "suspended_at": {
+          "name": "suspended_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -40,30 +46,36 @@
           "default": "now()"
         }
       },
-      "indexes": {
-        "organisation_id_idx": {
-          "name": "organisation_id_idx",
-          "columns": [
-            "account_id"
+      "indexes": {},
+      "foreignKeys": {
+        "installation_organisation_id_organisation_organisation_id_fk": {
+          "name": "installation_organisation_id_organisation_organisation_id_fk",
+          "tableFrom": "installation",
+          "tableTo": "organisation",
+          "columnsFrom": [
+            "organisation_id"
           ],
-          "isUnique": false
-        },
-        "elba_organization_id_idx": {
-          "name": "elba_organization_id_idx",
-          "columns": [
-            "elba_organisation_id"
+          "columnsTo": [
+            "organisation_id"
           ],
-          "isUnique": false
+          "onDelete": "cascade",
+          "onUpdate": "no action"
         }
       },
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "installation_elba_organisation_id_unique": {
-          "name": "installation_elba_organisation_id_unique",
+        "installation_id_unique": {
+          "name": "installation_id_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "elba_organisation_id"
+            "id"
+          ]
+        },
+        "installation_organisation_id_unique": {
+          "name": "installation_organisation_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "organisation_id"
           ]
         },
         "installation_account_id_unique": {
@@ -124,7 +136,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -139,6 +151,36 @@
           ]
         }
       }
+    },
+    "organisation": {
+      "name": "organisation",
+      "schema": "",
+      "columns": {
+        "organisation_id": {
+          "name": "organisation_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "is_activated": {
+          "name": "is_activated",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
     }
   },
   "enums": {},

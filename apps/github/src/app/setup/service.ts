@@ -2,7 +2,7 @@ import { getInstallation } from '@/repositories/github/installation';
 import { inngest } from '../api/inngest/client';
 import { insertInstallation } from './data';
 
-export const setupInstallation = async (installationId: number, elbaOrganizationId: string) => {
+export const setupInstallation = async (installationId: number, organisationId: string) => {
   const installation = await getInstallation(installationId);
 
   if (installation.account.type !== 'Organization') {
@@ -17,7 +17,7 @@ export const setupInstallation = async (installationId: number, elbaOrganization
     id: installation.id,
     accountId: installation.account.id,
     accountLogin: installation.account.login,
-    elbaOrganizationId,
+    organisationId,
   });
 
   await inngest.send({

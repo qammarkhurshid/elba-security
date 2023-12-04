@@ -1,7 +1,7 @@
 import { expect, test, describe } from 'vitest';
 import { Installation, Organisation, db } from '@/database';
 import { createFunctionMock } from '../__mocks__/inngest';
-import { scheduleAppsScans } from './schedule-apps-scans';
+import { scheduleConnectionStatusScans } from './schedule-connection-status-scans';
 
 const installationIds = Array.from({ length: 5 }, (_, i) => i);
 const installations = installationIds.map((id) => ({
@@ -10,14 +10,10 @@ const installations = installationIds.map((id) => ({
   accountId: 10 + id,
   accountLogin: `login-${id}`,
 }));
-const organisations = installations.map(({ organisationId }) => ({
-  id: organisationId,
-  isActivated: true,
-}));
 
-const setup = createFunctionMock(scheduleAppsScans);
+const setup = createFunctionMock(scheduleConnectionStatusScans);
 
-describe('schedule-apps-scans', () => {
+describe('schedule-connection-status-scans', () => {
   test('should not schedule any scans when there are no installation', async () => {
     const [result, { step }] = setup();
     await expect(result).resolves.toStrictEqual({ installationIds: [] });
@@ -25,7 +21,9 @@ describe('schedule-apps-scans', () => {
   });
 
   test('should schedule scans when there are installations', async () => {
-    await db.insert(Organisation).values(organisations);
+    await db
+      .insert(Organisation)
+      .values(installations.map(({ organisationId }) => ({ id: organisationId })));
     await db.insert(Installation).values(installations);
     const [result, { step }] = setup();
 
@@ -35,10 +33,10 @@ describe('schedule-apps-scans', () => {
 
     expect(step.sendEvent).toBeCalledTimes(1);
     expect(step.sendEvent).toBeCalledWith(
-      'scan-apps',
+      'scan-connection-status',
       installations.map((installation) => ({
-        name: 'third-party-apps/scan',
-        data: { installationId: installation.id, isFirstScan: false },
+        name: 'connection-status/scan',
+        data: { installationId: installation.id, organisationId: installation.organisationId },
       }))
     );
   });

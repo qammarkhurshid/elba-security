@@ -5,7 +5,7 @@ import * as client from '../api/inngest/client';
 import { setupInstallation } from './service';
 
 const installationId = 1;
-const elbaOrganizationId = `45a76301-f1dd-4a77-b12f-9d7d3fca3c90`;
+const organisationId = `45a76301-f1dd-4a77-b12f-9d7d3fca3c90`;
 
 vi.mock('../client', () => {
   return {
@@ -38,7 +38,7 @@ describe('schedule-users-sync-jobs', () => {
       },
       suspended_at: null,
     });
-    const [result, mocks] = setup(installationId, elbaOrganizationId);
+    const [result, mocks] = setup(installationId, organisationId);
 
     await expect(result).rejects.toThrow(
       new Error('Cannot install elba github app on an account that is not an organization')
@@ -57,7 +57,7 @@ describe('schedule-users-sync-jobs', () => {
       },
       suspended_at: new Date().toISOString(),
     });
-    const [result, mocks] = setup(installationId, elbaOrganizationId);
+    const [result, mocks] = setup(installationId, organisationId);
 
     await expect(result).rejects.toThrow(new Error('Installation is suspended'));
     await expect(db.select().from(Installation)).resolves.toHaveLength(0);
@@ -74,10 +74,10 @@ describe('schedule-users-sync-jobs', () => {
       },
       suspended_at: null,
     });
-    const [result, mocks] = setup(installationId, elbaOrganizationId);
+    const [result, mocks] = setup(installationId, organisationId);
     const installation = {
       id: installationId,
-      elbaOrganizationId,
+      organisationId,
       accountId: 1,
       accountLogin: 'some-login',
     };

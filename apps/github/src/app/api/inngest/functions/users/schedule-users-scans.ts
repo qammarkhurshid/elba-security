@@ -1,12 +1,12 @@
 import { env } from '@/env';
 import { inngest } from '../../client';
-import { getInstallationIds } from '../data';
+import { getUnsuspendedInstallationIds } from '../data';
 
 export const scheduleUsersScans = inngest.createFunction(
   { id: 'schedule-users-scans' },
   { cron: env.USERS_SYNC_CRON },
   async ({ step }) => {
-    const installationIds = await getInstallationIds();
+    const installationIds = await getUnsuspendedInstallationIds();
 
     if (installationIds.length > 0) {
       await step.sendEvent(

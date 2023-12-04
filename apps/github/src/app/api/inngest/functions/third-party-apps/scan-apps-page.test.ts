@@ -40,7 +40,7 @@ const data = {
 
 const setup = createFunctionMock(scanAppsPage, 'third-party-apps/scan-page');
 
-describe('scan-apps', () => {
+describe('scan-apps-page', () => {
   test('should delay the function when github rate limit is reached on installations retrieval', async () => {
     const rateLimitReset = '1700137003';
     vi.spyOn(githubOrganization, 'getPaginatedOrganizationInstallations').mockRejectedValue(

@@ -37,7 +37,8 @@ export const scanAppsPage = inngest.createFunction(
       run: 'event.data.isFirstScan ? 600 : 0',
     },
     retries: env.THIRD_PARTY_APPS_MAX_RETRY,
-    // idempotency: 'event.data.installationId',
+    idempotency:
+      env.VERCEL_ENV && env.VERCEL_ENV !== 'development' ? 'event.data.installationId' : undefined,
     concurrency: [
       {
         limit: env.MAX_CONCURRENT_THIRD_PARTY_APPS_SYNC,

@@ -1,7 +1,6 @@
 import { beforeEach } from 'vitest';
-import { InstallationAdmin, Installation, db } from '@/database';
+import { db, Organisation } from '@/database';
 
 beforeEach(async () => {
-  await db.delete(InstallationAdmin);
-  await db.delete(Installation);
+  await db.delete(Organisation);
 });

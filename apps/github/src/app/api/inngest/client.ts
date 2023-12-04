@@ -6,6 +6,12 @@ export type FunctionHandler = Parameters<typeof inngest.createFunction>[2];
 export const inngest = new Inngest({
   id: 'github',
   schemas: new EventSchemas().fromZod({
+    'connection-status/scan': {
+      data: z.object({
+        installationId: z.number(),
+        organisationId: z.string().uuid(),
+      }),
+    },
     'users/scan-page': {
       data: z.object({
         installationId: z.number(),

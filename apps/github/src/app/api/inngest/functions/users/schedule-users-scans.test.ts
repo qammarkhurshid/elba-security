@@ -1,14 +1,18 @@
 import { expect, test, describe } from 'vitest';
-import { Installation, db } from '@/database';
+import { Installation, Organisation, db } from '@/database';
 import { createFunctionMock } from '../__mocks__/inngest';
 import { scheduleUsersScans } from './schedule-users-scans';
 
 const installationIds = Array.from({ length: 5 }, (_, i) => i);
 const installations = installationIds.map((id) => ({
   id,
-  elbaOrganizationId: `45a76301-f1dd-4a77-b12f-9d7d3fca3c9${id}`,
+  organisationId: `45a76301-f1dd-4a77-b12f-9d7d3fca3c9${id}`,
   accountId: 10 + id,
   accountLogin: `login-${id}`,
+}));
+const organisations = installations.map(({ organisationId }) => ({
+  id: organisationId,
+  isActivated: true,
 }));
 
 const setup = createFunctionMock(scheduleUsersScans);
@@ -21,6 +25,7 @@ describe('schedule-users-sync-jobs', () => {
   });
 
   test('should schedule jobs when there are installations', async () => {
+    await db.insert(Organisation).values(organisations);
     await db.insert(Installation).values(installations);
     const [result, { step }] = setup();
 

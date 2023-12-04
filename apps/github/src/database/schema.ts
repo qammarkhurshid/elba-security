@@ -1,31 +1,31 @@
-import { uuid, integer, text, index, timestamp, unique, pgTable } from 'drizzle-orm/pg-core';
+import { uuid, integer, text, timestamp, unique, pgTable, boolean } from 'drizzle-orm/pg-core';
 import { type InferSelectModel } from 'drizzle-orm';
 
-export const Installation = pgTable(
-  'installation',
-  {
-    id: integer('id').primaryKey(),
-    // TODO: support multiple github organization to elba organisation
-    elbaOrganizationId: uuid('elba_organisation_id').unique().notNull(),
-    accountId: integer('account_id').unique(),
-    accountLogin: text('account_login').notNull(),
-    createdAt: timestamp('created_at').defaultNow().notNull(),
-  },
-  (appInstallations) => ({
-    organizationIdIdx: index('organisation_id_idx').on(appInstallations.accountId),
-    elbaOrganizationIdIdx: index('elba_organization_id_idx').on(
-      appInstallations.elbaOrganizationId
-    ),
-  })
-);
+export const Organisation = pgTable('organisation', {
+  id: uuid('organisation_id').primaryKey(),
+  isActivated: boolean('is_activated').default(false),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
 
-export type SelectInstallation = InferSelectModel<typeof Installation>;
+export const Installation = pgTable('installation', {
+  id: integer('id').unique().notNull(),
+  organisationId: uuid('organisation_id')
+    .references(() => Organisation.id, { onDelete: 'cascade' })
+    .unique()
+    .notNull(),
+  accountId: integer('account_id').unique(),
+  accountLogin: text('account_login').notNull(),
+  suspendedAt: timestamp('suspended_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+export type SelectOrganisation = InferSelectModel<typeof Organisation>;
 
 export const InstallationAdmin = pgTable(
   'installation_admin',
   {
     installationId: integer('installation_id')
-      .references(() => Installation.id)
+      .references(() => Installation.id, { onDelete: 'cascade' })
       .notNull(),
     adminId: text('admin_id').notNull(),
     lastSyncAt: timestamp('last_sync_at').notNull(),

@@ -6,6 +6,7 @@ import { scanUsers } from './functions/users/scan-users';
 import { scanUsersPage } from './functions/users/scan-users-page';
 import { scanApps } from './functions/third-party-apps/scan-apps';
 import { scanAppsPage } from './functions/third-party-apps/scan-apps-page';
+import { scheduleConnectionStatusScans } from './functions/connection-status/schedule-connection-status-scans';
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -15,6 +16,7 @@ export const { GET, POST, PUT } = serve({
     scanUsers,
     scanUsersPage,
     scheduleAppsScans,
+    scheduleConnectionStatusScans,
     scheduleUsersScans,
   ],
 });

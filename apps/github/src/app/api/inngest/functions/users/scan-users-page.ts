@@ -20,7 +20,8 @@ export const scanUsersPage = inngest.createFunction(
       run: 'event.data.isFirstScan ? 600 : 0',
     },
     retries: env.USERS_SYNC_MAX_RETRY,
-    // idempotency: 'event.data.installationId',
+    idempotency:
+      env.VERCEL_ENV && env.VERCEL_ENV !== 'development' ? 'event.data.installationId' : undefined,
     concurrency: [
       {
         limit: env.MAX_CONCURRENT_USERS_SYNC,
@@ -35,7 +36,7 @@ export const scanUsersPage = inngest.createFunction(
     event: 'users/scan-page',
   },
   async ({ event, step }) => {
-    const { installationId, organisationId, accountLogin, cursor, isFirstScan } = event.data;
+    const { installationId, organisationId, accountLogin, cursor } = event.data;
     const syncStartedAt = new Date(event.data.syncStartedAt);
 
     const elba = new Elba({
@@ -82,17 +83,13 @@ export const scanUsersPage = inngest.createFunction(
         await elba.users.delete({ syncedBefore: syncStartedAt.toISOString() });
         await deleteInstallationAdminsSyncedBefore(installationId, syncStartedAt);
       });
-
-      if (isFirstScan) {
-        await step.sendEvent('run-third-party-apps-scan', {
-          name: 'third-party-apps/scan',
-          data: { installationId, isFirstScan: true },
-        });
-      }
+      return {
+        status: 'completed',
+      };
     }
 
     return {
-      installationId,
+      status: 'ongoing',
     };
   }
 );
