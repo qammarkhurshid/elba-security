@@ -35,6 +35,7 @@ export const env = z
     ELBA_API_KEY: z.string(),
     ELBA_REDIRECT_URL: z.string().url(),
     ELBA_SOURCE_ID: z.string().uuid(),
+    CONNECTION_STATUS_SYNC_CRON: z.string(),
     CONNECTION_STATUS_SYNC_MAX_RETRY: zEnvRetry(),
     GITHUB_APP_INSTALL_URL: z.string().url(),
     GITHUB_APP_ID: z.string(),

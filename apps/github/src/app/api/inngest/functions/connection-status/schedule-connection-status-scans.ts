@@ -4,7 +4,7 @@ import { getInstallations } from '../data';
 
 export const scheduleConnectionStatusScans = inngest.createFunction(
   { id: 'schedule-connection-status-scans' },
-  { cron: env.USERS_SYNC_CRON },
+  { cron: env.CONNECTION_STATUS_SYNC_CRON },
   async ({ step }) => {
     const installations = await getInstallations();
 
