@@ -1,5 +1,4 @@
-import type { SlackWebhookHandlerContext } from '@/inngest/functions';
-import type { SlackEventHandlers } from './types';
+import type { SlackWebhookHandlerContext, SlackEventHandlers } from './types';
 import { messageHandler } from './message';
 import { userChangeHandler } from './user-change';
 import { channelUnarchiveHandler } from './channel-unarchive';

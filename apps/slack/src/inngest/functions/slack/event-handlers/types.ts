@@ -1,10 +1,12 @@
 import type { EnvelopedEvent, KnownEventFromType, SlackEvent } from '@slack/bolt';
-import type { SlackWebhookHandlerEventName } from '@/inngest/functions';
 import type { GetInngestFunctionInput } from '@/inngest/client';
+import type { HandleSlackWebhookEventEventName } from '../handle-slack-webhook-event';
+
+export type SlackWebhookHandlerContext = GetInngestFunctionInput<HandleSlackWebhookEventEventName>;
 
 export type SlackEventHandler<T extends SlackEvent['type']> = (
   event: EnvelopedEvent<KnownEventFromType<T>>,
-  context: GetInngestFunctionInput<SlackWebhookHandlerEventName>
+  context: SlackWebhookHandlerContext
 ) => Promise<unknown>;
 
 export type SlackEventHandlers = Partial<{

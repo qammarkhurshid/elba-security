@@ -1,26 +1,8 @@
-import type { EnvelopedEvent, SlackEvent } from '@slack/bolt';
-import type { GetInngestFunctionInput } from '@/inngest/client';
-import { inngest } from '@/inngest/client';
-import { slackEventHandler } from './event-handlers';
+import {
+  handleSlackWebhookEvent,
+  type HandleSlackWebhookEventEvents,
+} from './handle-slack-webhook-event';
 
-export const slackWebhookHandlerEventName = 'slack/webhook.handle';
+export type SlackEvents = HandleSlackWebhookEventEvents;
 
-export type SlackWebhookHandlerEventName = typeof slackWebhookHandlerEventName;
-
-export type SlackEvents = {
-  [slackWebhookHandlerEventName]: SlackWebhookHandler;
-};
-
-export type SlackWebhookHandler = {
-  data: EnvelopedEvent<SlackEvent>;
-};
-
-export const slackWebhookHandler = inngest.createFunction(
-  { id: 'handle-slack-webhook-message', retries: 5 },
-  { event: slackWebhookHandlerEventName },
-  slackEventHandler
-);
-
-export type SlackWebhookHandlerContext = GetInngestFunctionInput<SlackWebhookHandlerEventName>;
-
-export const slackFunctions = [slackWebhookHandler];
+export const slackFunctions = [handleSlackWebhookEvent];

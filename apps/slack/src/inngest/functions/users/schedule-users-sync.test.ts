@@ -3,7 +3,7 @@ import { createFunctionMock } from '@/inngest/__mocks__/inngest';
 import { db } from '@/database/client';
 import { teams } from '@/database/schema';
 import { inngest } from '@/inngest/client';
-import { scheduleUsersSync } from '.';
+import { scheduleUsersSync } from './schedule-users-sync';
 
 const setup = createFunctionMock(scheduleUsersSync);
 
@@ -20,8 +20,9 @@ describe('schedule-users-sync', () => {
 
   test('should not schedule sync when there are no teams', async () => {
     const [result, { step }] = setup();
-    await expect(result).resolves.toStrictEqual({ teams: [] });
     expect(step.sendEvent).toBeCalledTimes(0);
+
+    await expect(result).resolves.toStrictEqual({ teams: [] });
   });
 
   test('should schedule sync when there are teams', async () => {
@@ -42,11 +43,9 @@ describe('schedule-users-sync', () => {
         url: 'url-2',
       },
     ]);
+
     const [result, { step }] = setup();
 
-    await expect(result).resolves.toStrictEqual({
-      teams: [{ id: 'team-id-1' }, { id: 'team-id-2' }],
-    });
     expect(step.sendEvent).toBeCalledTimes(1);
     expect(step.sendEvent).toBeCalledWith('start-users-sync', [
       {
@@ -66,5 +65,9 @@ describe('schedule-users-sync', () => {
         name: 'users/synchronize',
       },
     ]);
+
+    await expect(result).resolves.toStrictEqual({
+      teams: [{ id: 'team-id-1' }, { id: 'team-id-2' }],
+    });
   });
 });
