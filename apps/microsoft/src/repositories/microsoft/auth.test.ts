@@ -87,7 +87,7 @@ describe('auth.ts', () => {
       expect(mocks.inngest.send).toBeCalledTimes(1);
       expect(mocks.inngest.send).toBeCalledWith({
         data: { tenantId, isFirstScan: true },
-        name: 'users/scan',
+        name: 'users/start',
       });
     });
 

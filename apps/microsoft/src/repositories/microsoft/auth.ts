@@ -30,6 +30,9 @@ export const handleMicrosoftAuthCallback = async ({
   } catch (error) {
     throw new Error('Something went wrong', { cause: error });
   }
-  await inngest.send({ name: 'users/scan', data: { tenantId, isFirstScan: true } });
+  await inngest.send({
+    name: 'users/start',
+    data: { tenantId, isFirstScan: true },
+  });
   return 'You have successfully given admin consent. You may close this window now.';
 };
