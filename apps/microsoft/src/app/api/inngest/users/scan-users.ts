@@ -1,0 +1,58 @@
+import { Elba } from 'elba-sdk';
+import { scanUsersByTenantId } from '@/repositories/microsoft/users';
+import { env } from '@/common/env';
+import { inngest } from '../client';
+
+export const scanUsers = inngest.createFunction(
+  {
+    id: 'scan-users',
+    priority: {
+      run: 'event.data.isFirstScan ? 600 : 0',
+    },
+  },
+  {
+    event: 'users/scan',
+    rateLimit: {
+      key: 'event.data.tenantId',
+      limit: 1,
+      period: '24h',
+    },
+  },
+  async ({ event, step }) => {
+    const { tenantId, syncStartedAt, organizationId, cursor, accessToken } = event.data;
+
+    const elba = new Elba({
+      apiKey: env.ELBA_API_KEY,
+      organisationId: organizationId,
+      sourceId: env.ELBA_SOURCE_ID,
+      baseUrl: env.ELBA_API_BASE_URL,
+    });
+
+    const { formattedUsers, nextLink } = await scanUsersByTenantId({
+      accessToken,
+      tenantId,
+      pageLink: cursor,
+    });
+
+    if (formattedUsers.length > 0) {
+      await elba.users.update({ users: formattedUsers });
+    }
+
+    if (nextLink) {
+      await step.sendEvent('scan-users', {
+        name: 'users/scan',
+        data: {
+          ...event.data,
+          cursor: nextLink,
+        },
+      });
+    } else {
+      await step.run('finalize', () => elba.users.delete({ syncedBefore: syncStartedAt }));
+      return {
+        status: 'completed',
+      };
+    }
+
+    return { status: 'ongoing' };
+  }
+);

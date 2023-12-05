@@ -1,8 +1,13 @@
 import { setupServer } from 'msw/node';
 import { beforeAll, afterAll, afterEach } from 'vitest';
-import { elbaRequestHandlers } from './elba-request-handlers';
+import { http, passthrough } from 'msw';
+import { createElbaRequestHandlers } from 'elba-msw';
+import { env } from '@/common/env';
 
-const server = setupServer(...elbaRequestHandlers);
+const server = setupServer(
+  http.all(`http://localhost:${env.POSTGRES_PROXY}/*`, () => passthrough()),
+  ...createElbaRequestHandlers(env.ELBA_API_BASE_URL, env.ELBA_API_KEY)
+);
 
 beforeAll(() => {
   server.listen({ onUnhandledRequest: 'error' });

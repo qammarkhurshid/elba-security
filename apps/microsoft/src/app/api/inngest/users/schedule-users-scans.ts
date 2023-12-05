@@ -2,15 +2,19 @@ import { db } from '@/lib/db';
 import { organizations } from '@/schemas/organization';
 import { inngest } from '../client';
 
-export const scheduleThirdPartyAppsScans = inngest.createFunction(
-  { id: 'schedule-third-party-apps-scans' },
+export const scheduleUsersScans = inngest.createFunction(
+  { id: 'schedule-users-scans' },
   { cron: '0 0 * * *' },
   async () => {
-    const orgs = await db.select({ tenantId: organizations.tenantId }).from(organizations);
+    const orgs = await db
+      .select({
+        tenantId: organizations.tenantId,
+      })
+      .from(organizations);
     await Promise.all(
       orgs.map(({ tenantId }) =>
         inngest.send({
-          name: 'third-party-apps/scan',
+          name: 'users/start',
           data: { tenantId, isFirstScan: false },
         })
       )
