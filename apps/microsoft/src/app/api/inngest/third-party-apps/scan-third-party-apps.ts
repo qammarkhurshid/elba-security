@@ -28,22 +28,26 @@ export const scanThirdPartyApps = inngest.createFunction(
       baseUrl: env.ELBA_API_BASE_URL,
     });
 
-    const { thirdPartyAppsObjects, pageLink } = await scanThirdPartyAppsByTenantId({
-      accessToken,
-      tenantId,
-      pageLink: cursor,
+    const nextCursor = await step.run('paginate', async () => {
+      const { thirdPartyAppsObjects, pageLink } = await scanThirdPartyAppsByTenantId({
+        accessToken,
+        tenantId,
+        pageLink: cursor,
+      });
+
+      if (thirdPartyAppsObjects.apps.length > 0) {
+        await elba.thirdPartyApps.updateObjects({ apps: thirdPartyAppsObjects.apps });
+      }
+
+      return pageLink;
     });
 
-    if (thirdPartyAppsObjects.apps.length > 0) {
-      await elba.thirdPartyApps.updateObjects({ apps: thirdPartyAppsObjects.apps });
-    }
-
-    if (pageLink) {
+    if (nextCursor) {
       await step.sendEvent('scan-third-party-apps', {
         name: 'third-party-apps/scan',
         data: {
           ...event.data,
-          cursor: pageLink,
+          cursor: nextCursor,
         },
       });
     } else {

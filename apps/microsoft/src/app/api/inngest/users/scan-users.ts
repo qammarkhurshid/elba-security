@@ -28,22 +28,26 @@ export const scanUsers = inngest.createFunction(
       baseUrl: env.ELBA_API_BASE_URL,
     });
 
-    const { formattedUsers, nextLink } = await scanUsersByTenantId({
-      accessToken,
-      tenantId,
-      pageLink: cursor,
+    const nextCursor = await step.run('paginate', async () => {
+      const { formattedUsers, nextLink } = await scanUsersByTenantId({
+        accessToken,
+        tenantId,
+        pageLink: cursor,
+      });
+
+      if (formattedUsers.length > 0) {
+        await elba.users.update({ users: formattedUsers });
+      }
+
+      return nextLink;
     });
 
-    if (formattedUsers.length > 0) {
-      await elba.users.update({ users: formattedUsers });
-    }
-
-    if (nextLink) {
+    if (nextCursor) {
       await step.sendEvent('scan-users', {
         name: 'users/scan',
         data: {
           ...event.data,
-          cursor: nextLink,
+          cursor: nextCursor,
         },
       });
     } else {
