@@ -75,7 +75,7 @@ export const handleSlackInstallation = async ({
     data: {
       teamId: result.data.id,
       isFirstSync: true,
-      syncStartedAt: Date.now(),
+      syncStartedAt: new Date().toISOString(),
     },
   });
 };

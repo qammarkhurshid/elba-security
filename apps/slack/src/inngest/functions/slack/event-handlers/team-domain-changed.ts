@@ -19,7 +19,7 @@ export const channelRenameHandler: SlackEventHandler<'team_domain_changed'> = as
     data: {
       teamId,
       isFirstSync: false,
-      syncStartedAt: Date.now(),
+      syncStartedAt: new Date().toISOString(),
     },
   });
 };

@@ -46,10 +46,7 @@ export const genericMessageHandler = async (event: GenericMessageEvent) => {
   });
 
   const elbaClient = createElbaClient(elbaOrganisationId);
-
-  await elbaClient.dataProtection.updateObjects({
-    objects: [object],
-  });
+  await elbaClient.dataProtection.updateObjects({ objects: [object] });
 
   return { elbaOrganisationId, object };
 };

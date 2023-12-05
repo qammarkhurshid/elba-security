@@ -23,7 +23,7 @@ export type ConversationsEvents = {
 type ConversationsSync = {
   data: {
     teamId: string;
-    syncStartedAt: number;
+    syncStartedAt: string;
     isFirstSync: boolean;
     cursor?: string;
   };
@@ -143,10 +143,7 @@ export const synchronizeSlackConversations = inngest.createFunction(
       });
 
       const elbaClient = createElbaClient(elbaOrganisationId);
-
-      await elbaClient.dataProtection.deleteObjects({
-        syncedBefore: new Date(syncStartedAt).toISOString(),
-      });
+      await elbaClient.dataProtection.deleteObjects({ syncedBefore: syncStartedAt });
     }
 
     return { conversationsToInsert, nextCursor };
@@ -268,10 +265,7 @@ export const synchronizeSlackConversationMessages = inngest.createFunction(
     }
 
     const elbaClient = createElbaClient(conversation.team.elbaOrganisationId);
-
-    await elbaClient.dataProtection.updateObjects({
-      objects,
-    });
+    await elbaClient.dataProtection.updateObjects({ objects });
 
     if (threadIds.length) {
       console.log({ threadIds });
@@ -313,9 +307,9 @@ export const synchronizeSlackConversationMessages = inngest.createFunction(
         data: { teamId, conversationId, isFirstSync, cursor: nextCursor },
       });
     } else {
-      await step.run('over', async () => {
-        console.log(`--- OVER ${conversationId} ---`);
-      });
+      // await step.run('over', async () => {
+      //   console.log(`--- OVER ${conversationId} ---`);
+      // });
       await step.sendEvent('conversation-sync-complete', {
         name: 'conversations/synchronize.messages.complete',
         data: { teamId, conversationId },
@@ -422,10 +416,7 @@ export const synchronizeSlackConversationThreadMessages = inngest.createFunction
     }
 
     const elbaClient = createElbaClient(conversation.team.elbaOrganisationId);
-
-    await elbaClient.dataProtection.updateObjects({
-      objects,
-    });
+    await elbaClient.dataProtection.updateObjects({ objects });
 
     const nextCursor = responseMetadata?.next_cursor;
     if (nextCursor) {

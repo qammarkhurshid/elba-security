@@ -14,7 +14,7 @@ export type UsersEvents = {
 type SynchronizeUsers = {
   data: {
     teamId: string;
-    syncStartedAt: number;
+    syncStartedAt: string;
     isFirstSync: boolean;
     cursor?: string;
   };
@@ -76,7 +76,6 @@ export const synchronizeUsers = inngest.createFunction(
     }
 
     const elbaClient = createElbaClient(elbaOrganisationId);
-
     await elbaClient.users.update({ users });
 
     if (nextCursor) {
@@ -90,9 +89,7 @@ export const synchronizeUsers = inngest.createFunction(
         },
       });
     } else {
-      await elbaClient.users.delete({
-        syncedBefore: new Date(syncStartedAt).toISOString(),
-      });
+      await elbaClient.users.delete({ syncedBefore: syncStartedAt });
     }
 
     return { users, nextCursor };
@@ -108,17 +105,21 @@ export const scheduleUsersSync = inngest.createFunction(
         id: true,
       },
     });
-    await step.sendEvent(
-      'start-users-sync',
-      teams.map(({ id: teamId }) => ({
-        name: 'users/synchronize',
-        data: {
-          teamId,
-          isFirstSync: false,
-          syncStartedAt: Date.now(),
-        },
-      }))
-    );
+
+    if (teams.length) {
+      const syncStartedAt = new Date().toISOString();
+      await step.sendEvent(
+        'start-users-sync',
+        teams.map(({ id: teamId }) => ({
+          name: 'users/synchronize',
+          data: {
+            teamId,
+            isFirstSync: false,
+            syncStartedAt,
+          },
+        }))
+      );
+    }
 
     return { teams };
   }

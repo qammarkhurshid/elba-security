@@ -39,7 +39,7 @@ export const channelCreatedHandler: SlackEventHandler<'channel_created'> = async
     data: {
       teamId,
       isFirstSync: false,
-      syncStartedAt: Date.now(),
+      syncStartedAt: new Date().toISOString(),
     },
   });
 };

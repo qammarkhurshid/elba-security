@@ -3,11 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "database:migrate": "node ./scripts/migrate.js .env.local",
+    "database": "docker-compose -p slack --env-file=.env.local up -d",
+    "dev": "next dev",
+    "dev:inngest": "inngest-cli dev",
+    "generate:migration": "drizzle-kit generate:pg --schema=./src/database/schema.ts",
     "lint": "next lint",
-    "test": "vitest"
+    "start": "next start",
+    "test:database:down": "docker-compose -p slack-test down",
+    "test:database:migrate": "node ./scripts/migrate.js .env.test",
+    "test:database:up": "docker-compose -p slack-test --env-file=.env.test up -d",
+    "test": "./scripts/run-test.sh"
   },
   "dependencies": {
     "@elba-security/schemas": "workspace:*",
@@ -28,16 +35,21 @@
   },
   "devDependencies": {
     "@edge-runtime/vm": "^3.1.7",
+    "@elba-security/msw-utils": "workspace:*",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "@zeplo/cli": "^1.0.1",
     "dotenv": "^16.3.1",
+    "dotenv-expand": "^10.0.0",
     "drizzle-kit": "^0.20.1",
     "eslint": "^8",
     "eslint-config-custom": "workspace:*",
+    "inngest-cli": "^0.22.0",
+    "msw": "^2.0.1",
+    "postgres": "^3.4.3",
     "tsconfig": "workspace:*",
     "typescript": "^5",
-    "vitest": "^0.34.6"
+    "vitest": "^1.0.1"
   }
 }

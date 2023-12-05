@@ -4,12 +4,14 @@ const dotenv = require('dotenv');
 const postgres = require('postgres');
 
 // setup process.env from .env file
-dotenv.config();
+dotenv.config({
+  path: process.argv[2],
+});
 
 const sql = postgres({
   host: process.env.POSTGRES_HOST,
   port: process.env.POSTGRES_PORT,
-  username: process.env.POSTGRES_USERNAME,
+  username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   db: process.env.POSTGRES_DATABASE,
 });

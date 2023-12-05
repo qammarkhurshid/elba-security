@@ -1,15 +1,21 @@
 import { resolve } from 'node:path';
-/// <reference types="vitest" />
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import { config } from 'dotenv';
+import { expand } from 'dotenv-expand'
 
-config({ path: '.env.local' });
+const env = config({ path: '.env.test' });
+expand(env)
 
 export default defineConfig({
   test: {
-    // setupFiles: ['./vitest/setup-database.ts'],
+    setupFiles: ['./vitest/setup-database.ts', './vitest/setup-database.ts'],
     env: process.env,
     environment: 'edge-runtime',
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
   },
   resolve: {
     alias: {

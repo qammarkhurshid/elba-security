@@ -27,12 +27,8 @@ export const userChangeHandler: SlackEventHandler<'user_change'> = async ({
   const elbaClient = createElbaClient(team.elbaOrganisationId);
 
   if (user.deleted) {
-    // Call delete source user
-
     await elbaClient.users.delete({ ids: [result.data.id] });
   } else {
-    // Call update source user
-
     await elbaClient.users.update({
       users: [
         {

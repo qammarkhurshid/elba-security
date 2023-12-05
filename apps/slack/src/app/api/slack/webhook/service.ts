@@ -9,10 +9,12 @@ import { env } from '@/common/env';
 export const handleSlackWebhookMessage = async (request: NextRequest) => {
   console.log('------ NEW EVENT ------');
   const textBody = await request.clone().text();
-  await fs.promises.appendFile(
-    env.REMOVE_ME_WEBHOOK_LOG_FILE,
-    `${new Date().toISOString()}\n${textBody}\n`
-  );
+  if (env.REMOVE_ME_WEBHOOK_LOG_FILE) {
+    await fs.promises.appendFile(
+      env.REMOVE_ME_WEBHOOK_LOG_FILE,
+      `${new Date().toISOString()}\n${textBody}\n`
+    );
+  }
 
   const timestamp = Number(request.headers.get('x-slack-request-timestamp'));
   const signature = request.headers.get('x-slack-signature');

@@ -20,7 +20,7 @@ export const scheduleDataProtectionSync = inngest.createFunction(
         data: {
           teamId,
           isFirstSync: false,
-          syncStartedAt: Date.now(),
+          syncStartedAt: new Date().toISOString(),
         },
       }))
     );
