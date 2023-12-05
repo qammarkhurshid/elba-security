@@ -1,8 +1,8 @@
 import { eq } from 'drizzle-orm';
-import { env } from '@/common/env';
 import { db } from '@/database/client';
 import { teams } from '@/database/schema';
 import { slackMemberSchema } from '@/repositories/slack/members';
+import { createElbaClient } from '@/repositories/elba/client';
 import type { SlackEventHandler } from './types';
 
 export const userChangeHandler: SlackEventHandler<'user_change'> = async ({
@@ -24,38 +24,24 @@ export const userChangeHandler: SlackEventHandler<'user_change'> = async ({
     throw new Error('Team not found');
   }
 
+  const elbaClient = createElbaClient(team.elbaOrganisationId);
+
   if (user.deleted) {
     // Call delete source user
 
-    const deleteResponse = await fetch(`${env.ELBA_API_BASE_URL}/api/rest/users`, {
-      method: 'DELETE',
-      body: JSON.stringify({
-        sourceId: env.ELBA_SOURCE_ID,
-        organisationId: team.elbaOrganisationId,
-        ids: [result.data.id],
-      }),
-    });
-    const deleteResponseJson = await deleteResponse.json();
-    console.log({ deleteResponseJson });
+    await elbaClient.users.delete({ ids: [result.data.id] });
   } else {
     // Call update source user
 
-    const updateResponse = await fetch(`${env.ELBA_API_BASE_URL}/api/rest/users`, {
-      method: 'POST',
-      body: JSON.stringify({
-        sourceId: env.ELBA_SOURCE_ID,
-        organisationId: team.elbaOrganisationId,
-        users: [
-          {
-            id: result.data.id,
-            email: result.data.profile.email,
-            displayName: result.data.real_name,
-            additionalEmails: [],
-          },
-        ],
-      }),
+    await elbaClient.users.update({
+      users: [
+        {
+          id: result.data.id,
+          email: result.data.profile.email,
+          displayName: result.data.real_name,
+          additionalEmails: [],
+        },
+      ],
     });
-    const updateResponseJson = await updateResponse.json();
-    console.log({ updateResponseJson });
   }
 };

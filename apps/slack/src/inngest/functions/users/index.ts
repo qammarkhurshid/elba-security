@@ -1,9 +1,11 @@
 import { SlackAPIClient } from 'slack-web-api-client';
 import { eq } from 'drizzle-orm';
+import type { User } from '@elba-security/sdk';
 import { db } from '@/database/client';
 import { inngest } from '@/inngest/client';
 import { slackMemberSchema } from '@/repositories/slack/members';
 import { teams as teamsTable } from '@/database/schema';
+import { createElbaClient } from '@/repositories/elba/client';
 
 export type UsersEvents = {
   'users/synchronize': SynchronizeUsers;
@@ -33,17 +35,17 @@ export const synchronizeUsers = inngest.createFunction(
     },
     step,
   }) => {
-    const token = await step.run('get-token', async () => {
+    const { elbaOrganisationId, token } = await step.run('get-token', async () => {
       const result = await db.query.teams.findFirst({
         where: eq(teamsTable.id, teamId),
-        columns: { token: true },
+        columns: { token: true, elbaOrganisationId: true },
       });
 
       if (!result) {
         throw new Error('Failed to find team');
       }
 
-      return result.token;
+      return result;
     });
 
     const { members, nextCursor } = await step.run('listing-users', async () => {
@@ -60,7 +62,7 @@ export const synchronizeUsers = inngest.createFunction(
       return { members: responseMember, nextCursor: responseMetadata?.next_cursor };
     });
 
-    const users: { id: string; email: string; displayName?: string; additionalEmails: [] }[] = [];
+    const users: User[] = [];
     for (const member of members) {
       const result = slackMemberSchema.safeParse(member);
       if (member.team_id === teamId && !member.deleted && !member.is_bot && result.success) {
@@ -73,17 +75,9 @@ export const synchronizeUsers = inngest.createFunction(
       }
     }
 
-    // const updateResponse = await fetch(`${env.ELBA_API_BASE_URL}/api/rest/users`, {
-    //   method: 'POST',
-    //   body: JSON.stringify({
-    //     sourceId: env.ELBA_SOURCE_ID,
-    //     organisationId: job.team.elbaOrganisationId,
-    //     users,
-    //   }),
-    // });
+    const elbaClient = createElbaClient(elbaOrganisationId);
 
-    // const updateResponseJson = await updateResponse.json();
-    // console.log({ updateResponseJson });
+    await elbaClient.users.update({ users });
 
     if (nextCursor) {
       await step.sendEvent('next-pagination-cursor', {
@@ -96,19 +90,37 @@ export const synchronizeUsers = inngest.createFunction(
         },
       });
     } else {
-      // const deleteResponse = await fetch(`${env.ELBA_API_BASE_URL}/api/rest/users`, {
-      //   method: 'DELETE',
-      //   body: JSON.stringify({
-      //     sourceId: env.ELBA_SOURCE_ID,
-      //     organisationId: job.team.elbaOrganisationId,
-      //     lastSyncedBefore: job.syncStartedAt.toISOString(),
-      //   }),
-      // });
-      // const deleteResponseJson = await deleteResponse.json();
-      // console.log({ deleteResponseJson, lastSyncedBefore: job.syncStartedAt.toISOString() });
+      await elbaClient.users.delete({
+        syncedBefore: new Date(syncStartedAt).toISOString(),
+      });
     }
 
     return { users, nextCursor };
+  }
+);
+
+export const scheduleUsersSync = inngest.createFunction(
+  { id: 'schedule-users-sync', retries: 5 },
+  { cron: 'TZ=Europe/Paris 0 0 * * *' },
+  async ({ step }) => {
+    const teams = await db.query.teams.findMany({
+      columns: {
+        id: true,
+      },
+    });
+    await step.sendEvent(
+      'start-users-sync',
+      teams.map(({ id: teamId }) => ({
+        name: 'users/synchronize',
+        data: {
+          teamId,
+          isFirstSync: false,
+          syncStartedAt: Date.now(),
+        },
+      }))
+    );
+
+    return { teams };
   }
 );
 

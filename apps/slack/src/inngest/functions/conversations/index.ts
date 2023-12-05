@@ -1,5 +1,6 @@
 import { SlackAPIClient } from 'slack-web-api-client';
 import { and, eq, lt, sql } from 'drizzle-orm';
+import type { DataProtectionObject } from '@elba-security/sdk';
 import { inngest } from '@/inngest/client';
 import {
   conversations as conversationsTable,
@@ -9,6 +10,7 @@ import {
 import { db } from '@/database/client';
 import { slackMessageSchema } from '@/repositories/slack/messages';
 import { formatDataProtectionObject } from '@/repositories/elba/data-protection/objects';
+import { createElbaClient } from '@/repositories/elba/client';
 
 export type ConversationsEvents = {
   'conversations/synchronize': ConversationsSync;
@@ -44,16 +46,17 @@ export const synchronizeSlackConversations = inngest.createFunction(
     },
     step,
   }) => {
-    const token = await step.run('get-token', async () => {
+    const { token, elbaOrganisationId } = await step.run('get-token', async () => {
       const result = await db.query.teams.findFirst({
         where: eq(teamsTable.id, teamId),
+        columns: { token: true, elbaOrganisationId: true },
       });
 
       if (!result) {
         throw new Error('Failed to find team');
       }
 
-      return result.token;
+      return result;
     });
 
     const { conversations, nextCursor } = await step.run('list-conversations', async () => {
@@ -138,7 +141,12 @@ export const synchronizeSlackConversations = inngest.createFunction(
             )
           );
       });
-      // TODO: call elba deletion endpoint
+
+      const elbaClient = createElbaClient(elbaOrganisationId);
+
+      await elbaClient.dataProtection.deleteObjects({
+        syncedBefore: new Date(syncStartedAt).toISOString(),
+      });
     }
 
     return { conversationsToInsert, nextCursor };
@@ -227,7 +235,7 @@ export const synchronizeSlackConversationMessages = inngest.createFunction(
       return { messages: responseMessages, nextCursor: responseMetadata?.next_cursor };
     });
 
-    const dpObjects: any[] = [];
+    const objects: DataProtectionObject[] = [];
     const threadIds: string[] = [];
     for (const message of messages) {
       if (message.thread_ts) {
@@ -248,7 +256,7 @@ export const synchronizeSlackConversationMessages = inngest.createFunction(
 
       // console.log(message);
 
-      const dpObject = formatDataProtectionObject({
+      const object = formatDataProtectionObject({
         teamId,
         teamUrl: conversation.team.url,
         conversationId,
@@ -256,25 +264,14 @@ export const synchronizeSlackConversationMessages = inngest.createFunction(
         message: result.data,
       });
 
-      dpObjects.push(dpObject);
+      objects.push(object);
     }
 
-    // console.log({ dpObjects });
+    const elbaClient = createElbaClient(conversation.team.elbaOrganisationId);
 
-    // const updateDPObjectResponse = await fetch(
-    //   `${env.ELBA_API_BASE_URL}/api/rest/data-protection/objects`,
-    //   {
-    //     method: 'POST',
-    //     body: JSON.stringify({
-    //       sourceId: env.ELBA_SOURCE_ID,
-    //       organisationId: conversation.team.elbaOrganisationId,
-    //       objects: dpObjects,
-    //     }),
-    //   }
-    // );
-    // const body = await updateDPObjectResponse.json();
-
-    // console.log({ body });
+    await elbaClient.dataProtection.updateObjects({
+      objects,
+    });
 
     if (threadIds.length) {
       console.log({ threadIds });
@@ -325,7 +322,7 @@ export const synchronizeSlackConversationMessages = inngest.createFunction(
       });
     }
 
-    return { threadIds, objects: dpObjects.length, nextCursor };
+    return { threadIds, objects: objects.length, nextCursor };
   }
 );
 
@@ -404,7 +401,7 @@ export const synchronizeSlackConversationThreadMessages = inngest.createFunction
       throw new Error('An error occurred while listing slack conversations');
     }
 
-    const dpObjects: any[] = [];
+    const objects: DataProtectionObject[] = [];
     for (const message of messages) {
       const result = slackMessageSchema.safeParse(message);
 
@@ -412,7 +409,7 @@ export const synchronizeSlackConversationThreadMessages = inngest.createFunction
         continue;
       }
 
-      const dpObject = formatDataProtectionObject({
+      const object = formatDataProtectionObject({
         teamId,
         teamUrl: conversation.team.url,
         conversationId,
@@ -421,25 +418,14 @@ export const synchronizeSlackConversationThreadMessages = inngest.createFunction
         message: result.data,
       });
 
-      dpObjects.push(dpObject);
+      objects.push(object);
     }
 
-    // console.log({ dpObjects });
+    const elbaClient = createElbaClient(conversation.team.elbaOrganisationId);
 
-    // const updateDPObjectResponse = await fetch(
-    //   `${env.ELBA_API_BASE_URL}/api/rest/data-protection/objects`,
-    //   {
-    //     method: 'POST',
-    //     body: JSON.stringify({
-    //       sourceId: env.ELBA_SOURCE_ID,
-    //       organisationId: conversation.team.elbaOrganisationId,
-    //       objects: dpObjects,
-    //     }),
-    //   }
-    // );
-    // const body = await updateDPObjectResponse.json();
-
-    // console.log({ body });
+    await elbaClient.dataProtection.updateObjects({
+      objects,
+    });
 
     const nextCursor = responseMetadata?.next_cursor;
     if (nextCursor) {
@@ -460,7 +446,7 @@ export const synchronizeSlackConversationThreadMessages = inngest.createFunction
       });
     }
 
-    return { objects: dpObjects.length, nextCursor };
+    return { objects: objects.length, nextCursor };
   }
 );
 

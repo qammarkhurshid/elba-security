@@ -1,10 +1,10 @@
-import { env } from 'node:process';
 import type { GenericMessageEvent } from '@slack/bolt';
 import { and, eq } from 'drizzle-orm';
 import { db } from '@/database/client';
 import { conversations } from '@/database/schema';
 import { formatDataProtectionObject } from '@/repositories/elba/data-protection/objects';
 import { slackMessageSchema } from '@/repositories/slack/messages';
+import { createElbaClient } from '@/repositories/elba/client';
 
 export const genericMessageHandler = async (event: GenericMessageEvent) => {
   const result = slackMessageSchema.safeParse(event);
@@ -45,20 +45,11 @@ export const genericMessageHandler = async (event: GenericMessageEvent) => {
     message: result.data,
   });
 
-  const updateDPObjectResponse = await fetch(
-    `${env.ELBA_API_BASE_URL}/api/rest/data-protection/objects`,
-    {
-      method: 'POST',
-      body: JSON.stringify({
-        sourceId: env.ELBA_SOURCE_ID,
-        organisationId: elbaOrganisationId,
-        objects: [object],
-      }),
-    }
-  );
-  const body = await updateDPObjectResponse.json();
+  const elbaClient = createElbaClient(elbaOrganisationId);
 
-  console.log({ body });
+  await elbaClient.dataProtection.updateObjects({
+    objects: [object],
+  });
 
   return { elbaOrganisationId, object };
 };

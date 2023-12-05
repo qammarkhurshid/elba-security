@@ -1,3 +1,4 @@
+import type { DataProtectionObject } from '@elba-security/sdk';
 import {
   type SlackMessage,
   getMessageUrl,
@@ -30,7 +31,7 @@ export const formatDataProtectionObject = ({
   conversationName: string;
   threadId?: string;
   message: SlackMessage;
-}) => {
+}): DataProtectionObject => {
   const messageId = message.ts;
   const dataProtectionObjectId = formatDataProtectionObjectId({
     teamId,
@@ -39,7 +40,7 @@ export const formatDataProtectionObject = ({
   });
   const url = getMessageUrl({ teamUrl, conversationId, messageId, threadId });
   const sentAt = convertTsToIsoString(messageId);
-  let editedAt: string | null = null;
+  let editedAt: string | undefined;
   if (message.edited?.ts) {
     editedAt = convertTsToIsoString(message.edited.ts);
   }
@@ -53,8 +54,8 @@ export const formatDataProtectionObject = ({
       messageId,
       type: threadId ? 'reply' : 'message',
     },
-    updated_at: editedAt,
-    owner_id: message.user,
+    updatedAt: editedAt,
+    ownerId: message.user,
     permissions: [
       {
         type: 'anyone',

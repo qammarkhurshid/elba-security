@@ -23,6 +23,12 @@ importers:
 
   apps/slack:
     dependencies:
+      '@elba-security/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
+      '@elba-security/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
       '@neondatabase/serverless':
         specifier: ^0.6.0
         version: 0.6.0
