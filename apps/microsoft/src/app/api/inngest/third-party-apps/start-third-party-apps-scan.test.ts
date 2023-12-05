@@ -4,7 +4,7 @@ import { organizations } from '@/schemas';
 import { db } from '@/lib/db';
 import * as microsoftModules from '@/common/microsoft';
 import { createFunctionMock } from '../functions/__mocks__/inngest';
-import { startUsersScan } from './start-users-scan';
+import { startThirdPartyAppsScan } from './start-third-party-apps-scan';
 
 const ids = Array.from({ length: 5 }, (_, i) => `${i}`);
 const mockedOrganizations = ids.map((id) => ({
@@ -18,10 +18,10 @@ vi.spyOn(microsoftModules, 'getTokenByTenantId').mockResolvedValue({
   scopes: [],
 });
 
-const setup = createFunctionMock(startUsersScan, 'users/start');
+const setup = createFunctionMock(startThirdPartyAppsScan, 'third-party-apps/start');
 
-describe('start-users-scan', () => {
-  test('should not scan users page when organization could not be retrieved', async () => {
+describe('start-third-party-apps-scan', () => {
+  test('should not scan third party apps page when organization could not be retrieved', async () => {
     const [result, { step }] = setup({
       tenantId: 'unknownId',
       isFirstScan: true,
@@ -30,7 +30,7 @@ describe('start-users-scan', () => {
     expect(step.sendEvent).toBeCalledTimes(0);
   });
 
-  test('should scan users when organization has been retrieved', async () => {
+  test('should scan third party apps when organization has been retrieved', async () => {
     await db.insert(organizations).values(mockedOrganizations);
 
     // targeted installation
@@ -46,8 +46,8 @@ describe('start-users-scan', () => {
     });
 
     expect(step.sendEvent).toBeCalledTimes(1);
-    expect(step.sendEvent).toBeCalledWith('scan-users', {
-      name: 'users/scan',
+    expect(step.sendEvent).toBeCalledWith('scan-third-party-apps', {
+      name: 'third-party-apps/scan',
       data: {
         tenantId: mockedOrganization.tenantId,
         organizationId: mockedOrganization.elbaOrganizationId,
