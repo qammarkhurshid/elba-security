@@ -10,7 +10,7 @@ export const startThirdPartyAppsScan = inngest.createFunction(
     },
   },
   {
-    event: 'third-party-apps/scan',
+    event: 'third-party-apps/start',
     rateLimit: {
       key: 'event.data.tenantId',
       limit: 1,

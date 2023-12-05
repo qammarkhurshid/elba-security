@@ -10,7 +10,7 @@ export const startUsersScan = inngest.createFunction(
     },
   },
   {
-    event: 'users/scan',
+    event: 'users/start',
     rateLimit: {
       key: 'event.data.tenantId',
       limit: 1,
