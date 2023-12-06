@@ -22,8 +22,6 @@ export async function GET(request: NextRequest) {
     if (isRedirectError(error)) {
       throw error;
     }
-    // eslint-disable-next-line no-console -- temporary
-    console.log(error);
     redirect(`${env.ELBA_REDIRECT_URL}?error=true`, RedirectType.replace);
   }
 }

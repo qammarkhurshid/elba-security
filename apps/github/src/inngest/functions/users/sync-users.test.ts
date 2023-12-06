@@ -4,6 +4,7 @@ import * as githubOrganization from '@/connectors/organization';
 import { Admin, Organisation } from '@/database/schema';
 import { db } from '@/database/client';
 import { spyOnElbaSdk } from '@/__mocks__/elba-sdk';
+import { env } from '@/env';
 import { syncUsers } from './sync-users';
 import { elbaUsers } from './__mocks__/snapshots';
 import { githubAdmins, githubUsers } from './__mocks__/github';
@@ -55,6 +56,14 @@ describe('sync-users', () => {
       data.cursor
     );
 
+    expect(elba.constructor).toBeCalledTimes(1);
+    expect(elba.constructor).toBeCalledWith({
+      organisationId: organisation.id,
+      sourceId: env.ELBA_SOURCE_ID,
+      apiKey: env.ELBA_API_KEY,
+      baseUrl: env.ELBA_API_BASE_URL,
+    });
+
     expect(elba.users.update).toBeCalledTimes(1);
     expect(elba.users.update).toBeCalledWith({
       users: githubUsers.map(({ id, email, name }) => ({
@@ -100,6 +109,14 @@ describe('sync-users', () => {
       data.accountLogin,
       data.cursor
     );
+
+    expect(elba.constructor).toBeCalledTimes(1);
+    expect(elba.constructor).toBeCalledWith({
+      organisationId: organisation.id,
+      sourceId: env.ELBA_SOURCE_ID,
+      apiKey: env.ELBA_API_KEY,
+      baseUrl: env.ELBA_API_BASE_URL,
+    });
 
     expect(elba.users.update).toBeCalledTimes(1);
     expect(elba.users.update).toBeCalledWith({

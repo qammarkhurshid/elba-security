@@ -6,6 +6,7 @@ import * as githubApp from '@/connectors/app';
 import { db } from '@/database/client';
 import { Admin, Organisation } from '@/database/schema';
 import { spyOnElbaSdk } from '@/__mocks__/elba-sdk';
+import { env } from '@/env';
 import { syncApps } from './sync-apps';
 import { elbaApps } from './__mocks__/snapshots';
 import { githubApps, githubInstallations } from './__mocks__/github';
@@ -64,6 +65,14 @@ describe('sync-apps', () => {
       );
     }
 
+    expect(elba.constructor).toBeCalledTimes(1);
+    expect(elba.constructor).toBeCalledWith({
+      organisationId: organisation.id,
+      sourceId: env.ELBA_SOURCE_ID,
+      apiKey: env.ELBA_API_KEY,
+      baseUrl: env.ELBA_API_BASE_URL,
+    });
+
     expect(elba.thirdPartyApps.updateObjects).toBeCalledTimes(1);
     expect(elba.thirdPartyApps.updateObjects).toBeCalledWith({
       apps: elbaApps,
@@ -115,6 +124,14 @@ describe('sync-apps', () => {
         githubInstallation.app_slug
       );
     }
+
+    expect(elba.constructor).toBeCalledTimes(1);
+    expect(elba.constructor).toBeCalledWith({
+      organisationId: organisation.id,
+      sourceId: env.ELBA_SOURCE_ID,
+      apiKey: env.ELBA_API_KEY,
+      baseUrl: env.ELBA_API_BASE_URL,
+    });
 
     expect(elba.thirdPartyApps.updateObjects).toBeCalledTimes(1);
     expect(elba.thirdPartyApps.updateObjects).toBeCalledWith({
