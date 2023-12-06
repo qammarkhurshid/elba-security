@@ -1,95 +1,90 @@
-import { expect, test, describe, vi } from 'vitest';
-import { Installation, db } from '@/database';
-import * as installationRepository from '@/repositories/github/installation';
-import * as client from '../api/inngest/client';
-import { setupInstallation } from './service';
+import { expect, test, describe, vi, beforeAll, afterAll } from 'vitest';
+import * as installationRepository from '@/connectors/installation';
+import * as client from '@/inngest/client';
+import { db } from '@/database/client';
+import { Organisation } from '@/database/schema';
+import { setupOrganisation } from './service';
 
 const installationId = 1;
 const organisationId = `45a76301-f1dd-4a77-b12f-9d7d3fca3c90`;
+const now = Date.now();
 
-vi.mock('../client', () => {
-  return {
-    inngest: {
-      send: vi.fn(),
-    },
-  };
-});
+describe('setupOrganisation', () => {
+  beforeAll(() => {
+    vi.setSystemTime(now);
+  });
 
-const setup = (...params: Parameters<typeof setupInstallation>) => {
-  const send = vi.spyOn(client.inngest, 'send').mockResolvedValue({ ids: [] });
-  return [
-    setupInstallation(...params),
-    {
-      inngest: {
-        send,
-      },
-    },
-  ] as const;
-};
+  afterAll(() => {
+    vi.useRealTimers();
+  });
 
-describe('schedule-users-sync-jobs', () => {
-  test('should not setup installation when github account is not an organization', async () => {
+  test('should not setup organisation when github account is not an organization', async () => {
+    const send = vi.spyOn(client.inngest, 'send').mockResolvedValue({ ids: [] });
     vi.spyOn(installationRepository, 'getInstallation').mockResolvedValue({
       id: installationId,
       account: {
-        id: 1,
         type: 'PERSONNAL',
         login: 'some-login',
       },
       suspended_at: null,
     });
-    const [result, mocks] = setup(installationId, organisationId);
 
-    await expect(result).rejects.toThrow(
+    await expect(setupOrganisation(installationId, organisationId)).rejects.toThrow(
       new Error('Cannot install elba github app on an account that is not an organization')
     );
-    await expect(db.select().from(Installation)).resolves.toHaveLength(0);
-    expect(mocks.inngest.send).toBeCalledTimes(0);
+    await expect(db.select().from(Organisation)).resolves.toHaveLength(0);
+    expect(send).toBeCalledTimes(0);
   });
 
-  test('should not setup installation when github account is suspended', async () => {
+  test('should not setup organisation when github account is suspended', async () => {
+    const send = vi.spyOn(client.inngest, 'send').mockResolvedValue({ ids: [] });
     vi.spyOn(installationRepository, 'getInstallation').mockResolvedValue({
       id: installationId,
       account: {
-        id: 1,
         type: 'Organization',
         login: 'some-login',
       },
       suspended_at: new Date().toISOString(),
     });
-    const [result, mocks] = setup(installationId, organisationId);
 
-    await expect(result).rejects.toThrow(new Error('Installation is suspended'));
-    await expect(db.select().from(Installation)).resolves.toHaveLength(0);
-    expect(mocks.inngest.send).toBeCalledTimes(0);
+    await expect(setupOrganisation(installationId, organisationId)).rejects.toThrow(
+      new Error('Installation is suspended')
+    );
+    await expect(db.select().from(Organisation)).resolves.toHaveLength(0);
+    expect(send).toBeCalledTimes(0);
   });
 
-  test('should setup installation when github account is not suspended and is an Organization', async () => {
+  test('should setup organisation when github account is not suspended and is an Organization', async () => {
+    const organisation = {
+      id: organisationId,
+      installationId,
+      accountLogin: 'some-login',
+    };
+    const send = vi.spyOn(client.inngest, 'send').mockResolvedValue({ ids: [] });
     vi.spyOn(installationRepository, 'getInstallation').mockResolvedValue({
-      id: 1,
+      id: organisation.installationId,
       account: {
-        id: 1,
         type: 'Organization',
-        login: 'some-login',
+        login: organisation.accountLogin,
       },
       suspended_at: null,
     });
-    const [result, mocks] = setup(installationId, organisationId);
-    const installation = {
-      id: installationId,
-      organisationId,
-      accountId: 1,
-      accountLogin: 'some-login',
-    };
 
-    await expect(result).resolves.toMatchObject(installation);
-    await expect(db.select().from(Installation)).resolves.toMatchObject([installation]);
-    expect(mocks.inngest.send).toBeCalledTimes(1);
-    expect(mocks.inngest.send).toBeCalledWith({
-      name: 'users/scan',
+    await expect(setupOrganisation(installationId, organisationId)).resolves.toMatchObject(
+      organisation
+    );
+    await expect(db.select().from(Organisation)).resolves.toMatchObject([organisation]);
+    expect(send).toBeCalledTimes(1);
+    expect(send).toBeCalledWith({
+      name: 'users/sync',
+
       data: {
-        installationId: installation.id,
-        isFirstScan: true,
+        organisationId,
+        installationId: organisation.installationId,
+        accountLogin: organisation.accountLogin,
+        syncStartedAt: now,
+        isFirstSync: true,
+        cursor: null,
       },
     });
   });

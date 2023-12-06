@@ -1,8 +1,9 @@
-import { getInstallation } from '@/repositories/github/installation';
-import { inngest } from '../api/inngest/client';
-import { insertInstallation } from './data';
+import { getInstallation } from '@/connectors/installation';
+import { inngest } from '@/inngest/client';
+import { db } from '@/database/client';
+import { Organisation } from '@/database/schema';
 
-export const setupInstallation = async (installationId: number, organisationId: string) => {
+export const setupOrganisation = async (installationId: number, organisationId: string) => {
   const installation = await getInstallation(installationId);
 
   if (installation.account.type !== 'Organization') {
@@ -13,20 +14,30 @@ export const setupInstallation = async (installationId: number, organisationId: 
     throw new Error('Installation is suspended');
   }
 
-  const appInstallation = await insertInstallation({
-    id: installation.id,
-    accountId: installation.account.id,
-    accountLogin: installation.account.login,
-    organisationId,
-  });
+  const [organisation] = await db
+    .insert(Organisation)
+    .values({
+      id: organisationId,
+      installationId: installation.id,
+      accountLogin: installation.account.login,
+    })
+    .returning();
+
+  if (!organisation) {
+    throw new Error(`Could not setup organisation with id=${organisationId}`);
+  }
 
   await inngest.send({
-    name: 'users/scan',
+    name: 'users/sync',
     data: {
+      organisationId,
       installationId: installation.id,
-      isFirstScan: true,
+      accountLogin: installation.account.login,
+      syncStartedAt: Date.now(),
+      isFirstSync: true,
+      cursor: null,
     },
   });
 
-  return appInstallation;
+  return organisation;
 };

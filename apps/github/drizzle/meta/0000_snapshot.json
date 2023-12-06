@@ -1,105 +1,22 @@
 {
+  "id": "b9c7e8ce-2f1b-4472-bda4-65e9814c7e14",
+  "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
-  "id": "ef34f380-d9d4-4ee8-8bfc-6923dbb78918",
-  "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "installation": {
-      "name": "installation",
+    "admin": {
+      "name": "admin",
       "schema": "",
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
-          "primaryKey": false,
+          "type": "text",
+          "primaryKey": true,
           "notNull": true
         },
         "organisation_id": {
           "name": "organisation_id",
           "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "account_id": {
-          "name": "account_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "account_login": {
-          "name": "account_login",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "suspended_at": {
-          "name": "suspended_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "installation_organisation_id_organisation_organisation_id_fk": {
-          "name": "installation_organisation_id_organisation_organisation_id_fk",
-          "tableFrom": "installation",
-          "tableTo": "organisation",
-          "columnsFrom": [
-            "organisation_id"
-          ],
-          "columnsTo": [
-            "organisation_id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "installation_id_unique": {
-          "name": "installation_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "id"
-          ]
-        },
-        "installation_organisation_id_unique": {
-          "name": "installation_organisation_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "organisation_id"
-          ]
-        },
-        "installation_account_id_unique": {
-          "name": "installation_account_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "account_id"
-          ]
-        }
-      }
-    },
-    "installation_admin": {
-      "name": "installation_admin",
-      "schema": "",
-      "columns": {
-        "installation_id": {
-          "name": "installation_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "admin_id": {
-          "name": "admin_id",
-          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -115,26 +32,19 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "update_at": {
-          "name": "update_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
         }
       },
       "indexes": {},
       "foreignKeys": {
-        "installation_admin_installation_id_installation_id_fk": {
-          "name": "installation_admin_installation_id_installation_id_fk",
-          "tableFrom": "installation_admin",
-          "tableTo": "installation",
+        "admin_organisation_id_organisation_organisation_id_fk": {
+          "name": "admin_organisation_id_organisation_organisation_id_fk",
+          "tableFrom": "admin",
+          "tableTo": "organisation",
           "columnsFrom": [
-            "installation_id"
+            "organisation_id"
           ],
           "columnsTo": [
-            "id"
+            "organisation_id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -142,12 +52,12 @@
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "installation_admin_installation_id_admin_id_unique": {
-          "name": "installation_admin_installation_id_admin_id_unique",
+        "admin_organisation_id_id_unique": {
+          "name": "admin_organisation_id_id_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "installation_id",
-            "admin_id"
+            "organisation_id",
+            "id"
           ]
         }
       }
@@ -162,12 +72,17 @@
           "primaryKey": true,
           "notNull": true
         },
-        "is_activated": {
-          "name": "is_activated",
-          "type": "boolean",
+        "id": {
+          "name": "id",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false,
-          "default": false
+          "notNull": true
+        },
+        "account_login": {
+          "name": "account_login",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -180,7 +95,15 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "organisation_id_unique": {
+          "name": "organisation_id_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "id"
+          ]
+        }
+      }
     }
   },
   "enums": {},
