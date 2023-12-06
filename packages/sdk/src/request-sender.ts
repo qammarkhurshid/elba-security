@@ -43,6 +43,7 @@ export class RequestSender {
       });
 
       if (!response.ok) {
+        console.log(await response.text());
         throw new ElbaError('Invalid response received from Elba API', {
           path,
           method,

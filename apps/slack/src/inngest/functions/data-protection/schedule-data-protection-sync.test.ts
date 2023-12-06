@@ -3,13 +3,13 @@ import { createFunctionMock } from '@/inngest/__mocks__/inngest';
 import { db } from '@/database/client';
 import { teams } from '@/database/schema';
 import { inngest } from '@/inngest/client';
-import { scheduleUsersSync } from './schedule-users-sync';
+import { scheduleDataProtectionSync } from './schedule-data-protection-sync';
 
-const setup = createFunctionMock(scheduleUsersSync);
+const setup = createFunctionMock(scheduleDataProtectionSync);
 
 const mockedDate = '2023-01-01T00:00:00.000Z';
 
-describe('schedule-users-sync', () => {
+describe('schedule-data-protection-sync', () => {
   beforeAll(() => {
     vi.setSystemTime(mockedDate);
   });
@@ -52,14 +52,14 @@ describe('schedule-users-sync', () => {
     });
 
     expect(step.sendEvent).toBeCalledTimes(1);
-    expect(step.sendEvent).toBeCalledWith('start-users-sync', [
+    expect(step.sendEvent).toBeCalledWith('start-data-protection-sync', [
       {
         data: {
           isFirstSync: false,
           syncStartedAt: mockedDate,
           teamId: 'team-id-1',
         },
-        name: 'users/synchronize',
+        name: 'conversations/synchronize',
       },
       {
         data: {
@@ -67,7 +67,7 @@ describe('schedule-users-sync', () => {
           syncStartedAt: mockedDate,
           teamId: 'team-id-2',
         },
-        name: 'users/synchronize',
+        name: 'conversations/synchronize',
       },
     ]);
   });

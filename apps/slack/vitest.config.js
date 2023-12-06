@@ -8,7 +8,7 @@ expand(env)
 
 export default defineConfig({
   test: {
-    setupFiles: ['./vitest/setup-database.ts', './vitest/setup-database.ts'],
+    setupFiles: ['./vitest/setup-database.ts', './vitest/setup-test-server.ts'],
     env: process.env,
     environment: 'edge-runtime',
     poolOptions: {

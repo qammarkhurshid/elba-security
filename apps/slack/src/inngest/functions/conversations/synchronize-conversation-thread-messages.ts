@@ -79,8 +79,8 @@ export const synchronizeConversationThreadMessages = inngest.createFunction(
       await slackWebClient.conversations.replies({
         channel: conversationId,
         ts: threadId,
-        latest: cursor || undefined,
         limit: 2,
+        cursor: cursor,
         // limit: 1000,
       });
 

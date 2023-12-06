@@ -13,17 +13,19 @@ export const scheduleDataProtectionSync = inngest.createFunction(
       });
     });
 
-    await step.sendEvent(
-      'start-data-protection-sync',
-      teams.map(({ id: teamId }) => ({
-        name: 'conversations/synchronize',
-        data: {
-          teamId,
-          isFirstSync: false,
-          syncStartedAt: new Date().toISOString(),
-        },
-      }))
-    );
+    if (teams.length) {
+      await step.sendEvent(
+        'start-data-protection-sync',
+        teams.map(({ id: teamId }) => ({
+          name: 'conversations/synchronize',
+          data: {
+            teamId,
+            isFirstSync: false,
+            syncStartedAt: new Date().toISOString(),
+          },
+        }))
+      );
+    }
 
     return { teams };
   }

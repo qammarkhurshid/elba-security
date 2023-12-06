@@ -14,7 +14,8 @@
     "test:database:down": "docker-compose -p slack-test down",
     "test:database:migrate": "node ./scripts/migrate.js .env.test",
     "test:database:up": "docker-compose -p slack-test --env-file=.env.test up -d",
-    "test": "./scripts/run-test.sh"
+    "test": "./scripts/run-test.sh",
+    "test:watch": "./scripts/run-test.sh -w"
   },
   "dependencies": {
     "@elba-security/schemas": "workspace:*",

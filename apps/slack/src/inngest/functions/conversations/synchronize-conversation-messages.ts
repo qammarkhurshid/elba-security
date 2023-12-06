@@ -79,7 +79,6 @@ export const synchronizeConversationMessages = inngest.createFunction(
       const { messages: responseMessages, response_metadata: responseMetadata } =
         await slackWebClient.conversations.history({
           channel: conversationId,
-          latest: cursor || undefined,
           limit: 2,
           // limit: 200,
           cursor,
