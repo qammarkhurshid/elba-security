@@ -15,7 +15,7 @@
     "test:database:migrate": "node ./scripts/migrate.js .env.test",
     "test:database:up": "docker-compose -p slack-test --env-file=.env.test up -d",
     "test": "./scripts/run-test.sh",
-    "test:watch": "./scripts/run-test.sh -w"
+    "test:watch": "pnpm test -- -w"
   },
   "dependencies": {
     "@elba-security/schemas": "workspace:*",
@@ -46,6 +46,7 @@
     "drizzle-kit": "^0.20.1",
     "eslint": "^8",
     "eslint-config-custom": "workspace:*",
+    "eslint-plugin-vitest": "^0.3.10",
     "inngest-cli": "^0.22.0",
     "msw": "^2.0.1",
     "postgres": "^3.4.3",

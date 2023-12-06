@@ -1,11 +1,10 @@
 import { expect, test, describe, vi, beforeAll, afterAll, afterEach } from 'vitest';
+import * as slack from 'slack-web-api-client';
+import * as elba from '@elba-security/sdk';
 import { createFunctionMock } from '@/inngest/__mocks__/inngest';
 import { db } from '@/database/client';
 import { conversations, teams } from '@/database/schema';
-import { inngest } from '@/inngest/client';
 import { synchronizeConversations } from './synchronize-conversations';
-import * as slack from 'slack-web-api-client';
-import * as elba from '@elba-security/sdk';
 
 vi.mock('slack-web-api-client');
 

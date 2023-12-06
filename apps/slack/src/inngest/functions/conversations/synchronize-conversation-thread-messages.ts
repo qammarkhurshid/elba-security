@@ -80,7 +80,7 @@ export const synchronizeConversationThreadMessages = inngest.createFunction(
         channel: conversationId,
         ts: threadId,
         limit: 2,
-        cursor: cursor,
+        cursor,
         // limit: 1000,
       });
 
