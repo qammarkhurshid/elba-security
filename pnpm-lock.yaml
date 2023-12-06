@@ -34,7 +34,7 @@ importers:
         specifier: latest
         version: 1.11.0
 
-  apps/asana-service:
+  apps/asana:
     dependencies:
       next:
         specifier: 14.0.1
