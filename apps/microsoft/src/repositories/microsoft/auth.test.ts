@@ -41,7 +41,7 @@ describe('auth.ts', () => {
         elbaOrganizationId,
         isAdminConsentGiven: false,
       });
-      await expect(result).resolves.toEqual('You must give admin consent to continue');
+      await expect(result).rejects.toThrow('You must give admin consent to continue');
       expect(mocks.inngest.send).toBeCalledTimes(0);
     });
 
@@ -55,7 +55,7 @@ describe('auth.ts', () => {
         elbaOrganizationId,
         isAdminConsentGiven: false,
       });
-      await expect(result).resolves.toEqual('You must give admin consent to continue');
+      await expect(result).rejects.toThrow('You must give admin consent to continue');
       expect(mocks.inngest.send).toBeCalledTimes(0);
     });
 
@@ -104,9 +104,13 @@ describe('auth.ts', () => {
       });
       const [result, mocks] = setup({ tenantId, elbaOrganizationId, isAdminConsentGiven: true });
       await expect(result).resolves.toEqual(
-        'You have already given admin consent. You may close this window now.'
+        'You have successfully given admin consent. You may close this window now.'
       );
-      expect(mocks.inngest.send).toBeCalledTimes(0);
+      expect(mocks.inngest.send).toBeCalledTimes(1);
+      expect(mocks.inngest.send).toBeCalledWith({
+        data: { tenantId, isFirstScan: true },
+        name: 'users/start',
+      });
     });
   });
 });

@@ -43,14 +43,20 @@ describe('scanThirdPartyAppsByTenantId', () => {
         appId: 'appId',
         appDisplayName: 'displayName',
         description: 'description',
-        verifiedPublisher: {
-          displayName: 'verifiedPublisher',
-        },
+        publisherName: 'verifiedPublisher',
+        logoUrl: 'logoUrl',
+        tags: [],
+        appRoles: [],
+        appRoleAssignments: [],
         homepage: 'homepage',
         servicePrincipalNames: ['servicePrincipalName'],
       },
     ]);
-    const result = await scanThirdPartyAppsByTenantId({ tenantId, accessToken, pageLink: null });
+    const result = await scanThirdPartyAppsByTenantId({
+      tenantId,
+      accessToken,
+      pageLink: undefined,
+    });
     expect(result).toStrictEqual({
       pageLink: undefined,
       permissionGrantsObjects: [
@@ -68,6 +74,7 @@ describe('scanThirdPartyAppsByTenantId', () => {
             id: 'clientId',
             name: 'displayName',
             publisherName: 'verifiedPublisher',
+            logoUrl: 'logoUrl',
             url: 'homepage',
             users: [
               {
@@ -80,7 +87,6 @@ describe('scanThirdPartyAppsByTenantId', () => {
             ],
           },
         ],
-        organisationId: 'tenantId',
       },
     });
   });

@@ -9,16 +9,16 @@ export const scheduleThirdPartyAppsScans = inngest.createFunction(
     const orgs = await db
       .select({
         tenantId: organizations.tenantId,
-        organizationId: organizations.elbaOrganizationId,
       })
       .from(organizations);
     await Promise.all(
-      orgs.map(({ tenantId, organizationId }) =>
+      orgs.map(({ tenantId }) =>
         inngest.send({
           name: 'third-party-apps/start',
-          data: { tenantId, organizationId, isFirstScan: false },
+          data: { tenantId, isFirstScan: false },
         })
       )
     );
+    return { status: 'scheduled' };
   }
 );

@@ -1,7 +1,8 @@
-import { Elba } from 'elba-sdk';
+import { Elba } from '@elba-security/sdk';
 import { env } from '@/common/env';
 import { scanThirdPartyAppsByTenantId } from '@/repositories/microsoft/tpa';
 import { inngest } from '../client';
+import { handleError } from '../functions/utils';
 
 export const scanThirdPartyApps = inngest.createFunction(
   {
@@ -28,19 +29,21 @@ export const scanThirdPartyApps = inngest.createFunction(
       baseUrl: env.ELBA_API_BASE_URL,
     });
 
-    const nextCursor = await step.run('paginate', async () => {
-      const { thirdPartyAppsObjects, pageLink } = await scanThirdPartyAppsByTenantId({
-        accessToken,
-        tenantId,
-        pageLink: cursor,
-      });
+    const nextCursor = await step
+      .run('paginate', async () => {
+        const { thirdPartyAppsObjects, pageLink } = await scanThirdPartyAppsByTenantId({
+          accessToken,
+          tenantId,
+          pageLink: cursor,
+        });
 
-      if (thirdPartyAppsObjects.apps.length > 0) {
-        await elba.thirdPartyApps.updateObjects({ apps: thirdPartyAppsObjects.apps });
-      }
+        if (thirdPartyAppsObjects.apps.length > 0) {
+          await elba.thirdPartyApps.updateObjects({ apps: thirdPartyAppsObjects.apps });
+        }
 
-      return pageLink;
-    });
+        return pageLink;
+      })
+      .catch(handleError);
 
     if (nextCursor) {
       await step.sendEvent('scan-third-party-apps', {

@@ -8,7 +8,7 @@ import { startUsersScan } from './start-users-scan';
 
 const ids = Array.from({ length: 5 }, (_, i) => `${i}`);
 const mockedOrganizations = ids.map((id) => ({
-  id,
+  id: `45c76301-f1dd-4a77-b12f-9d7d3fca3c9${id}`,
   tenantId: `45a76301-f1dd-4a77-b12f-9d7d3fca3c9${id}`,
   elbaOrganizationId: `45b76301-f1dd-4a77-b12f-9d7d3fca3c9${id}`,
 }));
@@ -42,13 +42,14 @@ describe('start-users-scan', () => {
     });
 
     await expect(result).resolves.toStrictEqual({
-      id: '0',
+      status: 'started',
     });
 
     expect(step.sendEvent).toBeCalledTimes(1);
     expect(step.sendEvent).toBeCalledWith('scan-users', {
       name: 'users/scan',
       data: {
+        accessToken: 'token',
         tenantId: mockedOrganization.tenantId,
         organizationId: mockedOrganization.elbaOrganizationId,
         syncStartedAt: new Date(event.ts).toISOString(),

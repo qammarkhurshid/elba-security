@@ -1,14 +1,19 @@
 import { resolve } from 'node:path';
+/// <reference types="vitest" />
 import { defineConfig } from 'vitest/config';
 import { config } from 'dotenv';
 
-config({ path: '.env.test' });
+const { error } = config({ path: '.env.test' });
+
+if (error) {
+  throw new Error(`Could not find environment variables file: .env.test`);
+}
 
 export default defineConfig({
   test: {
-    setupFiles: ['./vitest/setup-test-server.ts', './vitest/setup-database.ts'],
+    setupFiles: ['./vitest/setup-database.ts', './vitest/setup-test-server.ts'],
     env: process.env,
-    environment: 'edge-runtime',
+    environment: 'node',
     poolOptions: {
       threads: {
         singleThread: true,

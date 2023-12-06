@@ -38,5 +38,6 @@ export const startThirdPartyAppsScan = inngest.createFunction(
         accessToken: token.accessToken,
       },
     });
+    return { status: 'started' };
   }
 );

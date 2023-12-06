@@ -37,5 +37,6 @@ export const startUsersScan = inngest.createFunction(
         accessToken: token.accessToken,
       },
     });
+    return { status: 'started' };
   }
 );

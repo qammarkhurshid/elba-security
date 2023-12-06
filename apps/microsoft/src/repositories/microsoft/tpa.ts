@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO : disable this rule */
 import { eq } from 'drizzle-orm';
-import type { ThirdPartyAppsObject } from 'elba-sdk';
+import type { ThirdPartyAppsObject } from '@elba-security/sdk';
 import { getPermissionGrant } from '@/repositories/integration/permission-grant';
 import type {
   MicrosoftGraphAPIResponse,

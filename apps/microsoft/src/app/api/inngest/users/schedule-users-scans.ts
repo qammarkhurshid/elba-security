@@ -19,5 +19,8 @@ export const scheduleUsersScans = inngest.createFunction(
         })
       )
     );
+    return {
+      status: 'scheduled',
+    };
   }
 );

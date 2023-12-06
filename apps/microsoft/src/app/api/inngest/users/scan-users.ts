@@ -1,7 +1,8 @@
-import { Elba } from 'elba-sdk';
+import { Elba } from '@elba-security/sdk';
 import { scanUsersByTenantId } from '@/repositories/microsoft/users';
 import { env } from '@/common/env';
 import { inngest } from '../client';
+import { handleError } from '../functions/utils';
 
 export const scanUsers = inngest.createFunction(
   {
@@ -28,19 +29,21 @@ export const scanUsers = inngest.createFunction(
       baseUrl: env.ELBA_API_BASE_URL,
     });
 
-    const nextCursor = await step.run('paginate', async () => {
-      const { formattedUsers, nextLink } = await scanUsersByTenantId({
-        accessToken,
-        tenantId,
-        pageLink: cursor,
-      });
+    const nextCursor = await step
+      .run('paginate', async () => {
+        const { formattedUsers, nextLink } = await scanUsersByTenantId({
+          accessToken,
+          tenantId,
+          pageLink: cursor,
+        });
 
-      if (formattedUsers.length > 0) {
-        await elba.users.update({ users: formattedUsers });
-      }
+        if (formattedUsers.length > 0) {
+          await elba.users.update({ users: formattedUsers });
+        }
 
-      return nextLink;
-    });
+        return nextLink;
+      })
+      .catch(handleError);
 
     if (nextCursor) {
       await step.sendEvent('scan-users', {

@@ -1,4 +1,4 @@
-import type { User } from 'elba-sdk';
+import type { User } from '@elba-security/sdk';
 import type { SafeMicrosoftGraphUser } from '@/common/microsoft';
 import { getPaginatedUsersByTenantId } from '@/common/microsoft';
 
