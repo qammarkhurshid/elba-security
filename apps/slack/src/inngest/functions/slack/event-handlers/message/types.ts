@@ -8,7 +8,7 @@ type KnownMessageFromSubtype<T extends string> = Extract<
   }
 >;
 
-type SlackMessageSubtype = Exclude<MessageEvent['subtype'], undefined>;
+export type SlackMessageSubtype = Exclude<MessageEvent['subtype'], undefined>;
 
 export type SlackMessageHandler<T extends SlackMessageSubtype> = (
   event: EnvelopedEvent<KnownMessageFromSubtype<T>>

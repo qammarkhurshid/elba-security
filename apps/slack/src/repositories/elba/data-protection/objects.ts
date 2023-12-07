@@ -58,6 +58,7 @@ export const formatDataProtectionObject = ({
     ownerId: message.user,
     permissions: [
       {
+        // TODO: anyone for slack domain & domain for public channels
         type: 'anyone',
         id: 'anyone',
       },

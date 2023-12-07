@@ -6,12 +6,19 @@ import { formatDataProtectionObject } from '@/repositories/elba/data-protection/
 import { slackMessageSchema } from '@/repositories/slack/messages';
 import { createElbaClient } from '@/repositories/elba/client';
 
+// TODO: handle inngest context & add steps?
 export const genericMessageHandler = async (event: GenericMessageEvent) => {
+  // TODO: check no subtype?
   const result = slackMessageSchema.safeParse(event);
   // TODO: remove condition? Confirm working for slack connect: seems ok
   const teamId = event.team;
   if (!teamId || !result.success) {
-    return { message: 'Ignored: invalid generic message input' };
+    return {
+      message: 'Ignored: invalid generic message input',
+      teamId,
+      channelId: event.channel,
+      messageId: event.ts,
+    };
   }
 
   const conversation = await db.query.conversations.findFirst({
@@ -28,7 +35,12 @@ export const genericMessageHandler = async (event: GenericMessageEvent) => {
 
   if (!conversation) {
     // We don't throw an error as the message might come from a slack connect channel where the other team hasn't installed the app
-    return { message: 'Ignored: conversation not found' };
+    return {
+      message: 'Ignored: conversation not found',
+      teamId,
+      channelId: event.channel,
+      messageId: event.ts,
+    };
   }
 
   const {
@@ -48,5 +60,10 @@ export const genericMessageHandler = async (event: GenericMessageEvent) => {
   const elbaClient = createElbaClient(elbaOrganisationId);
   await elbaClient.dataProtection.updateObjects({ objects: [object] });
 
-  return { elbaOrganisationId, object };
+  return {
+    message: 'Message handled',
+    teamId,
+    channelId: event.channel,
+    messageId: event.ts,
+  };
 };

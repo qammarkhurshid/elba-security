@@ -14,12 +14,20 @@ export const messageDeletedHandler: SlackMessageHandler<'message_deleted'> = asy
   });
 
   if (!team) {
-    // TODO: remove me?
+    // TODO: remove me? use non retryable error?
     throw new Error('Team not found');
   }
 
-  const id = JSON.stringify([teamId, event.channel, event.deleted_ts]);
+  const messageEvent = event.event;
+  const id = JSON.stringify([teamId, messageEvent.channel, messageEvent.deleted_ts]);
   const elbaClient = createElbaClient(team.elbaOrganisationId);
 
   await elbaClient.dataProtection.deleteObjects({ ids: [id] });
+
+  return {
+    message: 'Message deleted',
+    teamId,
+    channelId: messageEvent.channel,
+    messageId: messageEvent.deleted_ts,
+  };
 };
