@@ -12,4 +12,5 @@ export const channelArchiveHandler: SlackEventHandler<'channel_archive'> = async
     .where(and(eq(conversations.teamId, teamId), eq(conversations.id, channelId)));
 
   // TODO: trigger full scan
+  return { message: 'Channel archived', teamId, channelId };
 };

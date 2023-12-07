@@ -11,8 +11,10 @@ export const channelIdChangedHandler: SlackEventHandler<'channel_id_changed'> = 
     .update(conversations)
     .set({
       id: newChannelId,
+      // TODO: update last synced at?
     })
     .where(and(eq(conversations.teamId, teamId), eq(conversations.id, oldChannelId)));
 
   // TODO: trigger scan
+  return { message: 'Channel id changed', teamId, oldChannelId, newChannelId };
 };

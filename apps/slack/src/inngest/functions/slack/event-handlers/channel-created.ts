@@ -10,8 +10,8 @@ export const channelCreatedHandler: SlackEventHandler<'channel_created'> = async
     event: {
       channel: { id: channelId, name: channelName },
     },
-  },
-  { step }
+  }
+  // { step }
 ) => {
   // Unnecessary as you can't create a slack connect channel directly but need to convert it later
   // const slackWebClient = new SlackAPIClient(env.REMOVE_ME_SLACK_OAUTH_TOKEN);
@@ -29,17 +29,20 @@ export const channelCreatedHandler: SlackEventHandler<'channel_created'> = async
       teamId,
       id: channelId,
       name: channelName,
-      isSharedExternally: Boolean(false),
+      isSharedExternally: false,
       lastSyncedAt: new Date(),
     })
     .onConflictDoNothing();
 
-  await step.sendEvent('synchronize-conversation-messages', {
-    name: 'conversations/synchronize',
-    data: {
-      teamId,
-      isFirstSync: false,
-      syncStartedAt: new Date().toISOString(),
-    },
-  });
+  // Not necessary as a created channel doesn't have any messages
+  // await step.sendEvent('synchronize-conversation-messages', {
+  //   name: 'conversations/synchronize',
+  //   data: {
+  //     teamId,
+  //     isFirstSync: false,
+  //     syncStartedAt: new Date().toISOString(),
+  //   },
+  // });
+
+  return { message: 'Channel created', teamId, channelId, channelName };
 };

@@ -12,4 +12,6 @@ export const channelDeletedHandler: SlackEventHandler<'channel_deleted'> = async
     .where(and(eq(conversations.teamId, teamId), eq(conversations.id, channelId)));
 
   // TODO: trigger full scan
+
+  return { message: 'Channel deleted', teamId, channelId };
 };

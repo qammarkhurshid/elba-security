@@ -3,7 +3,7 @@ import { teams } from '@/database/schema';
 import { db } from '@/database/client';
 import type { SlackEventHandler } from './types';
 
-export const channelRenameHandler: SlackEventHandler<'team_domain_changed'> = async (
+export const teamDomainChangedHandler: SlackEventHandler<'team_domain_changed'> = async (
   { team_id: teamId, event: { url } },
   { step }
 ) => {
@@ -14,6 +14,7 @@ export const channelRenameHandler: SlackEventHandler<'team_domain_changed'> = as
     })
     .where(eq(teams.id, teamId));
 
+  // We need to update every objects url
   await step.sendEvent('synchronize-conversations', {
     name: 'conversations/synchronize',
     data: {
@@ -22,4 +23,6 @@ export const channelRenameHandler: SlackEventHandler<'team_domain_changed'> = as
       syncStartedAt: new Date().toISOString(),
     },
   });
+
+  return { message: 'Team domain changed', teamId, url };
 };

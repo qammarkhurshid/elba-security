@@ -58,4 +58,6 @@ export const channelUnarchiveHandler: SlackEventHandler<'channel_unarchive'> = a
       isFirstSync: false,
     },
   });
+
+  return { message: 'Channel unarchived', teamId, channelId };
 };

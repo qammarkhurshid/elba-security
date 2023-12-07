@@ -11,8 +11,9 @@ export const userChangeHandler: SlackEventHandler<'user_change'> = async ({
 }) => {
   const result = slackMemberSchema.safeParse(user);
   // TODO: is_stranger?
+  // TODO: handle slack connect
   if (user.is_bot || user.team_id !== teamId || !result.success) {
-    return { message: 'Ignored: invalid user' };
+    return { message: 'Ignored: invalid user', user };
   }
 
   const team = await db.query.teams.findFirst({
@@ -29,6 +30,7 @@ export const userChangeHandler: SlackEventHandler<'user_change'> = async ({
   if (user.deleted) {
     await elbaClient.users.delete({ ids: [result.data.id] });
   } else {
+    // TODO: format user function
     await elbaClient.users.update({
       users: [
         {
@@ -40,4 +42,6 @@ export const userChangeHandler: SlackEventHandler<'user_change'> = async ({
       ],
     });
   }
+
+  return { message: `User ${user.deleted ? 'deleted' : 'updated'}`, teamId, user };
 };

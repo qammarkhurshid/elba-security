@@ -7,6 +7,8 @@ import { channelCreatedHandler } from './channel-created';
 import { channelDeletedHandler } from './channel-deleted';
 import { channelRenameHandler } from './channel-rename';
 import { channelArchiveHandler } from './channel-archive';
+import { channelIdChangedHandler } from './channel-id-changed';
+import { teamDomainChangedHandler } from './team-domain-changed';
 
 const slackEventHandlers: SlackEventHandlers = {
   message: messageHandler,
@@ -16,7 +18,7 @@ const slackEventHandlers: SlackEventHandlers = {
   channel_created: channelCreatedHandler, // TODO: test
   channel_deleted: channelDeletedHandler, // TODO: test
   // app_rate_limited: async () => {},
-  // channel_id_changed: channelIdChangedHandler,
+  channel_id_changed: channelIdChangedHandler, // TODO: test,
   channel_rename: channelRenameHandler, // TODO: test
   channel_unarchive: channelUnarchiveHandler, // TODO: test
   // channel_shared: async () => {},
@@ -27,7 +29,7 @@ const slackEventHandlers: SlackEventHandlers = {
   // tokens_revoked: async () => {},
   // user_profile_changed: async () => {}, // Same as user_change
   // team_join: async () => {}, // We could use user_change instead
-  // team_domain_changed: () => {}, // state of the world scan
+  team_domain_changed: teamDomainChangedHandler, // state of the world scan
   user_change: userChangeHandler,
 };
 
@@ -36,7 +38,7 @@ export const slackEventHandler = async (context: SlackWebhookHandlerContext) => 
   const type = payload.event.type;
   const eventHandler = slackEventHandlers[type];
   if (!eventHandler) {
-    return { message: `Event ignored: unhandled slack event type`, type };
+    return { message: 'Ignored: unhandled slack event type', type };
   }
 
   return eventHandler(payload as never, context);
