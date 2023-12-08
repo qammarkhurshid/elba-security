@@ -1,6 +1,6 @@
 import type { User } from '@elba-security/sdk';
-import type { SafeMicrosoftGraphUser } from '@/common/microsoft';
-import { getPaginatedUsersByTenantId } from '@/common/microsoft';
+import type { SafeMicrosoftGraphUser } from '@/repositories/microsoft/graph-api';
+import { getPaginatedUsersByTenantId } from '@/repositories/microsoft/graph-api';
 
 const formatUserUpsertInput = (user: SafeMicrosoftGraphUser): User => {
   return {

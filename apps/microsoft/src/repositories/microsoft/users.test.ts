@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import * as microsoftModules from '@/common/microsoft';
+import * as microsoftModules from '@/repositories/microsoft/graph-api';
 import { db } from '@/lib/db';
 import { organizations } from '@/schemas/organization';
 import { scanUsersByTenantId } from './users';

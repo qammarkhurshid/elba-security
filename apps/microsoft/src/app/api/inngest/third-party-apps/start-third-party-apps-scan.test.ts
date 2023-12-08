@@ -2,7 +2,7 @@ import { expect, test, describe, vi } from 'vitest';
 import { NonRetriableError } from 'inngest';
 import { organizations } from '@/schemas';
 import { db } from '@/lib/db';
-import * as microsoftModules from '@/common/microsoft';
+import * as microsoftModules from '@/repositories/microsoft/graph-api';
 import { createFunctionMock } from '../functions/__mocks__/inngest';
 import { startThirdPartyAppsScan } from './start-third-party-apps-scan';
 

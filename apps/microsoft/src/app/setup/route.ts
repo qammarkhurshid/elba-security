@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { type NextRequest } from 'next/server';
-import { formatMicrosoftConsentUrl } from '@/common/microsoft';
+import { formatMicrosoftConsentUrl } from '@/repositories/microsoft/graph-api';
 
 export const dynamic = 'force-dynamic';
 

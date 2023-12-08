@@ -6,13 +6,13 @@ import type {
   MicrosoftGraphAPIResponse,
   SafeMicrosoftGraphPermissionGrant,
   SafeMicrosoftGraphServicePrincipal,
-} from '@/common/microsoft';
+} from '@/repositories/microsoft/graph-api';
 import {
   getPaginatedDelegatedPermissionGrantsByTenantId,
   deletePermissionGrantById,
   getAllServicePrincipalsById,
   getTokenByTenantId,
-} from '@/common/microsoft';
+} from '@/repositories/microsoft/graph-api';
 import { checkOrganization } from '@/common/utils';
 import type { PermissionGrantInsertInput } from '@/schemas/permission-grant';
 import { permissionGrants as PermissionGrantTable } from '@/schemas/permission-grant';

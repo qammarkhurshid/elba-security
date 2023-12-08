@@ -2,7 +2,6 @@ import { expect, test, describe, beforeAll, vi, afterAll } from 'vitest';
 import { db } from '@/lib/db';
 import { organizations } from '@/schemas';
 import { createFunctionMock } from '../functions/__mocks__/inngest';
-import * as client from '../client';
 import { scheduleThirdPartyAppsScans } from './schedule-third-party-apps-scans';
 
 const ids = Array.from({ length: 5 }, (_, i) => `${i}`);
@@ -31,19 +30,19 @@ describe('schedule-third-party-apps-scans', () => {
   });
 
   test('should schedule jobs when there are organizations', async () => {
-    const sendEvent = vi.spyOn(client.inngest, 'send').mockResolvedValue({ ids: [] });
     await db.insert(organizations).values(mockedOrganizations);
-    const [result] = setup();
+    const [result, { step }] = setup();
 
     await expect(result).resolves.toStrictEqual({
       status: 'scheduled',
     });
-    expect(sendEvent).toBeCalledTimes(5);
-    mockedOrganizations.forEach((org) => {
-      expect(sendEvent).toBeCalledWith({
+    expect(step.sendEvent).toBeCalledTimes(1);
+    expect(step.sendEvent).toBeCalledWith(
+      'start-third-party-apps-scan',
+      mockedOrganizations.map(({ tenantId }) => ({
         name: 'third-party-apps/start',
-        data: { tenantId: org.tenantId, isFirstScan: false },
-      });
-    });
+        data: { tenantId, isFirstScan: false },
+      }))
+    );
   });
 });

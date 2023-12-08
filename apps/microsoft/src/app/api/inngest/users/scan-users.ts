@@ -10,14 +10,20 @@ export const scanUsers = inngest.createFunction(
     priority: {
       run: 'event.data.isFirstScan ? 600 : 0',
     },
+    retries: env.USERS_SYNC_MAX_RETRY,
+    idempotency: env.VERCEL_ENV !== 'development' ? 'event.data.tenantId' : undefined,
+    concurrency: [
+      {
+        limit: env.MAX_CONCURRENT_USERS_SYNCS,
+      },
+      {
+        key: 'event.data.tenantId',
+        limit: 1,
+      },
+    ],
   },
   {
     event: 'users/scan',
-    rateLimit: {
-      key: 'event.data.tenantId',
-      limit: 1,
-      period: '24h',
-    },
   },
   async ({ event, step }) => {
     const { tenantId, syncStartedAt, organizationId, cursor, accessToken } = event.data;

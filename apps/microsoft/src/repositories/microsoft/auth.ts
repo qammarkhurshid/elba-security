@@ -1,5 +1,5 @@
 import { inngest } from '@/app/api/inngest/client';
-import { getTokenByTenantId } from '@/common/microsoft';
+import { getTokenByTenantId } from '@/repositories/microsoft/graph-api';
 import { timeout } from '@/common/utils';
 import { db } from '@/lib/db';
 import { organizations } from '@/schemas/organization';

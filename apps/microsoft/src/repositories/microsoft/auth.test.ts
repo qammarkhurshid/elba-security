@@ -1,5 +1,5 @@
 import { expect, test, describe, vi } from 'vitest';
-import * as microsoftModules from '@/common/microsoft';
+import * as microsoftModules from '@/repositories/microsoft/graph-api';
 import * as utilsModules from '@/common/utils';
 import * as inngestClient from '@/app/api/inngest/client';
 import { db } from '@/lib/db';

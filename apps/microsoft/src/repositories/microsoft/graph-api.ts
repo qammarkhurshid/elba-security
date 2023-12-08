@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop -- TODO: disable this rule */
 import * as jose from 'jose';
 import type * as MicrosoftGraph from 'microsoft-graph';
-import { env } from './env';
+import { env } from '../../common/env';
 
 export type MicrosoftGraphAPIResponse<T> = {
   '@odata.context': string;

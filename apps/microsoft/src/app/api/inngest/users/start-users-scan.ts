@@ -1,4 +1,4 @@
-import { getTokenByTenantId } from '@/common/microsoft';
+import { getTokenByTenantId } from '@/repositories/microsoft/graph-api';
 import { inngest } from '../client';
 import { getOrganizationByTenantId } from './data';
 
@@ -11,17 +11,9 @@ export const startUsersScan = inngest.createFunction(
   },
   {
     event: 'users/start',
-    rateLimit: {
-      key: 'event.data.tenantId',
-      limit: 1,
-      period: '24h',
-    },
   },
   async ({ event, step }) => {
-    if (!event.ts) {
-      throw new Error('Missing event timestamp');
-    }
-    const syncStartedAt = new Date(event.ts);
+    const syncStartedAt = Date.now();
     const { tenantId, isFirstScan } = event.data;
 
     const [organization, token] = await step.run('initialize', () =>
@@ -32,7 +24,7 @@ export const startUsersScan = inngest.createFunction(
       data: {
         tenantId,
         organizationId: organization.elbaOrganizationId,
-        syncStartedAt: syncStartedAt.toISOString(),
+        syncStartedAt: syncStartedAt.toString(),
         isFirstScan,
         accessToken: token.accessToken,
       },
