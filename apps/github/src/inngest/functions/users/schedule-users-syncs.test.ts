@@ -34,11 +34,12 @@ describe('schedule-users-syncs', () => {
     expect(step.sendEvent).toBeCalledTimes(1);
     expect(step.sendEvent).toBeCalledWith(
       'sync-organisations-users',
-      organisations.map(({ id, installationId, accountLogin }) => ({
+      organisations.map(({ id, installationId, accountLogin, region }) => ({
         name: 'users/page_sync.requested',
         data: {
           installationId,
           organisationId: id,
+          region,
           accountLogin,
           cursor: null,
           syncStartedAt: now,

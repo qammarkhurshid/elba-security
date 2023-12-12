@@ -38,11 +38,12 @@ describe('schedule-apps-syncs', () => {
     expect(step.sendEvent).toBeCalledTimes(1);
     expect(step.sendEvent).toBeCalledWith(
       'sync-organisations-apps',
-      organisations.map(({ id, installationId, accountLogin }) => ({
+      organisations.map(({ id, installationId, accountLogin, region }) => ({
         name: 'third-party-apps/page_sync.requested',
         data: {
           installationId,
           organisationId: id,
+          region,
           accountLogin,
           cursor: null,
           syncStartedAt: Date.now(),

@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { syncOrganisation } from './service';
+import { handleThirdPartyAppsSyncRequested } from './service';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +9,7 @@ export const POST = async (req: NextRequest) => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- conveniency
   const { organisationId } = await req.json();
 
-  const result = await syncOrganisation(organisationId as string);
+  const result = await handleThirdPartyAppsSyncRequested(organisationId as string);
 
   return NextResponse.json(result);
 };

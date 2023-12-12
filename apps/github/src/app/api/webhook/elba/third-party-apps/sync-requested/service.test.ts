@@ -3,12 +3,13 @@ import { eq } from 'drizzle-orm';
 import * as client from '@/inngest/client';
 import { db } from '@/database/client';
 import { Organisation } from '@/database/schema';
-import { syncOrganisation } from './service';
+import { handleThirdPartyAppsSyncRequested } from './service';
 
 const organisation = {
   id: '45a76301-f1dd-4a77-b12f-9d7d3fca3c90',
   installationId: 0,
   accountLogin: 'login-0',
+  region: 'us',
 };
 
 const now = Date.now();
@@ -23,7 +24,7 @@ describe('handleElbaOrganisationActivated', () => {
   });
 
   test('should throws when organisation is not registered', async () => {
-    await expect(syncOrganisation(organisation.id)).rejects.toStrictEqual(
+    await expect(handleThirdPartyAppsSyncRequested(organisation.id)).rejects.toStrictEqual(
       new Error(`Could not retrieve an organisation with id=${organisation.id}`)
     );
   });
@@ -32,7 +33,7 @@ describe('handleElbaOrganisationActivated', () => {
     const send = vi.spyOn(client.inngest, 'send').mockResolvedValue({ ids: [] });
     await db.insert(Organisation).values(organisation);
 
-    await expect(syncOrganisation(organisation.id)).resolves.toStrictEqual({
+    await expect(handleThirdPartyAppsSyncRequested(organisation.id)).resolves.toStrictEqual({
       success: true,
     });
     expect(send).toBeCalledTimes(1);
@@ -44,6 +45,7 @@ describe('handleElbaOrganisationActivated', () => {
         accountLogin: organisation.accountLogin,
         syncStartedAt: Date.now(),
         isFirstSync: true,
+        region: organisation.region,
         cursor: null,
       },
     });

@@ -21,8 +21,6 @@ export const syncUsersPage = inngest.createFunction(
       run: 'event.data.isFirstSync ? 600 : 0',
     },
     retries: env.USERS_SYNC_MAX_RETRY,
-    idempotency:
-      env.VERCEL_ENV && env.VERCEL_ENV !== 'development' ? 'event.data.installationId' : undefined,
     concurrency: [
       {
         limit: env.MAX_CONCURRENT_USERS_SYNC,
@@ -37,11 +35,12 @@ export const syncUsersPage = inngest.createFunction(
     event: 'users/page_sync.requested',
   },
   async ({ event, step }) => {
-    const { installationId, organisationId, accountLogin, cursor } = event.data;
+    const { installationId, organisationId, accountLogin, cursor, region } = event.data;
     const syncStartedAt = new Date(event.data.syncStartedAt);
 
     const elba = new Elba({
       organisationId,
+      region,
       sourceId: env.ELBA_SOURCE_ID,
       apiKey: env.ELBA_API_KEY,
       baseUrl: env.ELBA_API_BASE_URL,

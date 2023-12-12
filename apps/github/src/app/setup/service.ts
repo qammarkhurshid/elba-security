@@ -3,7 +3,11 @@ import { inngest } from '@/inngest/client';
 import { db } from '@/database/client';
 import { Organisation } from '@/database/schema';
 
-export const setupOrganisation = async (installationId: number, organisationId: string) => {
+export const setupOrganisation = async (
+  installationId: number,
+  organisationId: string,
+  region: string
+) => {
   const installation = await getInstallation(installationId);
 
   if (installation.account.type !== 'Organization') {
@@ -20,6 +24,7 @@ export const setupOrganisation = async (installationId: number, organisationId: 
       id: organisationId,
       installationId: installation.id,
       accountLogin: installation.account.login,
+      region,
     })
     .returning();
 
@@ -33,6 +38,7 @@ export const setupOrganisation = async (installationId: number, organisationId: 
       organisationId,
       installationId: installation.id,
       accountLogin: installation.account.login,
+      region,
       syncStartedAt: Date.now(),
       isFirstSync: true,
       cursor: null,

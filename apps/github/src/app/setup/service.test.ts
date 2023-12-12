@@ -7,6 +7,7 @@ import { setupOrganisation } from './service';
 
 const installationId = 1;
 const organisationId = `45a76301-f1dd-4a77-b12f-9d7d3fca3c90`;
+const region = 'us';
 const now = Date.now();
 
 describe('setupOrganisation', () => {
@@ -29,7 +30,7 @@ describe('setupOrganisation', () => {
       suspended_at: null,
     });
 
-    await expect(setupOrganisation(installationId, organisationId)).rejects.toThrow(
+    await expect(setupOrganisation(installationId, organisationId, region)).rejects.toThrow(
       new Error('Cannot install elba github app on an account that is not an organization')
     );
     await expect(db.select().from(Organisation)).resolves.toHaveLength(0);
@@ -47,7 +48,7 @@ describe('setupOrganisation', () => {
       suspended_at: new Date().toISOString(),
     });
 
-    await expect(setupOrganisation(installationId, organisationId)).rejects.toThrow(
+    await expect(setupOrganisation(installationId, organisationId, region)).rejects.toThrow(
       new Error('Installation is suspended')
     );
     await expect(db.select().from(Organisation)).resolves.toHaveLength(0);
@@ -70,7 +71,7 @@ describe('setupOrganisation', () => {
       suspended_at: null,
     });
 
-    await expect(setupOrganisation(installationId, organisationId)).resolves.toMatchObject(
+    await expect(setupOrganisation(installationId, organisationId, region)).resolves.toMatchObject(
       organisation
     );
     await expect(db.select().from(Organisation)).resolves.toMatchObject([organisation]);
@@ -83,6 +84,7 @@ describe('setupOrganisation', () => {
         accountLogin: organisation.accountLogin,
         syncStartedAt: now,
         isFirstSync: true,
+        region,
         cursor: null,
       },
     });

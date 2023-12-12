@@ -3,11 +3,12 @@ import { inngest } from '@/inngest/client';
 import { db } from '@/database/client';
 import { Organisation } from '@/database/schema';
 
-export const syncOrganisation = async (organisationId: string) => {
+export const handleThirdPartyAppsSyncRequested = async (organisationId: string) => {
   const [organisation] = await db
     .select({
       installationId: Organisation.installationId,
       accountLogin: Organisation.accountLogin,
+      region: Organisation.region,
     })
     .from(Organisation)
     .where(eq(Organisation.id, organisationId));
@@ -22,6 +23,7 @@ export const syncOrganisation = async (organisationId: string) => {
       organisationId,
       installationId: organisation.installationId,
       accountLogin: organisation.accountLogin,
+      region: organisation.region,
       syncStartedAt: Date.now(),
       isFirstSync: true,
       cursor: null,

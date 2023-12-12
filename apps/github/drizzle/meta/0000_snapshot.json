@@ -1,5 +1,5 @@
 {
-  "id": "b9c7e8ce-2f1b-4472-bda4-65e9814c7e14",
+  "id": "3dbca358-54f2-4ed9-97ed-82aaff7ffcd7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -70,6 +70,12 @@
           "name": "organisation_id",
           "type": "uuid",
           "primaryKey": true,
+          "notNull": true
+        },
+        "region": {
+          "name": "region",
+          "type": "text",
+          "primaryKey": false,
           "notNull": true
         },
         "id": {

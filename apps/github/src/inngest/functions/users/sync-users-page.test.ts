@@ -13,6 +13,7 @@ const organisation = {
   id: '45a76301-f1dd-4a77-b12f-9d7d3fca3c90',
   installationId: 0,
   accountLogin: 'some-login',
+  region: 'us',
 };
 
 const data = {
@@ -21,6 +22,7 @@ const data = {
   accountLogin: organisation.accountLogin,
   isFirstSync: true,
   syncStartedAt: Date.now(),
+  region: 'us',
   cursor: null,
 };
 
@@ -59,6 +61,7 @@ describe('sync-users-page', () => {
     expect(elba.constructor).toBeCalledTimes(1);
     expect(elba.constructor).toBeCalledWith({
       organisationId: organisation.id,
+      region: organisation.region,
       sourceId: env.ELBA_SOURCE_ID,
       apiKey: env.ELBA_API_KEY,
       baseUrl: env.ELBA_API_BASE_URL,
@@ -113,6 +116,7 @@ describe('sync-users-page', () => {
     expect(elba.constructor).toBeCalledTimes(1);
     expect(elba.constructor).toBeCalledWith({
       organisationId: organisation.id,
+      region: organisation.region,
       sourceId: env.ELBA_SOURCE_ID,
       apiKey: env.ELBA_API_KEY,
       baseUrl: env.ELBA_API_BASE_URL,

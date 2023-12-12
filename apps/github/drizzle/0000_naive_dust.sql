@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS "admin" (
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "organisation" (
 	"organisation_id" uuid PRIMARY KEY NOT NULL,
+	"region" text NOT NULL,
 	"id" integer NOT NULL,
 	"account_login" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
