@@ -22,36 +22,29 @@ describe('scanThirdPartyAppsByTenantId', () => {
       accessToken: 'accessToken',
       scopes: [],
     });
-    vi.spyOn(microsoftModules, 'getPaginatedDelegatedPermissionGrantsByTenantId').mockResolvedValue(
-      {
-        '@odata.context': 'context',
-        value: [
-          {
-            id: 'id-1',
-            clientId: 'clientId',
-            consentType: 'Principal',
-            principalId: 'principalId',
-            resourceId: 'resourceId',
-            scope: 'scope-1 scope-2',
+    vi.spyOn(microsoftModules, 'getPaginatedServicePrincipalsByTenantId').mockResolvedValue({
+      '@odata.context': 'context',
+      value: [
+        {
+          id: 'id-1',
+          appDisplayName: 'displayName',
+          description: 'description',
+          homepage: 'homepage',
+          info: {
+            logoUrl: 'logoUrl',
           },
-        ],
-      }
-    );
-    vi.spyOn(microsoftModules, 'getAllServicePrincipalsById').mockResolvedValue([
-      {
-        id: 'clientId',
-        appId: 'appId',
-        appDisplayName: 'displayName',
-        description: 'description',
-        publisherName: 'verifiedPublisher',
-        logoUrl: 'logoUrl',
-        tags: [],
-        appRoles: [],
-        appRoleAssignments: [],
-        homepage: 'homepage',
-        servicePrincipalNames: ['servicePrincipalName'],
-      },
-    ]);
+          verifiedPublisher: {
+            displayName: 'verifiedPublisher',
+          },
+          appRoleAssignedTo: [
+            {
+              principalId: 'principalId',
+              id: 'appRoleId',
+            },
+          ],
+        },
+      ],
+    });
     const result = await scanThirdPartyAppsByTenantId({
       tenantId,
       accessToken,
@@ -59,19 +52,11 @@ describe('scanThirdPartyAppsByTenantId', () => {
     });
     expect(result).toStrictEqual({
       pageLink: undefined,
-      permissionGrantsObjects: [
-        {
-          appId: 'clientId',
-          grantId: 'id-1',
-          tenantId: 'tenantId',
-          userId: 'principalId',
-        },
-      ],
       thirdPartyAppsObjects: {
         apps: [
           {
             description: 'description',
-            id: 'clientId',
+            id: 'id-1',
             name: 'displayName',
             publisherName: 'verifiedPublisher',
             logoUrl: 'logoUrl',
@@ -80,9 +65,9 @@ describe('scanThirdPartyAppsByTenantId', () => {
               {
                 id: 'principalId',
                 metadata: {
-                  grantId: 'id-1',
+                  appRoleId: 'appRoleId',
                 },
-                scopes: ['scope-1', 'scope-2'],
+                scopes: [],
               },
             ],
           },

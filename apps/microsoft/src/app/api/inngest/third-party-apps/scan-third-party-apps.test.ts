@@ -22,9 +22,9 @@ const formattedApps = [
     users: [
       {
         id: 'id',
-        scopes: ['scope'],
+        scopes: [],
         metadata: {
-          grantId: 'grantId',
+          appRoleId: 'appRoleId',
         },
       },
     ],
@@ -45,7 +45,6 @@ describe('scan-users', () => {
     const scanThirdPartyAppsMock = vi
       .spyOn(scanModules, 'scanThirdPartyAppsByTenantId')
       .mockResolvedValue({
-        permissionGrantsObjects: [],
         thirdPartyAppsObjects: { apps: formattedApps },
         pageLink: 'nextLink',
       });
@@ -64,7 +63,6 @@ describe('scan-users', () => {
     const scanThirdPartyAppsMock = vi
       .spyOn(scanModules, 'scanThirdPartyAppsByTenantId')
       .mockResolvedValue({
-        permissionGrantsObjects: [],
         thirdPartyAppsObjects: { apps: formattedApps },
         pageLink: undefined,
       });

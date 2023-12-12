@@ -1,4 +1,4 @@
-import { expect, test, describe, vi } from 'vitest';
+import { expect, test, describe, vi, beforeAll, afterAll } from 'vitest';
 import { NonRetriableError } from 'inngest';
 import { organizations } from '@/schemas';
 import { db } from '@/lib/db';
@@ -20,7 +20,16 @@ vi.spyOn(microsoftModules, 'getTokenByTenantId').mockResolvedValue({
 
 const setup = createFunctionMock(startUsersScan, 'users/start');
 
+const now = Date();
+
 describe('start-users-scan', () => {
+  beforeAll(() => {
+    vi.setSystemTime(now);
+  });
+
+  afterAll(() => {
+    vi.useRealTimers();
+  });
   test('should not scan users page when organization could not be retrieved', async () => {
     const [result, { step }] = setup({
       tenantId: 'unknownId',
@@ -36,7 +45,7 @@ describe('start-users-scan', () => {
     // targeted installation
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- test conviency
     const mockedOrganization = mockedOrganizations[0]!;
-    const [result, { step, event }] = setup({
+    const [result, { step }] = setup({
       tenantId: mockedOrganization.tenantId,
       isFirstScan: true,
     });
@@ -52,9 +61,8 @@ describe('start-users-scan', () => {
         accessToken: 'token',
         tenantId: mockedOrganization.tenantId,
         organizationId: mockedOrganization.elbaOrganizationId,
-        syncStartedAt: new Date(event.ts).toISOString(),
+        syncStartedAt: Date.now().toString(),
         isFirstScan: true,
-        cursor: undefined,
       },
     });
   });

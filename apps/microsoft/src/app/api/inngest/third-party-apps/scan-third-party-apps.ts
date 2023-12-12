@@ -41,7 +41,7 @@ export const scanThirdPartyApps = inngest.createFunction(
           await elba.thirdPartyApps.updateObjects({ apps: thirdPartyAppsObjects.apps });
         }
 
-        return pageLink;
+        return pageLink ?? null;
       })
       .catch(handleError);
 

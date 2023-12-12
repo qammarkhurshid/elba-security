@@ -1,113 +1,46 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion -- TODO : disable this rule */
 import { eq } from 'drizzle-orm';
-import type { ThirdPartyAppsObject } from '@elba-security/sdk';
 import { getPermissionGrant } from '@/repositories/integration/permission-grant';
 import type {
   MicrosoftGraphAPIResponse,
-  SafeMicrosoftGraphPermissionGrant,
   SafeMicrosoftGraphServicePrincipal,
 } from '@/repositories/microsoft/graph-api';
 import {
-  getPaginatedDelegatedPermissionGrantsByTenantId,
   deletePermissionGrantById,
-  getAllServicePrincipalsById,
   getTokenByTenantId,
+  getPaginatedServicePrincipalsByTenantId,
 } from '@/repositories/microsoft/graph-api';
 import { checkOrganization } from '@/common/utils';
-import type { PermissionGrantInsertInput } from '@/schemas/permission-grant';
 import { permissionGrants as PermissionGrantTable } from '@/schemas/permission-grant';
 import { db } from '@/lib/db';
 
-type ThirdPartyAppsObjectsUpsertInput = {
-  apps: ThirdPartyAppsObject[];
-};
-
 const formatThirdPartyAppsObjectUpsertInput = (
   tenantId: string,
-  // Will be used whenever we decide to scan apps that require application permissions
-  // servicePrincipalsWithScopes: ServicePrincipal[],
-  permissionGrants: MicrosoftGraphAPIResponse<SafeMicrosoftGraphPermissionGrant>,
-  allServicePrincipals: SafeMicrosoftGraphServicePrincipal[]
-): {
-  thirdPartyAppsObjects: ThirdPartyAppsObjectsUpsertInput;
-  permissionGrantsObjects: PermissionGrantInsertInput[];
-} => {
-  const permissionGrantsObjects: PermissionGrantInsertInput[] = [];
-  const apps = [
-    // Will be used whenever we decide to scan apps that require application permissions
-    // ...servicePrincipalsWithScopes.map((sp) =>
-    //   formatServicePrincipalToThirdPartyAppObject(sp)
-    // ),
-    ...permissionGrants.value.map((pg) => {
-      permissionGrantsObjects.push({
-        tenantId,
-        userId: pg.principalId,
-        appId: pg.clientId,
-        grantId: pg.id,
-      });
-      const servicePrincipal = allServicePrincipals.filter((sp) => sp.id === pg.clientId)[0];
-      if (!servicePrincipal) {
-        throw new Error(`Service principal not found for permission grant ${pg.id}`);
-      }
-      return formatPermissionGrantToThirdPartyAppObject(pg, servicePrincipal);
-    }),
-  ];
+  servicePrincipals: MicrosoftGraphAPIResponse<SafeMicrosoftGraphServicePrincipal>
+) => ({
+  apps: servicePrincipals.value.map((servicePrincipal) =>
+    formatServicePrincipalToThirdPartyAppObject(servicePrincipal)
+  ),
+});
 
-  const groupedApps = apps.reduce((acc: Record<string, (typeof apps)[0]>, curr) => {
-    if (acc[curr.id]) {
-      const existingApp = acc[curr.id]!;
-      existingApp.users = [...existingApp.users, ...curr.users];
-    } else {
-      acc[curr.id] = { ...curr };
-    }
-    return acc;
-  }, {});
-
-  return {
-    thirdPartyAppsObjects: {
-      apps: Object.values(groupedApps),
-    },
-    permissionGrantsObjects,
-  };
-};
-
-const formatPermissionGrantToThirdPartyAppObject = (
-  permissionGrant: SafeMicrosoftGraphPermissionGrant,
+const formatServicePrincipalToThirdPartyAppObject = (
   servicePrincipal: SafeMicrosoftGraphServicePrincipal
 ) => ({
   id: servicePrincipal.id,
   name: servicePrincipal.appDisplayName,
   description: servicePrincipal.description,
   url: servicePrincipal.homepage,
-  logoUrl: servicePrincipal.logoUrl,
-  publisherName: servicePrincipal.publisherName,
-  users: [
-    {
-      id: permissionGrant.principalId,
-      scopes: permissionGrant.scope.trim().split(' '),
-      metadata: {
-        grantId: permissionGrant.id,
-      },
-    },
-  ],
+  logoUrl: servicePrincipal.info?.logoUrl ?? undefined,
+  publisherName: servicePrincipal.verifiedPublisher?.displayName,
+  users: servicePrincipal.appRoleAssignedTo
+    .filter((appRole) => Boolean(appRole.principalId) && Boolean(appRole.id))
+    .map((appRole) => ({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- we filter out the appRoles without principalId
+      id: appRole.principalId!,
+      scopes: [],
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- we filter out the appRoles without id
+      metadata: { appRoleId: appRole.id! },
+    })),
 });
-
-// Will be used whenever we decide to scan apps that require application permissions
-// const formatServicePrincipalToThirdPartyAppObject = (
-//   servicePrincipal: MicrosoftGraph.ServicePrincipal
-// ) => ({
-//   id: servicePrincipal.id,
-//   name: servicePrincipal.appDisplayName,
-//   description: servicePrincipal.description,
-//   url: servicePrincipal.homepage,
-//   publisherName: servicePrincipal.verifiedPublisher?.displayName,
-//   users: [
-//     {
-//       id: servicePrincipal.appRoleAssignedTo,
-//       scopes: servicePrincipal.appScopes,
-//     },
-//   ],
-// });
 
 export const scanThirdPartyAppsByTenantId = async ({
   tenantId,
@@ -118,56 +51,26 @@ export const scanThirdPartyAppsByTenantId = async ({
   accessToken: string;
   pageLink: string | undefined;
 }) => {
-  const permissionGrants = await getPaginatedDelegatedPermissionGrantsByTenantId({
+  const servicePrincipals = await getPaginatedServicePrincipalsByTenantId({
     accessToken,
     tenantId,
     pageLink,
   });
-  const allServicePrincipals = await getAllServicePrincipalsById({
-    accessToken,
-    tenantId,
-  });
 
-  // Will be used whenever we decide to scan apps that require application permissions
-  // const servicePrincipalsWithScopes = await Promise.all(
-  //   allServicePrincipals
-  //     .filter((sp) =>
-  //       sp.tags?.includes("WindowsAzureActiveDirectoryIntegratedApp")
-  //     )
-  //     .map(async (sp) => {
-  //       const appRoleAssignedTo =
-  //         await getServicePrincipalAppRoleAssignedToById({
-  //           tenantId,
-  //           accessToken,
-  //           appId: sp.id,
-  //         });
-  //       return {
-  //         ...sp,
-  //         appScopes: sp.appRoleAssignments.map(
-  //           (assignment) =>
-  //             allServicePrincipals
-  //               .filter((sp) => sp.id === assignment.resourceId)[0]
-  //               .appRoles.filter((role) => role.id === assignment.appRoleId)[0]
-  //               .value
-  //         ),
-  //         appRoleAssignedTo: appRoleAssignedTo.appRoleAssignedTo[0].principalId,
-  //       };
-  //     })
-  // );
+  const thirdPartyAppsObjects = formatThirdPartyAppsObjectUpsertInput(tenantId, servicePrincipals);
 
-  const { thirdPartyAppsObjects, permissionGrantsObjects } = formatThirdPartyAppsObjectUpsertInput(
-    tenantId,
-    // Will be used whenever we decide to scan apps that require application permissions
-    // servicePrincipalsWithScopes,
-    permissionGrants,
-    allServicePrincipals
+  const permissionGrantObjects = thirdPartyAppsObjects.apps.flatMap((app) =>
+    app.users.map((user) => ({
+      tenantId,
+      appId: app.id,
+      userId: user.id,
+      grantId: user.metadata.appRoleId,
+    }))
   );
-
-  await db.insert(PermissionGrantTable).values(permissionGrantsObjects).onConflictDoNothing();
+  await db.insert(PermissionGrantTable).values(permissionGrantObjects).onConflictDoNothing();
   return {
     thirdPartyAppsObjects,
-    permissionGrantsObjects,
-    pageLink: permissionGrants['@odata.nextLink'],
+    pageLink,
   };
 };
 
@@ -192,6 +95,7 @@ export const deletePermissionGrant = async ({
   });
   await deletePermissionGrantById({
     accessToken,
+    appId,
     tenantId,
     id: permissionGrant.grantId,
   });

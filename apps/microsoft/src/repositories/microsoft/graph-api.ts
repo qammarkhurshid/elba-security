@@ -26,13 +26,11 @@ export type SafeMicrosoftGraphServicePrincipal = {
   appDisplayName: NonNullable<MicrosoftGraph.ServicePrincipal['appDisplayName']>;
   description: NonNullable<MicrosoftGraph.ServicePrincipal['description']>;
   homepage: NonNullable<MicrosoftGraph.ServicePrincipal['homepage']>;
-  logoUrl?: NonNullable<NonNullable<MicrosoftGraph.ServicePrincipal['info']>['logoUrl']>;
-  publisherName?: NonNullable<
-    NonNullable<MicrosoftGraph.ServicePrincipal['verifiedPublisher']>['displayName']
+  info?: NonNullable<NonNullable<MicrosoftGraph.ServicePrincipal['info']>>;
+  verifiedPublisher?: NonNullable<
+    NonNullable<MicrosoftGraph.ServicePrincipal['verifiedPublisher']>
   >;
-  tags: NonNullable<MicrosoftGraph.ServicePrincipal['tags']>;
-  appRoles: NonNullable<MicrosoftGraph.ServicePrincipal['appRoles']>;
-  appRoleAssignments: NonNullable<MicrosoftGraph.ServicePrincipal['appRoleAssignments']>;
+  appRoleAssignedTo: NonNullable<NonNullable<MicrosoftGraph.ServicePrincipal['appRoleAssignedTo']>>;
 } & Omit<
   MicrosoftGraph.ServicePrincipal,
   | 'id'
@@ -41,9 +39,7 @@ export type SafeMicrosoftGraphServicePrincipal = {
   | 'homepage'
   | 'info'
   | 'verifiedPublisher'
-  | 'tags'
-  | 'appRoles'
-  | 'appRoleAssignments'
+  | 'appRoleAssignedTo'
 >;
 
 export type SafeMicrosoftGraphUser = {
@@ -135,7 +131,7 @@ export const getPaginatedServicePrincipalsByTenantId = async ({
 }) => {
   const response = await fetch(
     pageLink ??
-      `https://graph.microsoft.com/v1.0/${tenantId}/servicePrincipals?$top=${MAX_RESULTS_PER_PAGE}&$select=appDisplayName,description,id,homepage,info,verifiedPublisher,tags,appRoles&$expand=appRoleAssignments`,
+      `https://graph.microsoft.com/v1.0/${tenantId}/servicePrincipals?$top=${MAX_RESULTS_PER_PAGE}&$filter=tags/Any(x: x eq 'WindowsAzureActiveDirectoryIntegratedApp')&$select=appDisplayName,description,id,homepage,info,verifiedPublisher&$expand=appRoleAssignedTo`,
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -144,35 +140,6 @@ export const getPaginatedServicePrincipalsByTenantId = async ({
   );
 
   return (await response.json()) as MicrosoftGraphAPIResponse<SafeMicrosoftGraphServicePrincipal>;
-};
-
-export const getAllServicePrincipalsById = async ({
-  accessToken,
-  tenantId,
-}: {
-  accessToken: string;
-  tenantId: string;
-}): Promise<SafeMicrosoftGraphServicePrincipal[]> => {
-  let allFetched = false;
-  let pageLink: string | undefined;
-  const aggregatedResults: SafeMicrosoftGraphServicePrincipal[][] = [];
-
-  while (!allFetched) {
-    const response = await getPaginatedServicePrincipalsByTenantId({
-      accessToken,
-      tenantId,
-      pageLink,
-    });
-    aggregatedResults.push(response.value);
-
-    if (response['@odata.nextLink']) {
-      allFetched = false;
-      pageLink = response['@odata.nextLink'];
-    } else {
-      allFetched = true;
-    }
-  }
-  return aggregatedResults.flat();
 };
 
 export const getPaginatedUsersByTenantId = async ({
@@ -228,15 +195,17 @@ export const getAllUsersByTenantId = async ({
 
 export const deletePermissionGrantById = async ({
   tenantId,
+  appId,
   accessToken,
   id,
 }: {
   tenantId: string;
+  appId: string;
   accessToken: string;
   id: string;
 }) => {
   const response = await fetch(
-    `https://graph.microsoft.com/v1.0/${tenantId}/oauth2PermissionGrants/${id}`,
+    `https://graph.microsoft.com/v1.0/${tenantId}/servicePrincipals/${appId}/appRoleAssignedTo/${id}`,
     {
       method: 'DELETE',
       headers: {
