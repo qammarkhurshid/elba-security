@@ -10,8 +10,6 @@ export default async function CallbackPage({ searchParams }: CallbackPageProps) 
   const tenantId = searchParams?.tenant as string;
   const organizationId = cookies().get('organizationId')?.value;
 
-  console.log('test');
-
   try {
     const result = await handleMicrosoftAuthCallback({
       isAdminConsentGiven,
