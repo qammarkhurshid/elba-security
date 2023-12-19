@@ -19,7 +19,7 @@ As Vercel offers storage hosting, we chose to select one of the supported databa
 
 We are requiring the use of [`drizzle-orm`](https://orm.drizzle.team/docs/overview), which provides type safety and migration generation. Unlike the `@vercel/postgres` utility `sql` used alone, it allows for local database usage.
 
-### `inngest`
+#### `inngest`
 
 We use [`inngest`](https://inngest.com/) for its efficient handling of event-driven architectures and serverless functions, enabling us to easily create and manage responsive workflows.
 
