@@ -1,4 +1,4 @@
-import { createElbaRequestHandlers } from '@elba-security/msw-utils';
+import { createElbaRequestHandlers } from '@elba-security/test-utils';
 import { setupServer } from 'msw/node';
 import { beforeAll, afterAll, afterEach } from 'vitest';
 
@@ -9,7 +9,7 @@ if (!baseUrl || !apiKey) {
   throw new Error('could not setup msw test server');
 }
 
-const elbaRequestHandlers = createElbaRequestHandlers(baseUrl, apiKey);
+const elbaRequestHandlers = createElbaRequestHandlers(baseUrl.replace('{REGION}', 'us'), apiKey);
 const server = setupServer(...elbaRequestHandlers);
 
 beforeAll(() => {
