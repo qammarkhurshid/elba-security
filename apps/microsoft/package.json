@@ -41,15 +41,15 @@
     "autoprefixer": "^10.4.16",
     "drizzle-kit": "^0.19.13",
     "eslint": "^8",
-    "eslint-config-custom": "workspace:*",
+    "@elba-security/eslint-config-custom": "workspace:*",
     "inngest-cli": "^0.21.1",
     "msw": "^2.0.7",
     "pg": "^8.11.3",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.5",
-    "tsconfig": "workspace:*",
+    "@elba-security/tsconfig": "workspace:*",
     "typescript": "^5",
     "vitest": "^1.0.0-beta.5",
-    "@elba-security/msw-utils": "workspace:*"
+    "@elba-security/test-utils": "workspace:*"
   }
 }
