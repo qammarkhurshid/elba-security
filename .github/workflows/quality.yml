@@ -36,7 +36,6 @@ jobs:
           key: ${{ runner.os }}-quality_node_modules-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-quality_node_modules-
-          fail-on-cache-miss: true
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
