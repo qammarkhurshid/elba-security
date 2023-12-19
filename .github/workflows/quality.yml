@@ -29,15 +29,14 @@ jobs:
 
       # Cache TurboRepo's artifacts and node_modules
       - name: Cache TurboRepo
-        uses: actions/cache@v2
+      - uses: actions/cache@v3
+        id: node-modules-cache
         with:
-          path: |
-            ~/.pnpm-store
-            **/node_modules
-            **/.turbo
-          key: ${{ runner.os }}-turbo-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: '**/node_modules'
+          key: ${{ runner.os }}-quality_node_modules-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
-            ${{ runner.os }}-turbo-${{ hashFiles('**/pnpm-lock.yaml') }}
+            ${{ runner.os }}-quality_node_modules-
+          fail-on-cache-miss: true
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
