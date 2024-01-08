@@ -2,15 +2,19 @@ import { RequestError } from '@octokit/request-error';
 import { eq } from 'drizzle-orm';
 import { InngestMiddleware, NonRetriableError } from 'inngest';
 import { Elba } from '@elba-security/sdk';
+import { z } from 'zod';
 import { env } from '@/env';
 import { db } from '@/database/client';
 import { Organisation } from '@/database/schema';
 
-const hasDataOrganisationId = (data: unknown): data is { organisationId: string } =>
-  typeof data === 'object' &&
-  data !== null &&
-  'organisationId' in data &&
-  typeof data.organisationId === 'string';
+const apiRequiredDataSchema = z.object({
+  organisationId: z.string().uuid(),
+  region: z.string().min(0),
+});
+
+const hasApiRequiredDataProperties = (
+  data: unknown
+): data is z.infer<typeof apiRequiredDataSchema> => apiRequiredDataSchema.safeParse(data).success;
 
 export const unauthorizedMiddleware = new InngestMiddleware({
   name: 'unauthorized',
@@ -30,9 +34,10 @@ export const unauthorizedMiddleware = new InngestMiddleware({
             } = ctx;
 
             if (error instanceof RequestError && error.response?.status === 401) {
-              if (hasDataOrganisationId(data)) {
+              if (hasApiRequiredDataProperties(data)) {
                 const elba = new Elba({
                   organisationId: data.organisationId,
+                  region: data.region,
                   sourceId: env.ELBA_SOURCE_ID,
                   apiKey: env.ELBA_API_KEY,
                   baseUrl: env.ELBA_API_BASE_URL,

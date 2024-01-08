@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm/sql';
+import { eq } from 'drizzle-orm';
 import { inngest } from '@/inngest/client';
 import { db } from '@/database/client';
 import { Organisation } from '@/database/schema';

@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion -- test conveniency */
 import { expect, test, describe, vi, beforeEach } from 'vitest';
-import { createInngestFunctionMock } from '@elba-security/test-utils';
+import { createInngestFunctionMock, spyOnElba } from '@elba-security/test-utils';
 import * as githubOrganization from '@/connectors/organization';
 import * as githubApp from '@/connectors/app';
 import { db } from '@/database/client';
 import { Admin, Organisation } from '@/database/schema';
-import { spyOnElbaSdk } from '@/__mocks__/elba-sdk';
 import { env } from '@/env';
 import { syncAppsPage } from './sync-apps-page';
 import { elbaApps } from './__mocks__/snapshots';
@@ -31,7 +30,7 @@ describe('sync-apps-page', () => {
   });
 
   test('should sync apps when there is another apps page', async () => {
-    const elba = spyOnElbaSdk();
+    const elba = spyOnElba();
     const nextCursor = '1234';
     const getPaginatedOrganizationInstallations = vi
       .spyOn(githubOrganization, 'getPaginatedOrganizationInstallations')
@@ -66,8 +65,8 @@ describe('sync-apps-page', () => {
       );
     }
 
-    expect(elba.constructor).toBeCalledTimes(1);
-    expect(elba.constructor).toBeCalledWith({
+    expect(elba).toBeCalledTimes(1);
+    expect(elba).toBeCalledWith({
       organisationId: organisation.id,
       region: organisation.region,
       sourceId: env.ELBA_SOURCE_ID,
@@ -75,12 +74,14 @@ describe('sync-apps-page', () => {
       baseUrl: env.ELBA_API_BASE_URL,
     });
 
-    expect(elba.thirdPartyApps.updateObjects).toBeCalledTimes(1);
-    expect(elba.thirdPartyApps.updateObjects).toBeCalledWith({
+    const elbaInstance = elba.mock.results.at(0)?.value;
+
+    expect(elbaInstance?.thirdPartyApps.updateObjects).toBeCalledTimes(1);
+    expect(elbaInstance?.thirdPartyApps.updateObjects).toBeCalledWith({
       apps: elbaApps,
     });
 
-    expect(elba.thirdPartyApps.deleteObjects).toBeCalledTimes(0);
+    expect(elbaInstance?.thirdPartyApps.deleteObjects).toBeCalledTimes(0);
 
     expect(step.sendEvent).toBeCalledTimes(1);
     expect(step.sendEvent).toBeCalledWith('sync-apps-page', {
@@ -93,7 +94,7 @@ describe('sync-apps-page', () => {
   });
 
   test('should scan apps page and finalize scan when there is no other apps page', async () => {
-    const elba = spyOnElbaSdk();
+    const elba = spyOnElba();
     const getPaginatedOrganizationInstallations = vi
       .spyOn(githubOrganization, 'getPaginatedOrganizationInstallations')
       .mockResolvedValue({
@@ -127,8 +128,8 @@ describe('sync-apps-page', () => {
       );
     }
 
-    expect(elba.constructor).toBeCalledTimes(1);
-    expect(elba.constructor).toBeCalledWith({
+    expect(elba).toBeCalledTimes(1);
+    expect(elba).toBeCalledWith({
       organisationId: organisation.id,
       region: organisation.region,
       sourceId: env.ELBA_SOURCE_ID,
@@ -136,13 +137,15 @@ describe('sync-apps-page', () => {
       baseUrl: env.ELBA_API_BASE_URL,
     });
 
-    expect(elba.thirdPartyApps.updateObjects).toBeCalledTimes(1);
-    expect(elba.thirdPartyApps.updateObjects).toBeCalledWith({
+    const elbaInstance = elba.mock.results.at(0)?.value;
+
+    expect(elbaInstance?.thirdPartyApps.updateObjects).toBeCalledTimes(1);
+    expect(elbaInstance?.thirdPartyApps.updateObjects).toBeCalledWith({
       apps: elbaApps,
     });
 
-    expect(elba.thirdPartyApps.deleteObjects).toBeCalledTimes(1);
-    expect(elba.thirdPartyApps.deleteObjects).toBeCalledWith({
+    expect(elbaInstance?.thirdPartyApps.deleteObjects).toBeCalledTimes(1);
+    expect(elbaInstance?.thirdPartyApps.deleteObjects).toBeCalledWith({
       syncedBefore: new Date(data.syncStartedAt).toISOString(),
     });
 

@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm/sql';
+import { eq } from 'drizzle-orm';
 import type { ThirdPartyAppsObject } from '@elba-security/sdk';
 import { Elba } from '@elba-security/sdk';
 import { db } from '@/database/client';

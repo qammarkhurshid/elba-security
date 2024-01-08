@@ -3,15 +3,17 @@ import { describe, expect, test } from 'vitest';
 import { RequestError } from '@octokit/request-error';
 import { NonRetriableError } from 'inngest';
 import { eq } from 'drizzle-orm';
+import { spyOnElba } from '@elba-security/test-utils';
 import { db } from '@/database/client';
 import { Organisation } from '@/database/schema';
-import { spyOnElbaSdk } from '@/__mocks__/elba-sdk';
+import { env } from '@/env';
 import { unauthorizedMiddleware } from './unauthorized-middleware';
 
 const organisationId = '45a76301-f1dd-4a77-b12f-9d7d3fca3c90';
 
 const organisation = {
   id: '45a76301-f1dd-4a77-b12f-9d7d3fca3c90',
+  region: 'us',
   installationId: 0,
   accountLogin: 'some-login',
 };
@@ -48,7 +50,7 @@ describe('unauthorized middleware', () => {
   });
 
   test('should transform the output error to NonRetriableError and remove the organisation when the error is about github authorization', async () => {
-    const elba = spyOnElbaSdk();
+    const elba = spyOnElba();
     const unauthorizedError = new RequestError('foo bar', 401, {
       request: { method: 'GET', url: 'http://foo.bar', headers: {} },
       // @ts-expect-error this is a mock
@@ -70,8 +72,12 @@ describe('unauthorized middleware', () => {
 
     const result = await unauthorizedMiddleware
       .init()
-      // @ts-expect-error -- this is a mock
-      .onFunctionRun({ fn: { name: 'foo' }, ctx: { event: { data: { organisationId } } } })
+      .onFunctionRun({
+        // @ts-expect-error -- this is a mock
+        fn: { name: 'foo' },
+        // @ts-expect-error -- this is a mock
+        ctx: { event: { data: { organisationId, region: 'us' } } },
+      })
       .transformOutput(context);
     expect(result?.result.error).toBeInstanceOf(NonRetriableError);
     expect(result?.result.error.cause).toStrictEqual(unauthorizedError);
@@ -85,8 +91,18 @@ describe('unauthorized middleware', () => {
       },
     });
 
-    expect(elba.connectionStatus.update).toBeCalledTimes(1);
-    expect(elba.connectionStatus.update).toBeCalledWith({
+    expect(elba).toBeCalledTimes(1);
+    expect(elba).toBeCalledWith({
+      organisationId: organisation.id,
+      region: organisation.region,
+      sourceId: env.ELBA_SOURCE_ID,
+      apiKey: env.ELBA_API_KEY,
+      baseUrl: env.ELBA_API_BASE_URL,
+    });
+    const elbaInstance = elba.mock.results.at(0)?.value;
+
+    expect(elbaInstance?.connectionStatus.update).toBeCalledTimes(1);
+    expect(elbaInstance?.connectionStatus.update).toBeCalledWith({
       hasError: true,
     });
     await expect(

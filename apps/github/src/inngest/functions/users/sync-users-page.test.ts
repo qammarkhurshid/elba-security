@@ -1,9 +1,8 @@
 import { expect, test, describe, vi, beforeEach } from 'vitest';
-import { createInngestFunctionMock } from '@elba-security/test-utils';
+import { createInngestFunctionMock, spyOnElba } from '@elba-security/test-utils';
 import * as githubOrganization from '@/connectors/organization';
 import { Admin, Organisation } from '@/database/schema';
 import { db } from '@/database/client';
-import { spyOnElbaSdk } from '@/__mocks__/elba-sdk';
 import { env } from '@/env';
 import { syncUsersPage } from './sync-users-page';
 import { elbaUsers } from './__mocks__/snapshots';
@@ -34,7 +33,7 @@ describe('sync-users-page', () => {
   });
 
   test('should sync users page when there is another apps page', async () => {
-    const elba = spyOnElbaSdk();
+    const elba = spyOnElba();
     const nextCursor = '1234';
     const getPaginatedOrganizationMembers = vi
       .spyOn(githubOrganization, 'getPaginatedOrganizationMembers')
@@ -58,17 +57,18 @@ describe('sync-users-page', () => {
       data.cursor
     );
 
-    expect(elba.constructor).toBeCalledTimes(1);
-    expect(elba.constructor).toBeCalledWith({
+    expect(elba).toBeCalledTimes(1);
+    expect(elba).toBeCalledWith({
       organisationId: organisation.id,
       region: organisation.region,
       sourceId: env.ELBA_SOURCE_ID,
       apiKey: env.ELBA_API_KEY,
       baseUrl: env.ELBA_API_BASE_URL,
     });
+    const elbaInstance = elba.mock.results.at(0)?.value;
 
-    expect(elba.users.update).toBeCalledTimes(1);
-    expect(elba.users.update).toBeCalledWith({
+    expect(elbaInstance?.users.update).toBeCalledTimes(1);
+    expect(elbaInstance?.users.update).toBeCalledWith({
       users: githubUsers.map(({ id, email, name }) => ({
         id: String(id),
         email,
@@ -77,7 +77,7 @@ describe('sync-users-page', () => {
       })),
     });
 
-    expect(elba.users.delete).toBeCalledTimes(0);
+    expect(elbaInstance?.users.delete).toBeCalledTimes(0);
 
     expect(step.sendEvent).toBeCalledTimes(1);
     expect(step.sendEvent).toBeCalledWith('sync-users-page', {
@@ -90,7 +90,7 @@ describe('sync-users-page', () => {
   });
 
   test('should sync users page and finalize when there is no other users page', async () => {
-    const elba = spyOnElbaSdk();
+    const elba = spyOnElba();
     const getPaginatedOrganizationMembers = vi
       .spyOn(githubOrganization, 'getPaginatedOrganizationMembers')
       .mockResolvedValue({
@@ -113,22 +113,23 @@ describe('sync-users-page', () => {
       data.cursor
     );
 
-    expect(elba.constructor).toBeCalledTimes(1);
-    expect(elba.constructor).toBeCalledWith({
+    expect(elba).toBeCalledTimes(1);
+    expect(elba).toBeCalledWith({
       organisationId: organisation.id,
       region: organisation.region,
       sourceId: env.ELBA_SOURCE_ID,
       apiKey: env.ELBA_API_KEY,
       baseUrl: env.ELBA_API_BASE_URL,
     });
+    const elbaInstance = elba.mock.results.at(0)?.value;
 
-    expect(elba.users.update).toBeCalledTimes(1);
-    expect(elba.users.update).toBeCalledWith({
+    expect(elbaInstance?.users.update).toBeCalledTimes(1);
+    expect(elbaInstance?.users.update).toBeCalledWith({
       users: elbaUsers,
     });
 
-    expect(elba.users.delete).toBeCalledTimes(1);
-    expect(elba.users.delete).toBeCalledWith({
+    expect(elbaInstance?.users.delete).toBeCalledTimes(1);
+    expect(elbaInstance?.users.delete).toBeCalledWith({
       syncedBefore: new Date(data.syncStartedAt).toISOString(),
     });
 
