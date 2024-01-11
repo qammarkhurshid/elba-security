@@ -8,10 +8,12 @@ export const handleMicrosoftAuthCallback = async ({
   tenantId,
   elbaOrganizationId,
   isAdminConsentGiven,
+  region,
 }: {
   tenantId: string | null;
   elbaOrganizationId: string | undefined;
   isAdminConsentGiven: boolean;
+  region: string;
 }) => {
   if (!isAdminConsentGiven || !tenantId || !elbaOrganizationId) {
     throw new Error('You must give admin consent to continue');
@@ -26,7 +28,10 @@ export const handleMicrosoftAuthCallback = async ({
     throw new Error("Couldn't retrieve required scopes");
   }
   try {
-    await db.insert(organizations).values({ tenantId, elbaOrganizationId }).onConflictDoNothing();
+    await db
+      .insert(organizations)
+      .values({ tenantId, elbaOrganizationId, region })
+      .onConflictDoNothing();
   } catch (error) {
     throw new Error('Something went wrong', { cause: error });
   }

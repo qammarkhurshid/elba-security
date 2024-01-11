@@ -5,6 +5,7 @@ export const organizations = pgTable('organization', {
   id: uuid('id').notNull().primaryKey().defaultRandom(),
   elbaOrganizationId: text('elba_organization_id').unique().notNull(),
   tenantId: text('tenant_id').unique().notNull(),
+  region: text('region').notNull(),
 });
 
 export type Organization = InferSelectModel<typeof organizations>;

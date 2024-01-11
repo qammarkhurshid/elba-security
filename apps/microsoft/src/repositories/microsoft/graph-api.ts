@@ -216,5 +216,28 @@ export const deletePermissionGrantById = async ({
   return response.json();
 };
 
+export const fetchPermissionGrantById = async ({
+  tenantId,
+  appId,
+  accessToken,
+  id,
+}: {
+  tenantId: string;
+  appId: string;
+  accessToken: string;
+  id: string;
+}) => {
+  const response = await fetch(
+    `https://graph.microsoft.com/v1.0/${tenantId}/servicePrincipals/${appId}/appRoleAssignedTo/${id}`,
+    {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+  return response.json();
+};
+
 export const formatMicrosoftConsentUrl = () =>
   `https://login.microsoftonline.com/organizations/adminconsent?client_id=${env.MICROSOFT_TPAC_APP_CLIENT_ID}&redirect_uri=${env.MICROSOFT_TPAC_APP_REDIRECT_URI}`;

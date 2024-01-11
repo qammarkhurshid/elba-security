@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS "organization" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"elba_organization_id" text NOT NULL,
 	"tenant_id" text NOT NULL,
+	"region" text NOT NULL,
 	CONSTRAINT "organization_elba_organization_id_unique" UNIQUE("elba_organization_id"),
 	CONSTRAINT "organization_tenant_id_unique" UNIQUE("tenant_id")
 );

@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "pg",
-  "id": "5504212e-d2c2-4b5e-8f49-ccd708a4ac7d",
+  "id": "c3546ce1-8f1e-402c-962d-56eaa9ae4e20",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "organization": {
@@ -23,6 +23,12 @@
         },
         "tenant_id": {
           "name": "tenant_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "region": {
+          "name": "region",
           "type": "text",
           "primaryKey": false,
           "notNull": true

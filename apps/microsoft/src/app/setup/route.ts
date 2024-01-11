@@ -7,6 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export function GET(request: NextRequest) {
   const organizationId = request.nextUrl.searchParams.get('organizationId');
+  const region = request.nextUrl.searchParams.get('region');
 
   if (!organizationId) {
     // TODO - replace url by elba install error
@@ -14,5 +15,8 @@ export function GET(request: NextRequest) {
   }
 
   cookies().set('organizationId', organizationId);
+  if (region) {
+    cookies().set('region', region);
+  }
   redirect(formatMicrosoftConsentUrl());
 }
