@@ -1,6 +1,7 @@
 import { DBXAccess, DBXAuth } from '@/repositories/dropbox/clients';
 import { insertAccessToken } from './data';
-import { addSeconds } from 'date-fns';
+import addSeconds from 'date-fns/addSeconds';
+import subMinutes from 'date-fns/subMinutes';
 import { inngest } from '@/common/clients/inngest';
 
 type GenerateAccessTokenArgs = {
@@ -61,12 +62,12 @@ export const generateAccessToken = async ({
   }
 
   try {
-    const accessTokenExpiresAt = addSeconds(new Date(), expires_in);
+    const tokenExpiresAt = addSeconds(new Date(), expires_in);
     await insertAccessToken({
       organisationId,
       accessToken,
       refreshToken: refresh_token,
-      expiresAt: accessTokenExpiresAt,
+      expiresAt: tokenExpiresAt,
       adminTeamMemberId: team_member_id,
       rootNamespaceId: root_info.root_namespace_id,
       teamName: team?.name as string,
@@ -74,10 +75,19 @@ export const generateAccessToken = async ({
     });
 
     await inngest.send({
+      name: 'tokens/run-refresh-token',
+      data: {
+        organisationId,
+      },
+      ts: subMinutes(tokenExpiresAt, 30).getTime(),
+      // ts: addSeconds(new Date(), 30).getTime(),
+      v: new Date().toISOString(),
+    });
+
+    await inngest.send({
       name: 'users/run-user-sync-jobs',
       data: {
         organisationId,
-        accessToken,
         isFirstScan: true,
         syncStartedAt: new Date().toISOString(),
       },

@@ -4,12 +4,10 @@ import type { inngest } from './inngest';
 
 const runRefreshTokensSchema = z.object({
   organisationId: z.string(),
-  refreshToken: z.string(),
 });
 
 const runUserSyncJobsSchema = z.object({
   organisationId: z.string(),
-  accessToken: z.string(),
   isFirstScan: z.boolean().default(false),
   cursor: z.string().optional(),
   syncStartedAt: z.string(),
@@ -44,7 +42,7 @@ export const synchronizeSharedLinks = commonEventArgs.extend({
 });
 
 export const zodEventSchemas = {
-  'tokens/run-refresh-tokens': { data: runRefreshTokensSchema },
+  'tokens/run-refresh-token': { data: runRefreshTokensSchema },
   'users/run-user-sync-jobs': { data: runUserSyncJobsSchema },
   'users/run-user-sync-jobs.completed': { data: runUserSyncJobsSchema },
   'data-protection/create-shared-link-sync-jobs': { data: createSharedLinkSyncJobs },

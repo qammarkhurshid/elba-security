@@ -42,10 +42,10 @@ export class DBXAuth {
     expires_at: Date;
   }> {
     await this.dbxAuth.refreshAccessToken();
-    const refreshedTokenDetails = {
+
+    return {
       access_token: this.dbxAuth.getAccessToken(),
       expires_at: this.dbxAuth.getAccessTokenExpiresAt(),
     };
-    return refreshedTokenDetails;
   }
 }

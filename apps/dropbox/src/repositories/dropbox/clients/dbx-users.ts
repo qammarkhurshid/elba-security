@@ -1,3 +1,4 @@
+import { formUsers } from '../utils';
 import { DBXAccess } from './dbx-access';
 
 const DROPBOX_BD_USERS_BATCH_SIZE = 1000;
@@ -21,14 +22,10 @@ export class DBXUsers extends DBXAccess {
           limit: DROPBOX_BD_USERS_BATCH_SIZE,
         });
 
-    if (!members.length) {
-      throw new Error('No members found');
-    }
-
     return {
       nextCursor,
       hasMore,
-      members,
+      members: formUsers(members),
     };
   };
 }

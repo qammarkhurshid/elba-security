@@ -1,7 +1,7 @@
 import { UpdateUsers } from '@elba-security/schemas';
 import { TeamMembers } from '../../../app/api/inngest/functions/users/types';
 
-export const formatElbaUsers = (members: TeamMembers) => {
+export const formUsers = (members: TeamMembers) => {
   // Invited members are not yet part of the team
   const filteredMembers = members.filter(({ profile }) => {
     return ['active', 'suspended'].includes(profile.status['.tag']) && !!profile.name.display_name;

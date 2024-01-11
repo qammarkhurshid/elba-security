@@ -1,46 +1,54 @@
 import { FunctionHandler, inngest } from '@/common/clients/inngest';
 import { elbaAccess } from '@/common/clients/elba';
-import { handleError } from '../../handle-error';
-import { formatElbaUsers } from '../../../../../repositories/dropbox/utils/format-elba-users';
 import { DBXUsers } from '@/repositories/dropbox/clients/dbx-users';
 import { InputArgWithTrigger } from '@/common/clients/types';
+import { getOrganisationAccessDetails } from '../common/data';
 
 const handler: FunctionHandler = async ({
   event,
   step,
 }: InputArgWithTrigger<'users/run-user-sync-jobs'>) => {
-  const { organisationId, accessToken, syncStartedAt, cursor } = event.data;
-
-  const dbx = new DBXUsers({
-    accessToken,
-  });
-
+  const { organisationId, syncStartedAt, cursor } = event.data;
   const elba = elbaAccess(organisationId);
 
-  const users = await step
-    .run('user-sync-initialize', async () => {
-      const response = await dbx.fetchUsers(cursor);
+  const users = await step.run('user-sync-initialize', async () => {
+    const [organisation] = await getOrganisationAccessDetails(organisationId);
 
-      if (response.members.length > 0) {
-        await elba.users.update({
-          users: formatElbaUsers(response.members),
-        });
-      }
+    if (!organisation) {
+      throw new Error('Access token not found');
+    }
 
-      return response;
-    })
-    .catch(handleError);
+    const dbx = new DBXUsers({
+      accessToken: organisation.accessToken,
+    });
+
+    const { members, ...rest } = await dbx.fetchUsers(cursor);
+
+    if (members.length > 0) {
+      await elba.users.update({
+        users: members,
+      });
+    }
+
+    return rest;
+  });
 
   if (users?.hasMore) {
     await step.sendEvent('run-user-sync-job', {
       name: 'users/run-user-sync-jobs',
       data: { ...event.data, cursor: users.nextCursor },
     });
-  } else {
+
+    return {
+      success: true,
+    };
+  }
+
+  await step.run('user-sync-finalize', async () => {
     await elba.users.delete({
       syncedBefore: syncStartedAt,
     });
-  }
+  });
 
   return {
     success: true,

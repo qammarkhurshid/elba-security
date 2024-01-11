@@ -1,14 +1,16 @@
 import { expect, test, describe, vi, beforeAll, beforeEach } from 'vitest';
-import { addMinutes } from 'date-fns';
 import { runRefreshToken } from './run-refresh-tokens';
 import { DropboxResponseError } from 'dropbox';
 import { createInngestFunctionMock } from '@elba-security/test-utils';
+import addSeconds from 'date-fns/addSeconds';
+import { insertOrganisations } from '@/common/__mocks__/token';
 
 const TOKEN_GENERATED_AT = '2023-03-13T16:19:20.818Z';
-const TOKEN_WILL_EXPIRE_IN = 240; // minutes
-const TOKEN_EXPIRES_AT = addMinutes(new Date(TOKEN_GENERATED_AT), TOKEN_WILL_EXPIRE_IN);
+const TOKEN_WILL_EXPIRE_IN = 14400; // seconds
+const TOKEN_EXPIRES_AT = addSeconds(new Date(TOKEN_GENERATED_AT), TOKEN_WILL_EXPIRE_IN);
+const organisationId = '00000000-0000-0000-0000-000000000001';
 
-const setup = createInngestFunctionMock(runRefreshToken, 'tokens/run-refresh-tokens');
+const setup = createInngestFunctionMock(runRefreshToken, 'tokens/run-refresh-token');
 
 const mocks = vi.hoisted(() => {
   return {
@@ -16,7 +18,7 @@ const mocks = vi.hoisted(() => {
   };
 });
 
-vi.mock('@/repositories/dropbox/clients/DBXAuth', () => {
+vi.mock('@/repositories/dropbox/clients/dbx-auth', () => {
   return {
     DBXAuth: vi.fn().mockImplementation(() => {
       return {
@@ -26,16 +28,17 @@ vi.mock('@/repositories/dropbox/clients/DBXAuth', () => {
   };
 });
 
-describe('run-refresh-tokens', () => {
+describe('run-refresh-token', () => {
   beforeEach(async () => {
     mocks.refreshAccessToken.mockReset();
+    await insertOrganisations({});
   });
 
-  beforeAll(async () => {
+  beforeAll(() => {
     vi.clearAllMocks();
   });
 
-  test('should refresh later when there is dropbox unauthorized issue', async () => {
+  test('should delete the organisations and call elba to notify', async () => {
     mocks.refreshAccessToken.mockRejectedValueOnce(
       new DropboxResponseError(
         401,
@@ -50,13 +53,10 @@ describe('run-refresh-tokens', () => {
     );
 
     const [result] = setup({
-      organisationId: 'b0771747-caf0-487d-a885-5bc3f1e9f770',
-      refreshToken: 'test-refresh-token-0',
+      organisationId,
     });
 
-    await expect(result).resolves.toStrictEqual({
-      success: true,
-    });
+    await expect(result).rejects.toBeInstanceOf(DropboxResponseError);
   });
 
   test('should refresh tokens for the available organisation', async () => {
@@ -66,9 +66,9 @@ describe('run-refresh-tokens', () => {
     });
 
     const [result] = setup({
-      organisationId: 'b0771747-caf0-487d-a885-5bc3f1e9f770',
-      refreshToken: 'test-refresh-token-0',
+      organisationId,
     });
+
     await expect(result).resolves.toStrictEqual({
       success: true,
     });

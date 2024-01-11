@@ -1,68 +1,57 @@
 import { FunctionHandler, inngest } from '@/common/clients/inngest';
 import { DBXAuth } from '@/repositories/dropbox/clients';
-import { updateDropboxTokens } from './data';
-import { DropboxResponseError } from 'dropbox';
-import { addMinutes } from 'date-fns';
+import { getOrganisationRefreshToken, updateDropboxTokens } from './data';
 import { InputArgWithTrigger } from '@/common/clients/types';
+import subMinutes from 'date-fns/subMinutes';
 
 const handler: FunctionHandler = async ({
   event,
   step,
-}: InputArgWithTrigger<'tokens/run-refresh-tokens'>) => {
-  const { organisationId, refreshToken } = event.data;
+}: InputArgWithTrigger<'tokens/run-refresh-token'>) => {
+  const { organisationId } = event.data;
 
-  await step.run('fetch-refresh-token', async () => {
+  const response = await step.run('fetch-refresh-token', async () => {
+    const [token] = await getOrganisationRefreshToken(organisationId);
+
+    if (!token) {
+      throw new Error(
+        `Not able to get the token details for the organisation with ID: ${organisationId}`
+      );
+    }
+
     const dbxAuth = new DBXAuth({
-      refreshToken,
+      refreshToken: token.refreshToken,
     });
 
-    try {
-      const response = await dbxAuth.refreshAccessToken();
+    const { access_token: accessToken, expires_at: expiresAt } = await dbxAuth.refreshAccessToken();
 
-      await updateDropboxTokens({
-        organisationId,
-        expiresAt: response.expires_at,
-        accessToken: response.access_token,
-      });
+    const tokenDetails = {
+      organisationId,
+      expiresAt,
+      accessToken,
+    };
 
-      return {
-        success: true,
-      };
-    } catch (error) {
-      if (error instanceof DropboxResponseError) {
-        const { status, error: innerError } = error;
-        if (status === 401) {
-          await updateDropboxTokens({
-            organisationId,
-            refreshAfter: null,
-            unauthorizedAt: new Date(),
-          });
-        }
+    await updateDropboxTokens(tokenDetails);
 
-        if (status === 429) {
-          const {
-            error: { retry_after: retryAfter },
-          } = innerError;
-
-          await updateDropboxTokens({
-            organisationId: organisationId,
-            refreshAfter: addMinutes(new Date(Date.now()), retryAfter * 1000),
-            unauthorizedAt: null,
-          });
-        }
-
-        return {
-          success: true,
-        };
-      }
-
-      throw error;
-    }
+    return tokenDetails;
   });
+
+  await step.sendEvent('run-refresh-token', {
+    name: 'tokens/run-refresh-token',
+    data: {
+      organisationId,
+    },
+    ts: subMinutes(new Date(response.expiresAt), 30).getTime(),
+    v: new Date().toISOString(),
+  });
+
+  return {
+    success: true,
+  };
 };
 
 export const runRefreshToken = inngest.createFunction(
-  { id: 'run-refresh-tokens' },
-  { event: 'tokens/run-refresh-tokens' },
+  { id: 'run-refresh-token' },
+  { event: 'tokens/run-refresh-token' },
   handler
 );

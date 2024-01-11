@@ -1,14 +1,22 @@
-import { and, gte, isNull } from 'drizzle-orm';
+import { and, eq, gte, isNull } from 'drizzle-orm';
 import { db, tokens } from '@/database';
 
-export const getOrganisationsToSyncJobs = async () => {
+export const getOrganisationsToSync = async () => {
   return db
     .select({
       organisationId: tokens.organisationId,
+    })
+    .from(tokens)
+    .where(and(gte(tokens.expiresAt, new Date()), isNull(tokens.unauthorizedAt)));
+};
+
+export const getOrganisationAccessDetails = async (organisationId: string) => {
+  return db
+    .select({
       accessToken: tokens.accessToken,
       pathRoot: tokens.rootNamespaceId,
       adminTeamMemberId: tokens.adminTeamMemberId,
     })
     .from(tokens)
-    .where(and(gte(tokens.expiresAt, new Date()), isNull(tokens.unauthorizedAt)));
+    .where(eq(tokens.organisationId, organisationId));
 };
