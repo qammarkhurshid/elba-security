@@ -4,7 +4,7 @@
   "private": true,
   "main": "src/index.ts",
   "scripts": {
-    "lint": "eslint src/**.ts"
+    "lint": "eslint src"
   },
   "dependencies": {
     "@elba-security/api-client": "workspace:*",
@@ -14,6 +14,7 @@
   "peerDependencies": {
     "msw": ">=2.0.0",
     "inngest": ">=3.6.0",
+    "@elba-security/sdk": "workspace:*",
     "vitest": ">=1.0.0"
   },
   "devDependencies": {

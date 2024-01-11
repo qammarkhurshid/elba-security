@@ -1,3 +1,41 @@
+import { ElbaError } from '../error';
+
+export type ValidateWebhookRequestSignatureResult =
+  | {
+      success: false;
+      error: ElbaError;
+    }
+  | { success: true };
+
+export const validateWebhookRequestSignature = async (request: Request, secret: string) => {
+  // cloning is mandatory to make sure that request.json() still works after this function invokation
+  const requestClone = request.clone();
+  const signature = requestClone.headers.get('X-Elba-Signature');
+
+  if (!signature) {
+    throw new ElbaError("Could not retrieve header 'X-Elba-Signature' from webhook request", {
+      request,
+    });
+  }
+
+  if (requestClone.method !== 'POST') {
+    throw new ElbaError('Could not retrieve payload from webhook request', {
+      request,
+      cause: `Method "${requestClone.method}" is not supported`,
+    });
+  }
+
+  const payload = await requestClone.text();
+
+  const isSignatureValid = await validateSignature(secret, payload, signature);
+
+  if (!isSignatureValid) {
+    throw new ElbaError('Could not validate elba signature from webhook request', {
+      request,
+    });
+  }
+};
+
 /**
  * Validates the signature sent in the 'X-elba-Signature' header of a webhook request
  * received from elba.
@@ -9,7 +47,7 @@
  * timing attacks.
  *
  * @param secret - The secret key generated at the time of creating the elba integration.
- * @param payload - A JSON object with the payload for which the signature is being validated.
+ * @param payload - A string for which the signature is being validated.
  * @param elbaSignatureFromHeader - The signature to be validated against the computed signature.
  * @returns A promise that resolves to true if the computed signature matches
  *          the signature from the header; false otherwise.
@@ -17,19 +55,19 @@
  * @example
  * ```ts
  * const secret = getSecurelyStoredSecret();
- * const payload = { data: 'example' };
+ * const payload = '{ "data": "example" }'
  * const signatureFromHeader = 'received-signature-from-header';
  * const isValid = await isValidWebhookElbaSignature(secret, payload, signatureFromHeader);
  * console.log("Is the signature valid?, isValid ? "Yes" : "No");
  * ```
  */
-export async function isValidWebhookElbaSignature(
+async function validateSignature(
   secret: string,
-  payload: Record<string, unknown>,
-  elbaSignatureFromHeader: string
+  payload: string,
+  signature: string
 ): Promise<boolean> {
-  const computedElbaSignature = await createWebhookElbaSignature(secret, payload);
-  return timingSafeEqual(computedElbaSignature, elbaSignatureFromHeader);
+  const expectedSignature = await createWebhookElbaSignature(secret, payload);
+  return timingSafeEqual(expectedSignature, signature);
 }
 
 /**
@@ -39,18 +77,18 @@ export async function isValidWebhookElbaSignature(
  * a HMAC SHA256 signature. The signature is returned as a hexadecimal string.
  *
  * @param secret - The secret key used for HMAC generation.
- * @param payload - A JSON object with the payload for which the signature is being generated.
+ * @param payload - A string for which the signature is being generated.
  * @returns A promise that resolves to a hexadecimal string representation of the signature.
  *
  * @example
  * ```ts
  * const secret = getSecurelyStoredSecret();
- * const payload = { data: 'example' };
+ * const payload = '{ "data": "example" }'
  * const signature = await createHmacSha256Signature(secret, payload)
  * console.log(signature);
  * ```
  */
-async function createWebhookElbaSignature(secret: string, payload: Record<string, unknown>) {
+async function createWebhookElbaSignature(secret: string, payload: string) {
   // encode the secret and payload to Uint8Array
   const encoder = new TextEncoder();
   const encodedSecret = encoder.encode(secret);
