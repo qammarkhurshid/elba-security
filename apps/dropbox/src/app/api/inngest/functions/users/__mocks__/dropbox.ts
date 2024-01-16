@@ -41,7 +41,6 @@ export const membersList: team.TeamMemberInfoV2[] = membersListFirstPage([
 ]) as team.TeamMemberInfoV2[];
 
 // Expected Result
-
 export const elbaUsers = {
   users: [
     {
@@ -64,3 +63,56 @@ export const elbaUsers = {
     },
   ],
 };
+
+export const membersListSecondPage: team.TeamMemberInfoV2[] = [
+  {
+    profile: {
+      team_member_id: 'dbmid:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+      account_id: 'dbid:zdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ikpva',
+      email: 'member-20@elba.security',
+      email_verified: false,
+      secondary_emails: [],
+      status: {
+        '.tag': 'active',
+      },
+      name: {
+        given_name: 'member-20-name',
+        surname: 'member-20-surname',
+        familiar_name: 'member-20-familiar-name',
+        display_name: 'member-20-display-name',
+        abbreviated_name: 'member-20-abbreviated-name',
+      },
+      membership_type: {
+        '.tag': 'full',
+      },
+      invited_on: '2023-01-30T19:05:23Z',
+      groups: ['g:21e7390f3226aa560000000000000003'],
+      member_folder_id: '3465994753',
+    },
+  },
+  {
+    profile: {
+      team_member_id: 'dbmid:wRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+      account_id: 'dbid:zdWIiOiIxMjM0NTY3ODasdaUOIawibmFtZSI6Ikpva',
+      email: 'member-21@elba.security',
+      email_verified: false,
+      secondary_emails: [],
+      status: {
+        '.tag': 'active',
+      },
+      name: {
+        given_name: 'member-21-name',
+        surname: 'member-21-surname',
+        familiar_name: 'member-21-familiar-name',
+        display_name: 'member-21-display-name',
+        abbreviated_name: 'member-21-abbreviated-name',
+      },
+      membership_type: {
+        '.tag': 'full',
+      },
+      invited_on: '2023-01-30T19:05:23Z',
+      groups: ['g:21e7390f3226aa560000000000000003'],
+      member_folder_id: '3567894753',
+    },
+  },
+];

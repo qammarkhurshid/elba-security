@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { DataProtectionPermission } from '@elba-security/schemas';
 import type { files, sharing } from 'dropbox/types/dropbox_types';
 
-export type DBXFetcherOptions = {
+export type DBXFilesOptions = {
   accessToken: string;
   adminTeamMemberId?: string;
   teamMemberId?: string;
@@ -18,11 +19,9 @@ export type GeneralFolderFilePermissions = {
 export type FolderFilePermissions = Map<string, GeneralFolderFilePermissions>;
 
 export type SyncJob = {
-  accessToken: string;
   organisationId: string;
   syncStartedAt: string;
   isFirstScan: boolean;
-  pathRoot: string;
 };
 
 export type SharedLinks = {
@@ -31,24 +30,15 @@ export type SharedLinks = {
   pathLower: string;
 };
 
-export type DBXPermissionType = 'user' | 'group' | 'anyone';
+export type DBXPermissionType = DataProtectionPermission['type'];
 
 export type FolderAndFilePermissions = {
   id: string;
   email?: string;
   team_member_id?: string;
   display_name?: string;
-  type: DBXPermissionType;
+  type: DataProtectionPermission['type'];
   role: sharing.AccessLevel['.tag'];
-  metadata?: any;
-};
-
-export type FolderAndFilePermissionsToSend = {
-  id: string;
-  email?: string;
-  displayName?: string;
-  userId?: string;
-  type: DBXPermissionType;
   metadata?: any;
 };
 

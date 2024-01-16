@@ -4,6 +4,8 @@ const mocks = vi.hoisted(() => {
   return {
     updateUsers: vi.fn(),
     deleteUsers: vi.fn(),
+    updateDataProtectionObjects: vi.fn(),
+    deleteDataProtectionObjects: vi.fn(),
   };
 });
 
@@ -16,6 +18,10 @@ vi.mock('@elba-security/sdk', () => {
         users: {
           update: mocks.updateUsers,
           delete: mocks.deleteUsers,
+        },
+        dataProtection: {
+          updateObjects: mocks.updateDataProtectionObjects,
+          deleteObjects: mocks.deleteDataProtectionObjects,
         },
       };
     }),
