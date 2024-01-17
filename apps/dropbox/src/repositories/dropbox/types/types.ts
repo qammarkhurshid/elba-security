@@ -51,3 +51,19 @@ export type FileToAdd = FileAndFolderType & {
     preview_url: string;
   };
 };
+
+export type DeleteObjectPermissions = {
+  id: string;
+  organisationId: string;
+  metadata: {
+    ownerId: string;
+    type: 'file' | 'folder';
+    isPersonal: boolean;
+  };
+  permissions: Array<{
+    id: string;
+    metadata: {
+      sharedLinks: string[];
+    };
+  }>;
+};

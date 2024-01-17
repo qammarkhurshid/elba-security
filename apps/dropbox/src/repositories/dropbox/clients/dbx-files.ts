@@ -1,4 +1,4 @@
-import { files as DbxFiles } from 'dropbox/types/dropbox_types';
+import { files as DbxFiles, sharing } from 'dropbox/types/dropbox_types';
 import { DBXAccess } from './dbx-access';
 import {
   DBXFilesOptions,
@@ -52,6 +52,31 @@ export class DBXFiles {
       links: sharedLinks,
       nextCursor,
     };
+  };
+
+  fetchSharedLinksByPath = async ({ isPersonal, path }: { path: string; isPersonal: boolean }) => {
+    this.dbx.setHeaders({
+      selectUser: this.teamMemberId,
+      ...(isPersonal ? {} : { pathRoot: JSON.stringify({ '.tag': 'root', root: this.pathRoot }) }),
+    });
+
+    const sharedLinks: sharing.ListSharedLinksResult['links'] = [];
+    let hasMore: boolean;
+    let nextCursor: string | undefined;
+    do {
+      const {
+        result: { links, has_more, cursor },
+      } = await this.dbx.sharingListSharedLinks({
+        path,
+        cursor: nextCursor,
+      });
+
+      sharedLinks.push(...links);
+      nextCursor = cursor;
+      hasMore = has_more;
+    } while (hasMore);
+
+    return filterSharedLinks(sharedLinks);
   };
 
   fetchFoldersAndFiles = async (cursor?: string) => {
@@ -200,6 +225,28 @@ export class DBXFiles {
     }
 
     return sharedFolderMetadata;
+  };
+
+  fetchFolderOrFileMetadataByPath = async ({
+    isPersonal,
+    path,
+  }: {
+    isPersonal: boolean;
+    path: string;
+  }) => {
+    this.dbx.setHeaders({
+      selectUser: this.teamMemberId,
+      ...(!isPersonal ? { pathRoot: JSON.stringify({ '.tag': 'root', root: this.pathRoot }) } : {}),
+    });
+
+    const { result } = await this.dbx.filesGetMetadata({
+      path,
+      include_deleted: false,
+      include_has_explicit_shared_members: true,
+      include_media_info: true,
+    });
+
+    return result;
   };
 
   // Fetch folder permissions

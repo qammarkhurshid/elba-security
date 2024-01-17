@@ -44,6 +44,34 @@ export const synchronizeSharedLinks = z.object({
   isPersonal: z.boolean(),
 });
 
+export const deleteObjectPermissionsSchema = z.object({
+  id: z.string(),
+  organisationId: z.string(),
+  metadata: z.object({
+    ownerId: z.string(),
+    isPersonal: z.boolean(),
+    type: z.enum(['file', 'folder']),
+  }),
+  permissions: z.array(
+    z.object({
+      id: z.string(),
+      metadata: z.object({
+        sharedLinks: z.array(z.string()),
+      }),
+    })
+  ),
+});
+
+export const refreshObjectSchema = z.object({
+  id: z.string(),
+  organisationId: z.string(),
+  metadata: z.object({
+    ownerId: z.string(),
+    isPersonal: z.boolean(),
+    type: z.enum(['file', 'folder']),
+  }),
+});
+
 export const zodEventSchemas = {
   'tokens/run-refresh-token': { data: runRefreshTokensSchema },
   'users/run-user-sync-jobs': { data: runUserSyncJobsSchema },
@@ -55,6 +83,8 @@ export const zodEventSchemas = {
   },
   'data-protection/create-folder-and-files-sync-jobs': { data: createFolderAndFilesSyncJobsSchema },
   'data-protection/synchronize-folders-and-files': { data: syncFilesAndFoldersSchema },
+  'data-protection/delete-object-permissions': { data: deleteObjectPermissionsSchema },
+  'data-protection/refresh-object': { data: refreshObjectSchema },
 };
 
 export type InputArgWithTrigger<T extends keyof typeof zodEventSchemas> = GetFunctionInput<

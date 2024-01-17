@@ -80,7 +80,6 @@ export const generateAccessToken = async ({
         organisationId,
       },
       ts: subMinutes(tokenExpiresAt, 30).getTime(),
-      // ts: addSeconds(new Date(), 30).getTime(),
       v: new Date().toISOString(),
     });
 

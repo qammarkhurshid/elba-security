@@ -56,7 +56,7 @@ describe('synchronizeFoldersAndFiles', async () => {
     elba.updateDataProtectionObjects.mockReset();
   });
 
-  beforeAll(async () => {
+  beforeAll(() => {
     vi.clearAllMocks();
   });
 
