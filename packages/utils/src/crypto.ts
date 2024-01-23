@@ -1,3 +1,5 @@
+import * as crypto from 'node:crypto';
+
 export const arrayBufferFromHexString = (hexString: string) => {
   const matches = hexString.match(/[0-9a-f]{2}/gi);
   if (!matches || hexString.length !== matches.length * 2) {
