@@ -32,9 +32,9 @@ importers:
       '@elba-security/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
-      '@t3-oss/env-nextjs':
-        specifier: ^0.7.1
-        version: 0.7.3(typescript@5.2.2)(zod@3.22.4)
+      '@elba-security/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@vercel/postgres':
         specifier: ^0.5.1
         version: 0.5.1
@@ -2094,33 +2094,6 @@ packages:
     resolution: {integrity: sha512-E4KcWTpoLHqwPHLxidpOqQbcrZVgi0rsmmZXUle1jXmJfuIf/UWpczUJ7MZZ5tlxytgJXyp0w4PGkkeLiuIdZw==}
     dependencies:
       tslib: 2.6.2
-
-  /@t3-oss/env-core@0.7.3(typescript@5.2.2)(zod@3.22.4):
-    resolution: {integrity: sha512-hhtj59TKC6TKVdwJ0CcbKsvkr9R8Pc/SNKd4IgGUIC9T9X6moB8EZZ3FTJdABA/h9UABCK4J+KsF8gzmvMvHPg==}
-    peerDependencies:
-      typescript: '>=4.7.2'
-      zod: ^3.0.0
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      typescript: 5.2.2
-      zod: 3.22.4
-    dev: false
-
-  /@t3-oss/env-nextjs@0.7.3(typescript@5.2.2)(zod@3.22.4):
-    resolution: {integrity: sha512-90TNffS17vjkQwfYyMUb4Zw9yqHwFV40f78qFug4JiQa5+N6DydTdlLOpzOcj8Cna/qpAVDwMSypofF/TVQDuA==}
-    peerDependencies:
-      typescript: '>=4.7.2'
-      zod: ^3.0.0
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-    dependencies:
-      '@t3-oss/env-core': 0.7.3(typescript@5.2.2)(zod@3.22.4)
-      typescript: 5.2.2
-      zod: 3.22.4
-    dev: false
 
   /@tsconfig/node10@1.0.9:
     resolution: {integrity: sha512-jNsYVVxU8v5g43Erja32laIDHXeoNvFEpX33OK4d6hljo3jDhCBDhx5dhCCTMWUojscpAagGiRkBKxpdl9fxqA==}
