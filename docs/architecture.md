@@ -23,7 +23,7 @@ The service file (`service.ts`) focuses exclusively on business logic. It should
 
 ### `webhooks`
 
-All the webhooks should be placed in the `/api/webhooks` directory, it can mainly contains `elba` related webhooks & `{source}`related webhooks.
+All webhook handlers must be located in the `/api/webhooks` directory, primarily dedicated to  `elba` and/or the `{source}` SaaS integrations.
 
 
 ## `/connectors`
@@ -73,12 +73,10 @@ apps/
 │   │   │   │       │   │   ├── refresh-object.ts
 │   │   │   │       │   │   ├── delete-object.ts
 │   │   │   │       │   │   └── start-sync.ts
-│   │   │   │       │   ├── data-protection/
-│   │   │   │       │   │   ├── refresh-object.ts
-│   │   │   │       │   │   ├── delete-object.ts
-│   │   │   │       │   │   └── start-sync.ts
-│   │   │   │       │   └── .../
-│   │   │   │       │       └── ...
+│   │   │   │       │   └── data-protection/
+│   │   │   │       │       ├── refresh-object.ts
+│   │   │   │       │       ├── delete-object.ts
+│   │   │   │       │       └── start-sync.ts
 │   │   │   │       └── {source}/
 │   │   │   │           ├── ...
 │   │   │   │           └── ...
@@ -86,18 +84,18 @@ apps/
 │   │   │   │   ├── route.ts
 │   │   │   │   ├── service.ts
 │   │   │   │   └── service.test.ts
-│   │   │   ├── inngest/
-│   │   │   │   ├── functions/
-│   │   │   │   │   └── users/
-│   │   │   │   │       ├── sync-user-page.ts
-│   │   │   │   │       └── sync-user-page.test.test
-│   │   │   │   ├── middlewares/
-│   │   │   │   │   └── rate-limit-middleware.ts
-│   │   │   │   └── client.ts
-│   │   │   └── install/
+│   │   │   └── inatall/
 │   │   │       └── route.ts
 │   │   ├── connectors/
 │   │   ├── database/
+│   │   ├── inngest/
+│   │   │   ├── functions/
+│   │   │   │   └── users/
+│   │   │   │       ├── sync-user-page.ts
+│   │   │   │       └── sync-user-page.test.test
+│   │   │   ├── middlewares/
+│   │   │   │   └── rate-limit-middleware.ts
+│   │   │   └── client.ts
 │   │   ├── env.ts
 │   │   └── middleware.ts
 │   ├── vitest/
