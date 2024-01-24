@@ -39,5 +39,5 @@ export const insertOrganisations = async ({ size = 1 }: { size?: number }) => {
     };
   });
 
-  return await insertTestAccessToken(tokenPromises);
+  return insertTestAccessToken(tokenPromises);
 };

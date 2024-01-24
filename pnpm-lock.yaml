@@ -7128,7 +7128,7 @@ packages:
       '@vitest/snapshot': 1.1.1
       '@vitest/spy': 1.1.1
       '@vitest/utils': 1.1.1
-      acorn-walk: 8.3.0
+      acorn-walk: 8.3.2
       cac: 6.7.14
       chai: 4.3.10
       debug: 4.3.4
