@@ -1,6 +1,6 @@
 # Refreshing token
 
-When integrating with SaaS APIs, it's crucial to ensure that the **access token** remains up-to-date. Typically, when a SaaS API grants an **access token**, it also provides an associated validity duration and a **refresh token**.
+When integrating with SaaS APIs, it's essential to ensure that the **access token** remains up-to-date. Typically, when a SaaS API grants an **access token**, it also provides an associated validity duration and a **refresh token**.
 
 ## Understanding OAuth-based Flow
 
@@ -91,7 +91,7 @@ export const refreshToken = inngest.createFunction(
 
 As mentioned previously, the Inngest function that refreshes the access token is designed to call itself, creating a loop. To initiate this loop, the integration needs to send a first event when acquiring the access token for the first time.
 
-Since an organization's admin could sign in multiple times, it is crucial for the integration to ensure that there are no multiple loops running simultaneously for a given organization. To prevent this behavior, a cancel event can be sent while scheduling the first token refresh.
+Since an organization's admin could sign in multiple times, it is essential for the integration to ensure that there are no multiple loops running simultaneously for a given organization. To prevent this behavior, a cancel event can be sent while scheduling the first token refresh.
 
 ```ts
 // app/auth/route.ts
