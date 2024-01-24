@@ -16,6 +16,17 @@ const hasApiRequiredDataProperties = (
   data: unknown
 ): data is z.infer<typeof apiRequiredDataSchema> => apiRequiredDataSchema.safeParse(data).success;
 
+const isGithubAuthorizationError = (error: unknown) => {
+  if (!(error instanceof RequestError)) return false;
+  // occures when the github elba app have unsufficient permissions
+  if (error.response?.status === 401) return true;
+  // occures when the github elba app is uninstalled
+  if (error.response?.status === 404) {
+    return error.request.url.endsWith('/access_tokens');
+  }
+  return false;
+};
+
 export const unauthorizedMiddleware = new InngestMiddleware({
   name: 'unauthorized',
   init: () => {
@@ -32,8 +43,7 @@ export const unauthorizedMiddleware = new InngestMiddleware({
               result: { error, ...result },
               ...context
             } = ctx;
-
-            if (error instanceof RequestError && error.response?.status === 401) {
+            if (isGithubAuthorizationError(error)) {
               if (hasApiRequiredDataProperties(data)) {
                 const elba = new Elba({
                   organisationId: data.organisationId,
