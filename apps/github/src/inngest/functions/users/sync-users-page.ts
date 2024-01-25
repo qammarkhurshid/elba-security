@@ -11,6 +11,7 @@ const formatElbaUser = (member: OrganizationMember): User => ({
   id: String(member.id),
   email: member.email || undefined,
   displayName: member.name ?? member.login,
+  role: member.role,
   additionalEmails: [],
 });
 

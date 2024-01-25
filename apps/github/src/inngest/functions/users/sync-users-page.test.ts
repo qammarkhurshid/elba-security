@@ -69,10 +69,11 @@ describe('sync-users-page', () => {
 
     expect(elbaInstance?.users.update).toBeCalledTimes(1);
     expect(elbaInstance?.users.update).toBeCalledWith({
-      users: githubUsers.map(({ id, email, name }) => ({
+      users: githubUsers.map(({ id, email, name, role }) => ({
         id: String(id),
         email,
         displayName: name,
+        role,
         additionalEmails: [],
       })),
     });
