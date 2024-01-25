@@ -6,7 +6,7 @@ When integrating with SaaS APIs, it's essential to ensure that the **access toke
 
 Our integration strategy often follows the OAuth standards. However, it's important to note that:
 
-- **Not all SaaS APIs provide refresh token**: Some APIs might not offer refresh tokens and specific validity durations. In such cases, the access token can still expire and require refreshing.
+- **Not all SaaS APIs provide a refresh token**: Some APIs might not offer refresh tokens and specific validity durations. In such cases, the access token can still expire and require refreshing.
 
 - **Handling token expiration**: For APIs that don't explicitly provide token expiration details, you can interpolate the token's duration using the information usually found in the SaaS API's documentation.
 
