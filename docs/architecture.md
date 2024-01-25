@@ -84,7 +84,7 @@ apps/
 │   │   │   │   ├── route.ts
 │   │   │   │   ├── service.ts
 │   │   │   │   └── service.test.ts
-│   │   │   └── inatall/
+│   │   │   └── install/
 │   │   │       └── route.ts
 │   │   ├── connectors/
 │   │   ├── database/
