@@ -3,11 +3,15 @@ import {
   dataProtectionContentRequestedDataSchema,
   dataProtectionScanTriggeredWebhookDataSchema,
   thirdPartyAppsScanTriggeredWebhookDataSchema,
+  thirdPartyAppsRefreshObjectRequestedWebhookDataSchema,
+  thirdPartyAppsDeleteObjectRequestedWebhookDataSchema
 } from '@elba-security/schemas';
 import { ElbaError } from '../error';
 
 const eventDataSchema = {
   'third_party_apps.scan_triggered': thirdPartyAppsScanTriggeredWebhookDataSchema,
+  'third_party_apps.refresh_requested': thirdPartyAppsRefreshObjectRequestedWebhookDataSchema,
+  'third_party_apps.delete_requested': thirdPartyAppsDeleteObjectRequestedWebhookDataSchema,
   'data_protection.scan_triggered': dataProtectionScanTriggeredWebhookDataSchema,
   'data_protection.content_requested': dataProtectionContentRequestedDataSchema,
 } as const satisfies Record<string, ZodSchema>;
