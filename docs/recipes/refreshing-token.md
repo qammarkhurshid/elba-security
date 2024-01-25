@@ -87,7 +87,7 @@ export const refreshToken = inngest.createFunction(
 );
 ```
 
-## Plan the first token refreshing
+## Schedule the first token refresh
 
 As mentioned previously, the Inngest function that refreshes the access token is designed to call itself, creating a loop. To initiate this loop, the integration needs to send a first event when acquiring the access token for the first time.
 
