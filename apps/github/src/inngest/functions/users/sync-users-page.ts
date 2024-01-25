@@ -31,6 +31,16 @@ export const syncUsersPage = inngest.createFunction(
         limit: 1,
       },
     ],
+    cancelOn: [
+      {
+        event: 'github/organisation.uninstalled',
+        match: 'data.organisationId',
+      },
+      {
+        event: 'github/organisation.installed',
+        match: 'data.organisationId',
+      },
+    ],
   },
   {
     event: 'users/page_sync.requested',

@@ -76,17 +76,25 @@ describe('setupOrganisation', () => {
     ).resolves.toMatchObject(organisation);
     await expect(db.select().from(Organisation)).resolves.toMatchObject([organisation]);
     expect(send).toBeCalledTimes(1);
-    expect(send).toBeCalledWith({
-      name: 'users/page_sync.requested',
-      data: {
-        organisationId,
-        installationId: organisation.installationId,
-        accountLogin: organisation.accountLogin,
-        syncStartedAt: now,
-        isFirstSync: true,
-        region,
-        cursor: null,
+    expect(send).toBeCalledWith([
+      {
+        name: 'github/organisation.installed',
+        data: {
+          organisationId,
+        },
       },
-    });
+      {
+        name: 'users/page_sync.requested',
+        data: {
+          organisationId,
+          installationId: organisation.installationId,
+          accountLogin: organisation.accountLogin,
+          syncStartedAt: now,
+          isFirstSync: true,
+          region,
+          cursor: null,
+        },
+      },
+    ]);
   });
 });

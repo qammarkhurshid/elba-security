@@ -29,7 +29,7 @@ const isGithubAuthorizationError = (error: unknown) => {
 
 export const unauthorizedMiddleware = new InngestMiddleware({
   name: 'unauthorized',
-  init: () => {
+  init: ({ client }) => {
     return {
       onFunctionRun: ({
         fn,
@@ -51,6 +51,12 @@ export const unauthorizedMiddleware = new InngestMiddleware({
                   sourceId: env.ELBA_SOURCE_ID,
                   apiKey: env.ELBA_API_KEY,
                   baseUrl: env.ELBA_API_BASE_URL,
+                });
+                await client.send({
+                  name: 'github/organisation.uninstalled',
+                  data: {
+                    organisationId: data.organisationId,
+                  },
                 });
                 await db.delete(Organisation).where(eq(Organisation.id, data.organisationId));
                 await elba.connectionStatus.update({ hasError: true });

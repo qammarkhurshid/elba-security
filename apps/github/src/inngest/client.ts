@@ -30,6 +30,16 @@ export const inngest = new Inngest({
         cursor: string | null;
       };
     };
+    'github/organisation.uninstalled': {
+      data: {
+        organisationId: string;
+      };
+    };
+    'github/organisation.installed': {
+      data: {
+        organisationId: string;
+      };
+    };
   }>(),
   middleware: [sentryMiddleware, rateLimitMiddleware, unauthorizedMiddleware],
 });

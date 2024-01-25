@@ -46,18 +46,26 @@ export const setupOrganisation = async ({
     throw new Error(`Could not setup organisation with id=${organisationId}`);
   }
 
-  await inngest.send({
-    name: 'users/page_sync.requested',
-    data: {
-      organisationId,
-      installationId: installation.id,
-      accountLogin: installation.account.login,
-      region,
-      syncStartedAt: Date.now(),
-      isFirstSync: true,
-      cursor: null,
+  await inngest.send([
+    {
+      name: 'github/organisation.installed',
+      data: {
+        organisationId,
+      },
     },
-  });
+    {
+      name: 'users/page_sync.requested',
+      data: {
+        organisationId,
+        installationId: installation.id,
+        accountLogin: installation.account.login,
+        region,
+        syncStartedAt: Date.now(),
+        isFirstSync: true,
+        cursor: null,
+      },
+    },
+  ]);
 
   return organisation;
 };

@@ -1,5 +1,4 @@
-import { beforeEach } from 'node:test';
-import { describe, expect, test } from 'vitest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { RequestError } from '@octokit/request-error';
 import { NonRetriableError } from 'inngest';
 import { eq } from 'drizzle-orm';
@@ -24,21 +23,28 @@ describe('unauthorized middleware', () => {
   });
 
   test('should not transform the output when their is no error', async () => {
+    const send = vi.fn().mockResolvedValue(undefined);
     await expect(
       unauthorizedMiddleware
-        .init()
+        // @ts-expect-error -- this is a mock
+        .init({ client: { send } })
         // @ts-expect-error -- this is a mock
         .onFunctionRun({ fn: { name: 'foo' }, ctx: { event: { data: {} } } })
         .transformOutput({
           result: {},
         })
     ).resolves.toBeUndefined();
+
+    expect(send).toBeCalledTimes(0);
   });
 
   test('should not transform the output when the error is not about github authorization', async () => {
+    const send = vi.fn().mockResolvedValue(undefined);
+
     await expect(
       unauthorizedMiddleware
-        .init()
+        // @ts-expect-error -- this is a mock
+        .init({ client: { send } })
         // @ts-expect-error -- this is a mock
         .onFunctionRun({ fn: { name: 'foo' }, ctx: { event: { data: {} } } })
         .transformOutput({
@@ -47,6 +53,8 @@ describe('unauthorized middleware', () => {
           },
         })
     ).resolves.toBeUndefined();
+
+    expect(send).toBeCalledTimes(0);
   });
 
   test('should transform the output error to NonRetriableError and remove the organisation when the error is about github authorization', async () => {
@@ -69,9 +77,11 @@ describe('unauthorized middleware', () => {
         error: unauthorizedError,
       },
     };
+    const send = vi.fn().mockResolvedValue(undefined);
 
     const result = await unauthorizedMiddleware
-      .init()
+      // @ts-expect-error -- this is a mock
+      .init({ client: { send } })
       .onFunctionRun({
         // @ts-expect-error -- this is a mock
         fn: { name: 'foo' },
@@ -104,6 +114,14 @@ describe('unauthorized middleware', () => {
     expect(elbaInstance?.connectionStatus.update).toBeCalledTimes(1);
     expect(elbaInstance?.connectionStatus.update).toBeCalledWith({
       hasError: true,
+    });
+
+    expect(send).toBeCalledTimes(1);
+    expect(send).toBeCalledWith({
+      name: 'github/organisation.uninstalled',
+      data: {
+        organisationId: organisation.id,
+      },
     });
     await expect(
       db.select().from(Organisation).where(eq(Organisation.id, organisationId))
