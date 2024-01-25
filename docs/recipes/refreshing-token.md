@@ -14,7 +14,7 @@ _If the integrated SaaS does not provide OAuth based authentication flow, the fo
 
 ## Refreshing the token using an Inngest function
 
-As an organisation can uninstall the SaaS integration, the Inngest function that refreshes the token should always verify that the organisation still exists before proceeding.
+Since an organization may uninstall the SaaS integration, the Inngest function that refreshes the token should always verify the existence of the organization before proceeding to refresh the token.
 
 After retrieving the new token and updating it in the database, the function should schedule itself to run again in the future, before the new token expires. This ensures that the access token stored in the database will always be valid.
 
