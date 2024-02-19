@@ -27,8 +27,6 @@ const fetchAuthToken = async (code: string, orgId: string) =>{
 
 export default function RedirectPage() {
   const searchParams = useSearchParams();
-/*   const [response, setResponse] = useState({}); */
-  
   useEffect(() => {
   const fetchData = async () => {
     const code = searchParams.get('code');
@@ -36,7 +34,6 @@ export default function RedirectPage() {
     if (code && orgId) {
       try {
         await fetchAuthToken(code, orgId);
-        /* setResponse(resp); */
       } catch (error) {
         logger.error('Error fetching auth token:', {error});
         // redirect(`${process.env.ELBA_REDIRECT_URL}/error`, RedirectType.replace);

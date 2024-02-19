@@ -2,6 +2,7 @@ import { logger } from "@elba-security/logger"
 import { eq } from "drizzle-orm";
 import { db } from '@/database/client';
 import { Organisation } from '@/database/schema';
+import { inngest } from "@/inngest/client";
 
 
 type UpdateOrganisationParams = {
@@ -25,11 +26,24 @@ type OrganizationRecordObject = {
 
 
 export const updateOrganization = async ({organisationId, authToken}: UpdateOrganisationParams)=>{
-  logger.info(`Setting up organization, ${organisationId} ${authToken}`);
+  logger.info(`Updating the organization, ${organisationId} ${authToken}`);
 
-  await db.update(Organisation)
+  const [organisation] = await db.update(Organisation)
   .set({ auth_token: authToken })
-  .where(eq(Organisation.id, organisationId))
+  .where(eq(Organisation.id, organisationId)).returning({region: Organisation.region});
+
+  if (organisation){
+  const syncStartedAt = Date.now();
+  await inngest.send({
+    name: 'zendesk/users.sync.triggered',
+    data: {
+      organisationId,
+      authToken,
+      syncStartedAt,
+      region: organisation.region,
+    },
+  });
+  }
 }
 
 export const findOrganisation = async ({organisationId}: FindOrganisationParams): Promise<OrganizationRecordObject[]>=>{

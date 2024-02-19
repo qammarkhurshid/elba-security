@@ -71,31 +71,18 @@ export async function GET(request: NextRequest) {
     })
 
   const authCodeResponseData = await response.json() as AuthTokenResponse;
-  
+  if (!authCodeResponseData.access_token){
+    // Throw error
+  }
   await updateOrganization({organisationId: orgId, authToken: authCodeResponseData.access_token});
+  return {
+    success: true
+  }
   } catch (error) {
       logger.info(`Failed to fetch auth token`, {error});
       /* @TODO: Confirm Error Scenario */
-    }
-
-  /* @TODO: Sync Users using Ingest
-  const url = `${subdomain}/api/v2/users`;
-  try {
-  const userResponse = await fetch(url, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': `Bearer ${authCodeResponseData.access_token}`
-        }
-      });
-
-  const userResponseData = await userResponse.json() as object;
-  return new Response(JSON.stringify(userResponseData), {
-    status:200
+      return new Response(JSON.stringify({error: "FAILED_TO_FETCH"}), {
+        status:400
   })
-    } catch (error) {
-      logger.error(`Unable to fetch auth token`, {error});
-      // @TODO: Confirma error scenario  
-  }
-  */
+    }
 }

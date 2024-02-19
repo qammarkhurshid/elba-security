@@ -1,27 +1,54 @@
-/**
- * DISCLAIMER:
- * This is an example connector, the function has a poor implementation. When requesting against API endpoint we might prefer
- * to valid the response data received using zod than unsafely assign types to it.
- * This might not fit your usecase if you are using a SDK to connect to the Saas.
- * These file illustrate potential scenarios and methodologies relevant for SaaS integration.
- */
-
+import { z } from 'zod';
 import { MySaasError } from './commons/error';
 
-export type MySaasUser = {
+
+export type ZendeskUser = {
   id: string;
-  username: string;
+  name: string;
   email: string;
+  role: string;
 };
 
-type GetUsersResponseData = { users: MySaasUser[]; nextPage: number | null };
+const ZendeskUserSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  email: z.string(),
+  role:z.string(),
+});
 
-export const getUsers = async (token: string, page: number | null) => {
-  const response = await fetch(`https://mysaas.com/api/v1/users?page=${page}`, {
+const GetUsersResponseDataSchema = z.object({
+  users: z.array(ZendeskUserSchema),
+  next_page: z.string().nullable(),
+  previous_page: z.string().nullable(),
+  count: z.number()
+});
+
+type GetUsersResponse = {
+  users: ZendeskUser[];
+  next_page: string | null;
+  previous_page: string | null;
+  count: number;
+};
+
+const tempPageUrl = `https://self1942.zendesk.com/api/v2/users?page=1&per_page=1`;
+
+export const getUsers = async (token: string, pageUrl: string | null = tempPageUrl ) => {
+  const response = await fetch(`${pageUrl}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
+  
   if (!response.ok) {
     throw new MySaasError('Could not retrieve users', { response });
   }
-  return response.json() as Promise<GetUsersResponseData>;
+  
+  const users = await response.json() as GetUsersResponse;
+
+  try {
+    const validatedData = GetUsersResponseDataSchema.parse(users);
+    return validatedData;
+  } catch (error) {
+    throw new MySaasError('Invalid response data received', { response });
+  }
 };
+
+

@@ -4,15 +4,15 @@ import { logger } from '@elba-security/logger';
 import { rateLimitMiddleware } from './middlewares/rate-limit-middleware';
 
 export const inngest = new Inngest({
-  id: 'slack',
+  id: 'zendesk',
   schemas: new EventSchemas().fromRecord<{
-    'users/sync_page.triggered': {
+    'zendesk/users.sync.triggered': {
       data: {
-        organisationId: string;
-        region: string;
-        isFirstSync: boolean;
-        syncStartedAt: number;
-        page: number | null;
+      organisationId: string;
+      authToken: string;
+      syncStartedAt: number;
+      region: string;
+      pageUrl?: string | null
       };
     };
   }>(),
