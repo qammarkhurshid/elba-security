@@ -21,7 +21,7 @@ export const syncUsersPage = inngest.createFunction(
   },
   { event: 'zendesk/users.sync.triggered' },
   async ({ event, step }) => {
-    const { organisationId, /* region, syncStartedAt, authToken, */ pageUrl } = event.data as EventData;
+    const { organisationId,/*  region, syncStartedAt, authToken, */ pageUrl } = event.data as EventData;
     
     const [organisation] = await db.select({
       auth_token: Organisation.auth_token,
@@ -59,9 +59,8 @@ export const syncUsersPage = inngest.createFunction(
         status: 'ongoing'
       }
     }
-
-    return {
-      validUsers: users
-    };
+      return {
+        status: 'completed'
+      }
   }
 );

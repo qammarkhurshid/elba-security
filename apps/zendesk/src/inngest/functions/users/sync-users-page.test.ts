@@ -17,19 +17,21 @@ import { syncUsersPage } from './sync-users-page';
 
 const organisation = {
   id: '45a76301-f1dd-4a77-b12f-9d7d3fca3c90',
-  token: 'test-token',
+  auth_token: 'test-token',
   region: 'us',
+  domain: 'https://mysaas.zendesk.com',
+  client_secret: 'supersecuresecret123',
+  client_id: 'integration-test-client'
 };
-const syncStartedAt = Date.now();
 
+const syncStartedAt = Date.now();
 const users: usersConnector.MySaasUser[] = Array.from({ length: 5 }, (_, i) => ({
   id: `id-${i}`,
-  username: `username-${i}`,
+  name: `username-${i}`,
   email: `username-${i}@foo.bar`,
 }));
 
-const setup = createInngestFunctionMock(syncUsersPage, 'users/sync_page.triggered');
-
+const setup = createInngestFunctionMock(syncUsersPage, 'zendesk/users.sync.triggered');
 describe('sync-users', () => {
   test('should abort sync when organisation is not registered', async () => {
     // setup the test without organisation entries in the database, the function cannot retrieve a token
@@ -51,16 +53,20 @@ describe('sync-users', () => {
   test('should continue the sync when there is a next page', async () => {
     // setup the test with an organisation
     await db.insert(Organisation).values(organisation);
+    
     // mock the getUser function that returns SaaS users page
     vi.spyOn(usersConnector, 'getUsers').mockResolvedValue({
-      nextPage: 1,
+      next_page: "https://mysaas.zendesk.com/api/v2/users?page=2",
+      previous_page: null,
+      count: 2,
       users,
     });
+
+    const ts = Date.now();
     const [result, { step }] = setup({
       organisationId: organisation.id,
-      isFirstSync: false,
-      syncStartedAt,
-      page: 0,
+      authToken: organisation.auth_token,
+      syncStartedAt: ts,
       region: 'us',
     });
 
@@ -69,13 +75,13 @@ describe('sync-users', () => {
     // check that the function continue the pagination process
     expect(step.sendEvent).toBeCalledTimes(1);
     expect(step.sendEvent).toBeCalledWith('sync-users-page', {
-      name: 'users/sync_page.triggered',
+      name: 'zendesk/users.sync.triggered',
       data: {
         organisationId: organisation.id,
-        isFirstSync: false,
-        syncStartedAt,
+        authToken: organisation.auth_token,
+        syncStartedAt: ts,
         region: organisation.region,
-        page: 1,
+        pageUrl: "https://mysaas.zendesk.com/api/v2/users?page=2",
       },
     });
   });
@@ -87,6 +93,7 @@ describe('sync-users', () => {
       nextPage: null,
       users,
     });
+
     const [result, { step }] = setup({
       organisationId: organisation.id,
       isFirstSync: false,

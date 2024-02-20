@@ -12,7 +12,8 @@ export const inngest = new Inngest({
       authToken: string;
       syncStartedAt: number;
       region: string;
-      pageUrl?: string | null
+      domain: string;
+      pageUrl?: string | null;
       };
     };
   }>(),

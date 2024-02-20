@@ -16,6 +16,7 @@ export const env = z
     POSTGRES_PROXY_PORT: z.coerce.number().int().positive(),
     VERCEL_PREFERRED_REGION: z.string().min(1),
     VERCEL_ENV: z.string().min(1).optional(),
-    REDIRECTION_URL_FOR_ZENDESK: z.string().min(1)
+    REDIRECTION_URL_FOR_ZENDESK: z.string().min(1),
+    USERS_SYNC_CRON: z.string()
   })
   .parse(process.env);

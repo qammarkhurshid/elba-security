@@ -30,7 +30,7 @@ export const updateOrganization = async ({organisationId, authToken}: UpdateOrga
 
   const [organisation] = await db.update(Organisation)
   .set({ auth_token: authToken })
-  .where(eq(Organisation.id, organisationId)).returning({region: Organisation.region});
+  .where(eq(Organisation.id, organisationId)).returning({region: Organisation.region, domain: Organisation.domain});
 
   if (organisation){
   const syncStartedAt = Date.now();
@@ -39,6 +39,7 @@ export const updateOrganization = async ({organisationId, authToken}: UpdateOrga
     data: {
       organisationId,
       authToken,
+      domain: organisation.domain,
       syncStartedAt,
       region: organisation.region,
     },
