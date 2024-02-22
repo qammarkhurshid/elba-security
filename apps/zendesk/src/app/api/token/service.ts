@@ -33,15 +33,13 @@ export const updateOrganization = async ({organisationId, authToken}: UpdateOrga
   .where(eq(Organisation.id, organisationId)).returning({region: Organisation.region, domain: Organisation.domain});
 
   if (organisation){
-  const syncStartedAt = Date.now();
+  const usersApiUrl = `${organisation.domain}/api/v2/users`
   await inngest.send({
     name: 'zendesk/users.sync.triggered',
     data: {
       organisationId,
-      authToken,
-      domain: organisation.domain,
-      syncStartedAt,
-      region: organisation.region,
+      isFirstSync: true,
+      pageUrl: usersApiUrl
     },
   });
   }

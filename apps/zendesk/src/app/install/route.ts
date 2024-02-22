@@ -3,6 +3,7 @@ import { RedirectType, redirect } from 'next/navigation';
 import { type NextRequest } from 'next/server';
 import { z } from 'zod';
 import { logger } from '@elba-security/logger';
+import { ElbaInstallRedirectResponse } from '@elba-security/nextjs';
 import { env } from '@/env';
 
 // Remove the next line if your integration does not works with edge runtime
@@ -39,8 +40,12 @@ export function GET(request: NextRequest) {
     logger.warn('Could not redirect user to Zendesk app install url', {
       error,
     });
-    // Change this to redirect to failure UI page
-    redirect(`${env.ELBA_REDIRECT_URL}?source_id=${env.ELBA_SOURCE_ID}&error=internal_error`);
+    return new ElbaInstallRedirectResponse({
+          error: `internal_error`,
+          region,
+          sourceId: env.ELBA_SOURCE_ID,
+          baseUrl: env.ELBA_REDIRECT_URL,
+        });
   }
 
   redirect(`${env.ELBA_REDIRECT_URL}/connection-details?organization_id=${organisationId}&region=${region}`);

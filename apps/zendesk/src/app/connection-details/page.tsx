@@ -20,6 +20,7 @@ export default function ConnectionDetailsPage() {
   }, [state.redirectUrl]);
 
   return (
+    <div>
     <form action={formAction}>
       <div role="group">
         <label htmlFor="domain">Domain</label>
@@ -52,5 +53,19 @@ export default function ConnectionDetailsPage() {
 
       <button type="submit">Install</button>
     </form>
+    <span>_____________________________________________________</span>
+    <div>
+      <h2>Steps to Obtain Client Id and Secret.</h2>
+      <ol>
+      <li>Login to your Zendesk Account.</li>
+      <li>Go to Admin Center.</li>
+      <li>Enable API Access.</li>
+      <li>Create OAuth client.</li>
+      <li>Paste the following URL in the redirect url field: https://elba-redirection-url.com/redirect</li>
+      <li>Add client id in the format: yourcompanyname-elba-integration </li>
+      <li>Copy the client id, and client secret and paste it into the form.</li>
+      </ol>
+    </div>
+    </div>
   );
 }

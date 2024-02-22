@@ -1,39 +1,48 @@
 import { eq } from 'drizzle-orm';
 import { NonRetriableError } from 'inngest';
+import { Elba } from '@elba-security/sdk';
 import { getUsers } from '@/connectors/users';
 import { db } from '@/database/client';
 import { Organisation } from '@/database/schema';
 import { inngest } from '@/inngest/client';
-import { createElbaClient } from '@/connectors/elba/client';
+import { env } from '@/env';
 
 type EventData = {
     organisationId: string;
-    region: string;
-    syncStartedAt: Date;
-    authToken: string;
     pageUrl: string;
+    isFirstSync: boolean,
 }
-
 
 export const syncUsersPage = inngest.createFunction(
   {
     id: 'zendesk-sync-users',
+     priority: {
+      run: 'event.data.isFirstSync ? 600 : -600',
+    },
+    concurrency: {
+      key: 'event.data.organisationId',
+      limit: 1,
+    },
   },
   { event: 'zendesk/users.sync.triggered' },
   async ({ event, step }) => {
-    const { organisationId,/*  region, syncStartedAt, authToken, */ pageUrl } = event.data as EventData;
+    const syncStartedAt = Date.now();
+    const { organisationId, pageUrl } = event.data as EventData;
     
     const [organisation] = await db.select({
       auth_token: Organisation.auth_token,
-      region: Organisation.region
+      domain: Organisation.domain,
+      region: Organisation.region,
     }).from(Organisation).where(eq(Organisation.id, organisationId));
 
     if (!organisation?.auth_token) {
       throw new NonRetriableError(`Could not retrieve organisation with id=${organisationId}`);
     }
 
-    const result = await getUsers(organisation.auth_token, pageUrl);
-    const elba = createElbaClient(organisationId, organisation.region);
+    const result = await getUsers({
+      token: organisation.auth_token, 
+      pageUrl,
+      });
     
     const users = result.users.map(user =>{
       return {
@@ -42,6 +51,13 @@ export const syncUsersPage = inngest.createFunction(
         email: user.email,
         additionalEmails: [],
       }
+    });
+
+    const elba = new Elba({
+      organisationId,
+      apiKey: env.ELBA_API_KEY,
+      baseUrl: env.ELBA_API_BASE_URL,
+      region: organisation.region,
     });
 
     await elba.users.update({ users });
@@ -59,6 +75,8 @@ export const syncUsersPage = inngest.createFunction(
         status: 'ongoing'
       }
     }
+    
+    await elba.users.delete({ syncedBefore: new Date(syncStartedAt).toISOString() });
       return {
         status: 'completed'
       }

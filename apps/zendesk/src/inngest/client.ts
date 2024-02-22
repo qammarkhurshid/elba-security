@@ -9,10 +9,7 @@ export const inngest = new Inngest({
     'zendesk/users.sync.triggered': {
       data: {
       organisationId: string;
-      authToken: string;
-      syncStartedAt: number;
-      region: string;
-      domain: string;
+      isFirstSync: boolean;
       pageUrl?: string | null;
       };
     };

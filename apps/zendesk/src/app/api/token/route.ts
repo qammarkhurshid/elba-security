@@ -1,6 +1,9 @@
 import {type NextRequest } from 'next/server';
 import { logger } from '@elba-security/logger';
+import { ElbaInstallRedirectResponse } from '@elba-security/nextjs';
+import { env } from '@/env';
 import { findOrganisation, updateOrganization } from './service';
+
 
 type OrganizationRecordObject = {
   id: string;
@@ -29,25 +32,41 @@ type AuthTokenResponse = {
 
 export async function GET(request: NextRequest) {
   const token: string | null = request.nextUrl.searchParams.get('code');
-  const orgId: string   | null = request.nextUrl.searchParams.get('orgId');
+  const orgId: string | null = request.nextUrl.searchParams.get('orgId');
+  const region: string | null = request.nextUrl.searchParams.get('region');
+
 
   if (!orgId){
-    return new Response(JSON.stringify({error: "Organisation id is required"}), {
-    status:400
-  })
+    return new ElbaInstallRedirectResponse({
+          error: `internal_error`,
+          region,
+          sourceId: env.ELBA_SOURCE_ID,
+          baseUrl: env.ELBA_REDIRECT_URL,
+        });
   }
+  
+  const organisation = await findOrganisation({organisationId: orgId})
+  
+  if (!organisation.length){
+    return new ElbaInstallRedirectResponse({
+          error: `internal_error`,
+          region,
+          sourceId: env.ELBA_SOURCE_ID,
+          baseUrl: env.ELBA_REDIRECT_URL,
+        });
+    }
+
 
   if (!token){
-    return new Response(JSON.stringify({error: "Code is required"}), {
-    status:400
-  })
-  /* Confirm Error Scenarios */
+    return new ElbaInstallRedirectResponse({
+          error: `internal_error`,
+          region,
+          sourceId: env.ELBA_SOURCE_ID,
+          baseUrl: env.ELBA_REDIRECT_URL,
+        });
   }
 
-  const organisation = await findOrganisation({organisationId: orgId})
-  if (!organisation.length){
-    return new Response(JSON.stringify({ error: 'Organization not found' }), { status: 404 });
-  }
+  
   
   const {client_id: clientId, client_secret: clientSecret, domain:subdomain} = organisation[0] as OrganizationRecordObject;
   const redirectURL = process.env.REDIRECTION_URL_FOR_ZENDESK;
@@ -72,7 +91,12 @@ export async function GET(request: NextRequest) {
 
   const authCodeResponseData = await response.json() as AuthTokenResponse;
   if (!authCodeResponseData.access_token){
-    // Throw error
+    return new ElbaInstallRedirectResponse({
+          error: `unauthorized`,
+          region,
+          sourceId: env.ELBA_SOURCE_ID,
+          baseUrl: env.ELBA_REDIRECT_URL,
+        });
   }
   await updateOrganization({organisationId: orgId, authToken: authCodeResponseData.access_token});
   return {
@@ -80,9 +104,11 @@ export async function GET(request: NextRequest) {
   }
   } catch (error) {
       logger.info(`Failed to fetch auth token`, {error});
-      /* @TODO: Confirm Error Scenario */
-      return new Response(JSON.stringify({error: "FAILED_TO_FETCH"}), {
-        status:400
-  })
+      return new ElbaInstallRedirectResponse({
+          error: `internal_error`,
+          region,
+          sourceId: env.ELBA_SOURCE_ID,
+          baseUrl: env.ELBA_REDIRECT_URL,
+        });
     }
 }

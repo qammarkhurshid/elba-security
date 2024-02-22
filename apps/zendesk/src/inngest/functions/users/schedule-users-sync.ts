@@ -17,21 +17,22 @@ export const scheduleUsersSyncs = inngest.createFunction(
       .from(Organisation);
 
     if (organisations.length > 0) {
-      await step.sendEvent(
+    await step.sendEvent(
         'sync-organisations-users',
-        organisations.map(({ id, auth_token:authToken, domain, region }) => ({
-          name: 'zendesk/users.sync.triggered',
-          data: {
-            organisationId: id,
-            authToken,
-            domain,
-            syncStartedAt: Date.now(),
-            region,
-          }
-        }))
-      );
-    }
-    
+        organisations.map(({ id, domain}) => {
+            const usersApiUrl = `${domain}/api/v2/users`;
+            return {
+                name: 'zendesk/users.sync.triggered',
+                data: {
+                    organisationId: id,
+                    isFirstSync: false,
+                    pageUrl: usersApiUrl
+                }
+            }
+        })
+    );
+}
+
     return { organisations };
   }
 );

@@ -30,9 +30,8 @@ type GetUsersResponse = {
   count: number;
 };
 
-const tempPageUrl = `https://self1942.zendesk.com/api/v2/users?page=1&per_page=1`;
 
-export const getUsers = async (token: string, pageUrl: string | null = tempPageUrl ) => {
+export const getUsers = async ({token, pageUrl} ) => {
   const response = await fetch(`${pageUrl}`, {
     headers: { Authorization: `Bearer ${token}` },
   });

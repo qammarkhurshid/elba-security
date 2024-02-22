@@ -1,8 +1,7 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {useSearchParams } from 'next/navigation';
 import { logger } from '@elba-security/logger';
-
 
 const getCookie = (name: string): string =>{
     const value = `; ${document.cookie}`;
@@ -13,8 +12,8 @@ const getCookie = (name: string): string =>{
     return 'null';
 }
 
-const fetchAuthToken = async (code: string, orgId: string) =>{
-      const response = await fetch(`/api/token?code=${code}&orgId=${orgId}`, {
+const fetchAuthToken = async (code: string, orgId: string, region: string) =>{
+      const response = await fetch(`/api/token?code=${code}&orgId=${orgId}&region=${region}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -26,18 +25,27 @@ const fetchAuthToken = async (code: string, orgId: string) =>{
     }
 
 export default function RedirectPage() {
+  const [accessGrantStatus, setAccessGrantStatus] = useState('WAITING');
+  const [displayMessage, setDisplayMessage] = useState('');
   const searchParams = useSearchParams();
   useEffect(() => {
   const fetchData = async () => {
     const code = searchParams.get('code');
     const orgId = getCookie('organisation_id');
-    if (code && orgId) {
+    const region = getCookie('region');
+    const zenDeskError = searchParams.get('error') || null; 
+    if (zenDeskError){
+      setAccessGrantStatus('FAILED');
+      setDisplayMessage('The end-user or authorization server denied the request.')
+    }
+    if (code && orgId && region) {
       try {
-        await fetchAuthToken(code, orgId);
+        await fetchAuthToken(code, orgId, region);
+        setAccessGrantStatus('GRANTED');
+        setDisplayMessage('Zendesk has been successfull integrated. You can safely close this tab now.')
       } catch (error) {
         logger.error('Error fetching auth token:', {error});
-        // redirect(`${process.env.ELBA_REDIRECT_URL}/error`, RedirectType.replace);
-        window.location.assign(encodeURI(`/err`))
+        window.location.assign(encodeURI(`/err`));
       }
     }
   };
@@ -47,8 +55,8 @@ export default function RedirectPage() {
 
     return (
     <div>
-      <h3>REDIRECTION_PAGE</h3>
-      <h3>CONFIRMATION_MESSAGE_FOR_SUCCESS</h3>
+      <h2>{accessGrantStatus}...</h2>
+      <span>{displayMessage}</span>
     </div>
   );
 }

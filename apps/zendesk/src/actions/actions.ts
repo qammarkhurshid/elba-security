@@ -2,6 +2,7 @@
 import { logger } from '@elba-security/logger';
 import { z } from 'zod';
 import { cookies } from 'next/headers';
+import { ElbaInstallRedirectResponse } from '@elba-security/nextjs';
 import { env } from '@/env';
 import { registerOrganisation } from './service';
 
@@ -69,9 +70,11 @@ export const install = async (_: FormState, formData: FormData): Promise<FormSta
     };
   } catch (error) {
     logger.warn('Could not register organisation', { error });
-  return {
-      // redirectUrl: `${env.ELBA_REDIRECT_URL}?source_id=${env.ELBA_SOURCE_ID}&success=true`,
-        redirectUrl: `${env.ELBA_REDIRECT_URL}/err`,
-    };
+    return new ElbaInstallRedirectResponse({
+          error: `internal_error`,
+          region: 'us',
+          sourceId: env.ELBA_SOURCE_ID,
+          baseUrl: env.ELBA_REDIRECT_URL,
+        });
   }
 };
